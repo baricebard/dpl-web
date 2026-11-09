@@ -1,8 +1,10 @@
+import { WalletPanel, useWallet } from '../../modules/wallet'
 import { modules } from '../../config/modules'
 import { teachingNetwork } from '../../config/network'
 import { ModuleCard } from '../../shared/components/ModuleCard'
 
 export function HomePage() {
+  const wallet = useWallet()
   return (
     <main id="main" tabIndex={-1}>
       <section className="hero" aria-labelledby="hero-title">
@@ -19,7 +21,7 @@ export function HomePage() {
           <p className="network-label">目標教學網路</p>
           <h2 id="network-title">{teachingNetwork.name}</h2>
           <p className="chain-id">TESTNET / CHAIN ID {teachingNetwork.chainId}</p>
-          <div className="panel-footer"><span>教學測試網</span><span>尚未連接網路</span></div>
+          <div className="panel-footer"><span>教學測試網</span><span>{wallet.address ? (wallet.isSepolia ? '已連接 Sepolia' : '目前非 Sepolia') : '尚未連接網路'}</span></div>
         </aside>
       </section>
       <div className="education-notice">
@@ -29,13 +31,14 @@ export function HomePage() {
       <section className="modules-section" id="modules" aria-labelledby="modules-title">
         <div className="section-heading">
           <div><p className="eyebrow">THE LEARNING MODULES</p><h2 id="modules-title">你的 DeFi 學習地圖</h2></div>
-          <p>六個模組，逐步探索。<br /><span>功能建置中，目前皆尚未開放。</span></p>
+          <p>六個模組，逐步探索。<br /><span>Wallet 已開放，其餘功能建置中。</span></p>
         </div>
         <div className="module-grid">{modules.map((module, index) => <ModuleCard key={module.id} module={module} index={index} />)}</div>
       </section>
+      <WalletPanel />
       <section className="about-section" id="about" aria-labelledby="about-title">
         <div><p className="eyebrow">BUILT FOR THE CLASSROOM</p><h2 id="about-title">從理解開始，循序實踐。</h2></div>
-        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。本階段先建立學習入口，後續依序加入經驗證的測試網功能。</p><p className="about-note">目前未提供錢包連接、資產查詢或鏈上交易。</p></div>
+        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。本階段先建立學習入口，後續依序加入經驗證的測試網功能。</p><p className="about-note">目前提供錢包連接與網路檢查，尚未提供資產查詢或鏈上交易。</p></div>
       </section>
     </main>
   )

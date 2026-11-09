@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('Pages 子路徑可載入、重新整理，所有模組維持未開放', async ({ page }) => {
+test('Pages 子路徑可載入、重新整理，Wallet 開放且保留其餘模組', async ({ page }) => {
   const errors: string[] = []
   const failedAssets: string[] = []
   const externalRequests: string[] = []
@@ -16,10 +16,10 @@ test('Pages 子路徑可載入、重新整理，所有模組維持未開放', as
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('DeFi Portfolio Lab.')
   await expect(page.getByRole('heading', { name: 'Ethereum Sepolia' })).toBeVisible()
   await expect(page.getByText('零真實資金，專注理解。')).toBeVisible()
-  for (const name of ['Wallet', 'Faucet', 'Token', 'Exchange', 'Liquidity', 'Portfolio']) {
+  for (const name of ['Faucet', 'Token', 'Exchange', 'Liquidity', 'Portfolio']) {
     await expect(page.getByRole('button', { name: `${name}：尚未開放`, exact: true })).toBeDisabled()
   }
-  await expect(page.getByRole('button')).toHaveCount(6)
+  await expect(page.getByRole('link', { name: 'Wallet：開啟錢包介面' })).toBeVisible()
   await expect(page.getByText('尚未連接網路')).toBeVisible()
   await page.getByRole('link', { name: '探索學習模組' }).click()
   await expect(page).toHaveURL(/\/dpl-web\/#modules$/)
