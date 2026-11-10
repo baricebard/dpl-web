@@ -1,5 +1,8 @@
 # Task 05C-1：Sepolia 部署準備指南
 
+> Task 05C-2 更新：已提供[本機 MetaMask 部署工具](08-local-deployment-tool.md)，固定部署者與 initialHolder 為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`。以下保留先前準備紀錄；使用本機工具時以 08 指南的固定地址、產物檢查與安全流程為準。目前仍未部署 Sepolia。
+
+
 ## 狀態與操作邊界
 
 本次從最新 `origin/main`（`f9f108c946d0bcb51004da14bb7dd392b41244a0`）建立 `task-05c-deployment-prep`，只準備文件。**尚未部署、未發送任何公用區塊鏈交易，沒有合約地址或交易 Hash，也未開始 Task 06。** 以下部署、簽署與 Etherscan 操作，留給日後另行授權後由使用者親自執行。

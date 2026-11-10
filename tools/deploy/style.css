@@ -1,0 +1,12 @@
+:root { font-family: system-ui, sans-serif; color: #e7edf7; background: #101826; line-height: 1.6; }
+main { max-width: 960px; margin: 2rem auto; padding: 1rem; }
+section { border: 1px solid #62728d; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; background: #1c293d; }
+button { padding: .7rem 1rem; margin: .5rem .5rem .5rem 0; font: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: .55; }
+label { display: block; margin: 1rem 0; }
+input:not([type=checkbox]) { display: block; width: 95%; padding: .5rem; font: inherit; }
+a { color: #8fd4ff; overflow-wrap: anywhere; }
+pre, strong { white-space: pre-wrap; overflow-wrap: anywhere; }
+dd { margin: .3rem 0 1rem; }
+[role=alert] { color: #ffb6af; }
+:focus-visible { outline: 3px solid #ffd479; outline-offset: 3px; }

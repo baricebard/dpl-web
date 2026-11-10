@@ -1,5 +1,8 @@
 # Task 05：ERC-20 教學代幣
 
+> Task 05C-2 更新：已提供[本機 MetaMask 部署工具](08-local-deployment-tool.md)，固定部署者與 initialHolder 為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`。以下保留先前準備紀錄；使用本機工具時以 08 指南的固定地址、產物檢查與安全流程為準。目前仍未部署 Sepolia。
+
+
 ## 狀態與決策
 
 Task 05 從包含 Task 01～04 的 `origin/main`（`91ba9de`）建立 `task-05-erc20`。只完成本機合約、測試及部署準備，**尚未部署 Sepolia**，沒有實際合約地址或交易 Hash。Token UI 仍未開放；沒有開始 Task 06、發送公用網路交易、索取或設定私鑰。
