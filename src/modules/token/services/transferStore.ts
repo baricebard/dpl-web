@@ -54,7 +54,7 @@ export function createTransferStore(client: TokenClient = sepoliaPublicClient, o
     async prepare(session: TransactionSession, input: TransferInput) {
       if (busy || unresolved) return
       busy = true
-      update({ status: 'validating', summary: undefined, message: '正在核對合約、餘額及模擬轉帳。' })
+      update({ status: 'validating', summary: undefined, message: '正在核對網路、餘額及模擬轉帳。' })
       try { update({ status: 'idle', summary: await prepareTransfer(session, input, client), message: '請核對完整摘要，再明確確認。' }) }
       catch (error) { update({ status: 'failed', message: tokenError(error) }) }
       finally { busy = false }

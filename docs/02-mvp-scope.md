@@ -20,7 +20,7 @@ Task 06 已實作 Wallet、Faucet 與 Token 教學閉環介面及 Mock 驗證；
 
 ## 前置條件與不納入項目
 
-MVP 整合驗收前需有經測試的三種 Sepolia 教學代幣、已確認的 ABI／地址，以及可供全班使用的 Gas 與教學代幣取得流程。Task 05 已完成合約本機測試，Task 06 使用任務提供的三個已部署地址，公開資料見 [Token 設定](modules/token.md)。本次環境無法核對 RPC，因此執行時仍需逐一驗證，不因文件聲稱部署便開放未驗證轉帳。Etherscan 原始碼驗證與歷史 runtime bytecode 比對未完成；部署 receipt 封存仍缺。A-03、A-04 已定固定供給與教師一般 transfer 分發，網站無自助 ERC-20 Faucet。
+MVP 整合驗收前需有經測試的三種 Sepolia 教學代幣、已確認的 ABI／地址，以及可供全班使用的 Gas 與教學代幣取得流程。Task 05 已完成合約本機測試，Task 06 使用任務提供的三個已部署地址，公開資料見 [Token 設定](modules/token.md)。學生流程使用已確認的三個固定地址與 18 decimals，查詢不以 runtime／Solidity metadata 相符為前置。轉帳必須重新核對帳號、11155111、允許清單、最新餘額、Gas 及 simulateContract，再經使用者明確確認。Etherscan 原始碼驗證與歷史 runtime bytecode 比對未完成；部署 receipt 封存仍缺。A-03、A-04 已定固定供給與教師一般 transfer 分發，網站無自助 ERC-20 Faucet。
 
 不納入獨立後端、資料庫、帳號登入、名冊、成績、主網、真實資產、交易所整合、自動交易、橋接與真實價格服務。
 

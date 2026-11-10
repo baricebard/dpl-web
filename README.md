@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，尚未發布或執行真實轉帳。三種合約必須在執行時通過完整 runtime 指紋（含 Solidity metadata）及 ERC-20 欄位唯讀核對才可轉帳；本次環境對 RPC 的讀取受阻，不能宣稱鏈上驗證完成。Exchange、Liquidity、Portfolio 仍未開放。
+Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，本次未執行真實轉帳。本次修正將學生餘額查詢與 runtime 診斷解耦：確認固定地址及 Sepolia 後直接讀 balanceOf；轉帳保留帳號／鏈、最新餘額、Gas、模擬與明確確認，完整 runtime／metadata 比對只供開發診斷。此修正尚未合併／發布，真實轉帳仍待人工驗收。Exchange、Liquidity、Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -32,7 +32,7 @@ npm run preview
 
 Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允許的環境使用 `npx playwright install --with-deps chromium`。已有 Chromium 時可用 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test`。
 
-`build` 先檢查型別再輸出 `dist/`；前端測試使用本機 Hardhat runtime 作為 Node 端 Mock fixture，請先執行 `npm run contracts:compile` 與 `node scripts/contracts/runtime-manifest.ts --check`。`test` 以 production preview 驗證桌面與手機的子路徑、重新整理、未開放入口、Wallet Mock Provider 流程與鍵盤導覽，執行前須先 build。測試產物、依賴目錄與建置產物不提交。
+`build` 先檢查型別再輸出 `dist/`；部分獨立完整性診斷測試使用本機 Hardhat runtime 作為 Node 端 fixture；跑完整開發驗證時先執行 `npm run contracts:compile` 與 `node scripts/contracts/runtime-manifest.ts --check`。`test` 以 production preview 驗證桌面與手機的子路徑、重新整理、未開放入口、Wallet Mock Provider 流程與鍵盤導覽，執行前須先 build。測試產物、依賴目錄與建置產物不提交。
 
 ## 結構與後續擴充
 
@@ -61,7 +61,7 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 ## Token 操作與公開合約
 
-首頁 Token → 選擇代幣、輸入收款地址與數量 → 檢查完整摘要 → 確認並親自核准 MetaMask → 查看 Receipt 與 Etherscan。標準 transfer 無需 approve。未連接、錯鏈、合約核對失敗、Gas 不足或結果未知會停用送出。Hash 不等於成功；成功需 receipt success、至少 1 個區塊及實際交易核對，仍不代表最終確定性。切換帳號／網路後原摘要失效，已廣播 Hash 保留；逾時不自動重送。
+首頁 Token → 選擇代幣、輸入收款地址與數量 → 檢查完整摘要 → 確認並親自核准 MetaMask → 查看 Receipt 與 Etherscan。標準 transfer 無需 approve。未連接、錯鏈、地址不在允許清單、最新餘額或 Gas 不足、模擬失敗或結果未知會停用送出。Hash 不等於成功；成功需 receipt success、至少 1 個區塊及實際交易核對，仍不代表最終確定性。切換帳號／網路後原摘要失效，已廣播 Hash 保留；逾時不自動重送。
 
 Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,000,000。地址由本次任務提供：
 
@@ -73,7 +73,7 @@ Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,0
 
 唯一設定為 [src/config/tokens.ts](src/config/tokens.ts)，ABI 使用 viem 的標準 `erc20Abi`，對應 TeachingToken 繼承的 OpenZeppelin ERC20。Etherscan 原始碼驗證、歷史 runtime bytecode 比對及部署 receipt 封存尚未完成，不因已有地址而假設完成。完整規格及 Mock／鏈上證據差異見 [Token](docs/modules/token.md)與 [Task 06 驗收紀錄](docs/08-task-06-validation.md)。
 
-已安裝既有依賴後可執行唯讀工具 `node scripts/contracts/read-deployed.ts`，核對 RPC chain ID、三份 code 與 metadata；不含部署或簽署。本次工具因 RPC 存取受阻失敗。此工具現在以完整 runtime 指紋（含 Solidity metadata）核對 Code，同時核對 ERC-20 欄位；前端只攜帶精簡指紋，不打包完整 artifact。來源 commit／compiler、離線重現與 CI 檢查見 [完整性審查修正](docs/09-task-06-runtime-integrity.md)。本機重現與執行時比對機制不等於已完成三地址鏈上匹配、歷史產物封存、Etherscan 原始碼驗證或人工兩帳號測試。
+已安裝既有依賴後可執行唯讀工具 `node scripts/contracts/read-deployed.ts`，核對 RPC chain ID、三份 code 與 metadata；不含部署或簽署。本次工具因 RPC 存取受阻失敗。此工具現在以完整 runtime 指紋（含 Solidity metadata）核對 Code，同時核對 ERC-20 欄位；此工具與 Runtime Manifest 保留為開發診斷；學生 balanceOf／transfer 不依賴完整 runtime 或 Solidity metadata 相符，也不打包完整 artifact。來源 commit／compiler、離線重現與 CI 檢查見 [完整性審查修正](docs/09-task-06-runtime-integrity.md)。開發階段的本機重現與診斷比對不等於已完成三地址鏈上匹配、歷史產物封存、Etherscan 原始碼驗證或人工兩帳號測試。
 
 ## GitHub Pages
 
@@ -114,7 +114,7 @@ npm run contracts:typecheck
 npm run contracts:test
 ```
 
-本機合約與準備檢查共 24 項；測試不涉及 Sepolia。Ignition 模組與公開教師地址／chain ID 的部署準備已建立；Hardhat 設定只含本機網路，沒有公用網路部署命令。本次未設定私鑰或執行鏈上部署；Token UI 已於 Task 06 開啟，合約資料未通過執行時核對則停用轉帳。
+本機合約與準備檢查共 24 項；測試不涉及 Sepolia。Ignition 模組與公開教師地址／chain ID 的部署準備已建立；Hardhat 設定只含本機網路，沒有公用網路部署命令。本次未設定私鑰或執行鏈上部署；Token UI 已於 Task 06 開啟，必要帳號／鏈、允許清單、最新餘額、Gas 或模擬未通過則停用轉帳。
 
 [合約規格、A-03／A-04／A-05 決策與部署紀錄格式](docs/06-token-contracts.md)包含離線準備、唯讀 RPC 預檢、未來驗證流程及 Task 06 前置條件。Task 06 已決定 receipt success、至少 1 個區塊及 canonical block／實際交易核對；重組／替換與未知結果策略見 [Token](docs/modules/token.md)。
 
@@ -125,4 +125,4 @@ npm run contracts:test
 
 ## Task 05C-3 本機唯讀驗證工具
 
-`npm run verify:local` 開啟 `http://127.0.0.1:5175/`，只讀公開 RPC、不連接錢包、不發交易；[指南](docs/10-local-readonly-verifier.md)、[使用者部署紀錄](docs/09-sepolia-deployment-record.json)及[歷史受阻報告](docs/09-sepolia-deployment-verification.md)保留各自證據分級。Task 06 的 runtime 指紋與學生轉帳不會取消本工具的五種唯讀方法限制。兩套工具的 build／preview 仍拒絕，正式 Pages 模組圖與 dist 檢查禁止本機工具、產物或完整 bytecode 流入。
+`npm run verify:local` 開啟 `http://127.0.0.1:5175/`，只讀公開 RPC、不連接錢包、不發交易；[指南](docs/10-local-readonly-verifier.md)、[使用者部署紀錄](docs/09-sepolia-deployment-record.json)及[歷史受阻報告](docs/09-sepolia-deployment-verification.md)保留各自證據分級。學生轉帳與獨立 runtime 診斷不會取消本工具的五種唯讀方法限制。兩套工具的 build／preview 仍拒絕，正式 Pages 模組圖與 dist 檢查禁止本機工具、產物或完整 bytecode 流入。

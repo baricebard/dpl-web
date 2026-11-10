@@ -1,5 +1,7 @@
 # Task 06 審查修正：完整 Runtime Bytecode 完整性
 
+> 後續簡化修正：本文件記錄開發完整性診斷的歷史設計。Runtime／Solidity metadata 比對不再阻擋一般學生餘額查詢或 transfer；最新必要檢查見 [Token 模組](modules/token.md)。獨立診斷工具與其完整比對保留。
+
 ## 審查發現與修正邊界
 
 PR #8 初版的「Code／Metadata 核對」只包含 code 非空，以及 ERC-20 name、symbol、decimals、totalSupply 值比對。這不足以辨識 runtime 身分，也未檢查 Solidity 編譯 metadata。不得把初版結果描述為已完成 bytecode 完整性驗證。

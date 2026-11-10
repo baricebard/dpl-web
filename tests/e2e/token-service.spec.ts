@@ -6,7 +6,6 @@ import { createTransferStore } from '../../src/modules/token/services/transferSt
 import { prepareTransfer, validateTransfer, verifyToken } from '../../src/modules/token/services/tokenService'
 import type { TokenClient } from '../../src/modules/token/services/tokenService'
 import type { TransactionSession } from '../../src/modules/wallet/types'
-import { runtime, wrongRuntime, wrongMetadata } from '../helpers/tokenRuntime'
 import { address, secondAddress } from '../helpers/wallet'
 
 const hash = `0x${'a'.repeat(64)}` as Hash
@@ -38,10 +37,10 @@ function fixture() {
   }
   const client = {
     getChainId: async () => 11155111,
-    getCode: async () => runtime,
+    getCode: async () => { throw new Error('Runtime diagnostic unavailable') },
     readContract: async ({ address: contract, functionName }: { address: string; functionName: string }) => {
-      const token = tokens.find(token => token.address === contract)!
-      return ({ name: token.name, symbol: token.symbol, decimals: 18, totalSupply: tokenSupply, balanceOf: tokenSupply })[functionName as 'name']
+      if (!tokens.some(token => token.address === contract) || functionName !== 'balanceOf') throw new Error('Only allowlisted balanceOf reads are expected')
+      return tokenSupply
     },
     getBalance: async () => 10n ** 18n,
     simulateContract: async () => ({ result: true }),
@@ -74,29 +73,31 @@ test('三種代幣使用相同核對流程與身份，實際餘額可為零', as
   const f = fixture()
   for (const token of tokens) { await verifyToken(token, f.client as unknown as TokenClient); expect(token.id).toBe(`11155111:${token.address.toLowerCase()}`) }
 })
-for (const mode of ['chain', 'code', 'runtime', 'metadata', 'name', 'symbol', 'decimals', 'totalSupply', 'rpc'] as const) {
-  test(`關鍵合約驗證失敗 ${mode} 阻止準備與發送`, async () => {
+for (const mode of ['chain', 'rpc'] as const) {
+  test(`必要查詢失敗 ${mode} 阻止準備與發送`, async () => {
     const f = fixture()
     if (mode === 'chain') f.client.getChainId = async () => 1
-    else if (mode === 'code') f.client.getCode = async () => '0x'
-    else if (mode === 'runtime') f.client.getCode = async () => wrongRuntime
-    else if (mode === 'metadata') f.client.getCode = async () => wrongMetadata
-    else {
-      const read = f.client.readContract
-      f.client.readContract = async args => { if (mode === 'rpc') throw new Error('RPC timeout'); return args.functionName === mode ? 'mismatch' : read(args) }
-    }
+    else f.client.readContract = async () => { throw new Error('RPC timeout') }
     await f.store.prepare(f.session, input)
     expect(f.store.getSnapshot().status).toBe('failed')
     expect(f.store.getSnapshot().summary).toBeUndefined()
     expect(f.calls.some(call => call.method === 'eth_sendTransaction')).toBe(false)
   })
 }
-for (const mode of ['account', 'chain', 'event', 'gas', 'revert', 'false'] as const) {
+test('不讀 runtime 或 metadata 仍可準備並確認標準 transfer', async () => {
+  const f = fixture() // getCode 會失敗；非 balanceOf 的 readContract 也會失敗。
+  await f.store.prepare(f.session, input)
+  expect(f.store.getSnapshot().summary).toBeDefined()
+  await f.store.confirm(f.store.getSnapshot().summary!)
+  expect(f.store.getSnapshot().status).toBe('success')
+})
+for (const mode of ['account', 'chain', 'event', 'balance', 'gas', 'revert', 'false'] as const) {
   test(`前置檢查阻止 ${mode}`, async () => {
     const f = fixture()
     if (mode === 'account') f.switchAccount()
     if (mode === 'chain') f.switchChain()
     if (mode === 'event') f.invalidate()
+    if (mode === 'balance') f.client.readContract = async () => 0n
     if (mode === 'gas') f.client.getBalance = async () => 0n
     if (mode === 'revert') f.client.simulateContract = async () => { throw new Error('execution reverted') }
     if (mode === 'false') f.client.simulateContract = async () => ({ result: false })
@@ -182,15 +183,12 @@ test('新交易無 Hash 逾時不會用較早成功交易解除未知鎖定', as
   expect(f.calls.filter(call => call.method === 'eth_sendTransaction')).toHaveLength(2)
 })
 
-for (const failure of ['runtime', 'metadata', 'rpc-code', 'rpc-metadata'] as const) {
-  test(`已有摘要後 ${failure} 核對失敗仍不能發送`, async () => {
+for (const failure of ['rpc', 'insufficient'] as const) {
+  test(`已有摘要後最新餘額 ${failure} 仍不能發送`, async () => {
     const f = fixture()
     await f.store.prepare(f.session, input)
     const summary = f.store.getSnapshot().summary!
-    if (failure === 'runtime') f.client.getCode = async () => wrongRuntime
-    if (failure === 'metadata') f.client.getCode = async () => wrongMetadata
-    if (failure === 'rpc-code') f.client.getCode = async () => { throw new Error('RPC timeout') }
-    if (failure === 'rpc-metadata') f.client.readContract = async () => { throw new Error('RPC timeout') }
+    f.client.readContract = async () => { if (failure === 'rpc') throw new Error('RPC timeout'); return 0n }
     await f.store.confirm(summary)
     expect(f.store.getSnapshot().status).toBe('failed')
     expect(f.store.getSnapshot().summary).toBeUndefined()
@@ -198,19 +196,16 @@ for (const failure of ['runtime', 'metadata', 'rpc-code', 'rpc-metadata'] as con
   })
 }
 
-test('合約核對等待中切換帳號，舊成功核對不能產生摘要或模擬轉帳', async () => {
+test('餘額查詢等待中切換帳號，舊回應不能產生摘要或發送轉帳', async () => {
   const f = fixture()
-  let resolveCode!: (value: typeof runtime) => void
-  f.client.getCode = () => new Promise(resolve => { resolveCode = resolve })
-  let simulated = false
-  f.client.simulateContract = async () => { simulated = true; return { result: true } }
+  let resolveBalance!: (value: bigint) => void
+  f.client.readContract = () => new Promise(resolve => { resolveBalance = resolve })
   const preparing = f.store.prepare(f.session, input)
-  await expect.poll(() => !!resolveCode).toBe(true)
+  await expect.poll(() => !!resolveBalance).toBe(true)
   f.invalidate()
-  resolveCode(runtime)
+  resolveBalance(tokenSupply)
   await preparing
   expect(f.store.getSnapshot().status).toBe('failed')
   expect(f.store.getSnapshot().summary).toBeUndefined()
-  expect(simulated).toBe(false)
   expect(f.calls.some(call => call.method === 'eth_sendTransaction')).toBe(false)
 })
