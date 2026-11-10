@@ -82,6 +82,8 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 ## Task 05 教學 ERC-20（尚未部署）
 
+Task 05C-1 已補充 [Remix + MetaMask Sepolia 部署指南](docs/07-sepolia-deployment-guide.md)，包含編譯重現門檻、Hardhat 產物替代方案、三組參數、receipt 與 Etherscan 驗證及待填紀錄；仍未部署，也未開始 Task 06。
+
 單一 `contracts/TeachingToken.sol` 使用 OpenZeppelin ERC20，三個實例為 DeFi Portfolio Lab Token（DPLT）、DeFi Portfolio Lab Asset A（DPLT-A）、DeFi Portfolio Lab Asset B（DPLT-B）；各 18 decimals、1,000,000 tokens。constructor 一次分配全部供給至部署時明確指定的教師地址，無 mint 入口或特殊管理權限。教師後續以一般 Sepolia transfer 分發；沒有自動 ERC-20 Faucet。
 
 使用 Hardhat 3.21.2、官方 viem Toolbox 5.0.7、Solidity 0.8.38、OpenZeppelin 5.6.1，沿用既有 npm lockfile、TypeScript 與 viem。前端與合約測試目錄／型別設定分離：
