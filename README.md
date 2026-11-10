@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02 已建立 React／TypeScript／Vite 前端與響應式首頁。Task 03 已開放 MetaMask Wallet 連接與 Sepolia 網路檢查；Task 04 已開放 Faucet，新增獨立 viem Public Client、Sepolia ETH 餘額查詢與 Gas 教材；其餘四張模組卡片保持未開放。RPC 真實可用性與 CORS 尚未驗證，沒有合約、資產交易或模擬連線結果。本次未發布 GitHub Pages。
+Task 02 已建立 React／TypeScript／Vite 前端與響應式首頁。Task 03 已開放 MetaMask Wallet 連接與 Sepolia 網路檢查；Task 04 已開放 Faucet，新增獨立 viem Public Client、Sepolia ETH 餘額查詢與 Gas 教材；其餘四張模組卡片保持未開放。RPC 真實可用性與 CORS 尚未驗證，Task 05 已完成教學 ERC-20 合約與本機測試、部署準備；尚未部署合約，沒有前端資產交易或模擬連線結果。本次未發布 GitHub Pages。
 
 ## 本機開發與驗證
 
@@ -78,4 +78,20 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 模組規格：[Wallet](docs/modules/wallet.md) · [Faucet](docs/modules/faucet.md) · [Token](docs/modules/token.md) · [Exchange](docs/modules/exchange.md) · [Liquidity](docs/modules/liquidity.md) · [Portfolio](docs/modules/portfolio.md) · [Layer 2](docs/modules/layer2.md)。
 
-前端已採 React、TypeScript、Vite、viem 2.57.17；Sepolia ETH 餘額已實作；ERC-20 讀寫與 Solidity／Hardhat 合約仍屬後續開發。
+前端已採 React、TypeScript、Vite、viem 2.57.17；Sepolia ETH 餘額已實作；ERC-20 合約與本機測試已由 Task 05 完成，尚未部署；前端 ERC-20 讀寫仍屬後續開發。
+
+## Task 05 教學 ERC-20（尚未部署）
+
+單一 `contracts/TeachingToken.sol` 使用 OpenZeppelin ERC20，三個實例為 DeFi Portfolio Lab Token（DPLT）、DeFi Portfolio Lab Asset A（DPLT-A）、DeFi Portfolio Lab Asset B（DPLT-B）；各 18 decimals、1,000,000 tokens。constructor 一次分配全部供給至部署時明確指定的教師地址，無 mint 入口或特殊管理權限。教師後續以一般 Sepolia transfer 分發；沒有自動 ERC-20 Faucet。
+
+使用 Hardhat 3.21.2、官方 viem Toolbox 5.0.7、Solidity 0.8.38、OpenZeppelin 5.6.1，沿用既有 npm lockfile、TypeScript 與 viem。前端與合約測試目錄／型別設定分離：
+
+```sh
+npm run contracts:compile
+npm run contracts:typecheck
+npm run contracts:test
+```
+
+本機合約與準備檢查共 24 項；測試不涉及 Sepolia。Ignition 模組與公開教師地址／chain ID 的部署準備已建立；Hardhat 設定只含本機網路，沒有公用網路部署命令。本次未設定私鑰、未執行鏈上部署，Token UI 保持未開放。
+
+[合約規格、A-03／A-04／A-05 決策與部署紀錄格式](docs/06-token-contracts.md)包含離線準備、唯讀 RPC 預檢、未來驗證流程及 Task 06 前置條件。至少 receipt status success 才可標記交易成功；進一步確認數／重組／替換策略須在 Task 06 前決定。

@@ -18,9 +18,19 @@ MVP 負責 DPLT、DPLT-A、DPLT-B 的資產資料、餘額與單筆轉帳。名�
 
 ## 合約設計邊界
 
-三種 ERC-20 預計使用 Solidity／Hardhat 開發測試，但目前沒有實作、地址或供給數值。A-03 待決：decimals、初始／最大供給、分配對象、鑄造／銷毀規則、管理角色、是否可暫停及升級性。代幣符號不代表代幣必須有不同經濟機制。
+Task 05 已實作單一 `contracts/TeachingToken.sol`，繼承 OpenZeppelin ERC20，由 constructor 設定名稱、symbol、初始教師持有人及基礎單位供給。三個實例規格如下，皆以 Ethereum Sepolia（11155111）為未來部署目標，**尚未部署**：
 
-實作前須確定標準函式與事件、選用可靠的 ERC-20 基礎函式庫及版本。不得先行加入稅費、黑名單、轉帳扣款或治理機制。
+| Name | Symbol | Decimals | 初始供給 |
+| --- | --- | --- | --- |
+| DeFi Portfolio Lab Token | DPLT | 18 | 1,000,000 |
+| DeFi Portfolio Lab Asset A | DPLT-A | 18 | 1,000,000 |
+| DeFi Portfolio Lab Asset B | DPLT-B | 18 | 1,000,000 |
+
+A-03 已確定：每個實例 `1_000_000n * 10n ** 18n`，constructor 一次 `_mint()` 給明確指定、有效且非零的教師地址，地址／餘額／供給互相獨立。固定供給，無後續 mint、burn、owner、管理員、pause、proxy、稅費、黑名單或凍結；完全沿用 OpenZeppelin 標準餘額與授權邏輯。
+
+A-04 已確定：教師使用一般 Sepolia transfer 分發三種教學代幣。沒有 ERC-20 自動 Faucet、批次合約或教師介面，原生 Sepolia ETH 領取指引不代表 ERC-20 領幣。A-05 最低原則為自行錢包確認、hash 不等於成功、至少 receipt status success；拒簽、失敗、RPC 逾時、未知分開呈現且不自動重送，切換帳號／網路不沿用授權。確認數、重組及替換策略於 Task 06 前決定。
+
+工具版本、24 項本機測試、Ignition 模組、部署預檢與待部署紀錄見 [Task 05 合約文件](../06-token-contracts.md)。Token UI 仍未開放，本次沒有前端轉帳實作。
 
 ## 驗證與後續
 

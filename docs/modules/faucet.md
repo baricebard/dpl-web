@@ -60,4 +60,4 @@ Gas Fee 用於支付交易的計算與網路資源、降低垃圾交易；費用
 
 Playwright 透過 HTTP route Mock RPC 與 EIP-1193 Mock Wallet 驗證，不把 mock 放入正式 bundle。案例包括未連線、零／非零／1 wei 精度、更新時間、複製、安全連結、返回後手動刷新、去重／無輪詢、逾時、RPC 錯誤、HTTP／JSON 限流、RPC 錯鏈、快速帳號切換及網路切換過期回應；桌面與手機皆執行，另保留 Task 03 回歸測試。**Mock 通過不等於真實 RPC、CORS 或 Faucet 發幣成功。** 執行結果見 Task 04 驗證紀錄。
 
-A-04 教學 ERC-20 的分發方式、額度、冷卻、權限與濫用防護仍待決；Task 05 前先完成 A-03／A-04／A-05 決策，再整合 Token。沒有自建 Faucet 伺服器／合約、ERC-20 部署或 Exchange 功能。
+A-04 已於 Task 05 決定：三種 ERC-20 初始供給由教師錢包統一持有，再於 Sepolia 以一般 transfer 分發給學生；不建立自動 ERC-20 Faucet、批次分發合約或教師操作介面。教師應為 30 人保留後續交換、池與投資組合資產，規劃見 [Task 05](../06-token-contracts.md)。現有 ETH Faucet 指引不會自動發放 ERC-20，也不替學生支付 ERC-20 轉帳 Gas。合約尚未部署，Token 前端未開放；沒有自建 Faucet 伺服器／合約或 Exchange 功能。
