@@ -18,6 +18,7 @@ assert.equal(artifact.contractName, 'TeachingToken')
 assert.deepEqual(artifact.deployedLinkReferences, {})
 assert.deepEqual(artifact.immutableReferences, {})
 const build = json(`artifacts/build-info/${artifact.buildInfoId}.json`)
+assert.equal(build.id, artifact.buildInfoId, 'Artifact build-info reference mismatch')
 const input = build.input
 assert.equal(build.solcLongVersion, '0.8.38+commit.1835d247')
 assert.equal(solc.version(), '0.8.38+commit.1835d247.Emscripten.clang')
@@ -40,6 +41,7 @@ assert.match(runtime, /^0x(?:[\da-f]{2})+$/i)
 assert.equal(runtime.toLowerCase(), artifact.deployedBytecode.toLowerCase(), 'Recompiled runtime differs from Hardhat artifact (including metadata)')
 const metadataLength = parseInt(runtime.slice(-4), 16)
 assert.ok(metadataLength > 0 && metadataLength + 2 < (runtime.length - 2) / 2, 'Missing Solidity metadata trailer')
+// Hardhat buildInfoId 包含本機 solcConfig.path，僅用於尋找產物；不可作為可攜指紋。
 const manifest = {
   sourceCommit,
   contract: 'contracts/TeachingToken.sol:TeachingToken',
@@ -47,7 +49,6 @@ const manifest = {
   openZeppelin: '5.6.1',
   optimizerRuns: 200,
   evmVersion: 'cancun',
-  buildInfoId: artifact.buildInfoId,
   packageLockSha256: sha256(text('package-lock.json')),
   standardJsonInputSha256: sha256(JSON.stringify(input)),
   solcJsSha256: sha256(readFileSync('node_modules/solc/soljson.js')),

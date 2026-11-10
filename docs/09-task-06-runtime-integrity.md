@@ -23,9 +23,9 @@ PR #8 初版的「Code／Metadata 核對」只包含 code 非空，以及 ERC-20
 [離線產生／檢查工具](../scripts/contracts/runtime-manifest.ts)的步驟：
 
 1. 比對目前 TeachingToken 原始碼、Hardhat 設定、package.json、lockfile 與指定 Git commit 原文完全一致。這個 commit 必須存在於 checkout 歷史中；工具不自動連線取檔或改用其他基線。
-2. 由 TeachingToken artifact 的 buildInfoId 載入其 Standard JSON input，核對精確 compiler build、optimizer、EVM、viaIR、metadata 預設與 remapping。逐份比對來源單位內容與本機原始碼／lockfile 安裝的 OpenZeppelin，拒絕未知 source-unit 路徑。
+2. 由 TeachingToken artifact 的 buildInfoId 載入其 Standard JSON input，確認 artifact 引用與 build-info 內的 id 相同；buildInfoId 含本機 compiler 絕對路徑，只用作檔案定位，不納入可攜 manifest。核對精確 compiler build、optimizer、EVM、viaIR、metadata 預設與 remapping。逐份比對來源單位內容與本機原始碼／lockfile 安裝的 OpenZeppelin，拒絕未知 source-unit 路徑。
 3. 以 lockfile 的 npm solc **重新編譯整份 input**（保留 source-unit 路徑與全部設定），要求重新生成的 deployedBytecode 與 Hardhat artifact 全文一致。拒絕 link／immutable references；TeachingToken 沒有需要替換的 runtime 欄位，三個 constructor 名稱與供給是 storage 初始化，runtime 本身相同。
-4. 要求存在 Solidity metadata 尾段，對包含尾段的完整 runtime 產生 Keccak-256／長度。manifest 同時記錄來源 commit、compiler、buildInfoId、lockfile／Standard JSON input／soljson.js 的 SHA-256，可供審查追溯；不把那些完整資料放進前端。
+4. 要求存在 Solidity metadata 尾段，對包含尾段的完整 runtime 產生 Keccak-256／長度。manifest 同時記錄來源 commit、compiler、lockfile／Standard JSON input／soljson.js 的 SHA-256，可供審查追溯；不把那些完整資料放進前端。
 5. `--check` 在記憶體重建 manifest，要求已提交檔案逐字一致，失敗即非零退出，不會自行改寫預期值。產生新值需要明確執行不帶 `--check` 的工具，且需人工審查差異，不是從 RPC 返回值學習可信 bytecode。
 
 重現命令（先使用專案 Node/npm 版本；完整 Git checkout，既有依賴未安裝時先 `npm ci`）：
@@ -70,10 +70,12 @@ Mock 核對、EDR 本機部署及指紋重現都不等於真實 Sepolia 三地�
 
 ## 本次驗證
 
-- 強制 Hardhat 重編與 manifest `--check` 通過；另在獨立暫存目錄從 Task 05C Git 原文重建，完整 runtime 與 buildInfoId 亦一致；三種本機 EDR 實例完整 runtime 均符合指紋，24 項合約回歸通過。
+- 強制 Hardhat 重編與 manifest `--check` 通過；當時跨目錄測試重用同一份 node_modules，完整 runtime 與 buildInfoId 一致，但未涵蓋獨立安裝路徑；後續 CI 因 buildInfoId 不可攜失敗，已由 [CI 修正紀錄](10-task-06-ci-reproducibility.md)補正；三種本機 EDR 實例完整 runtime 均符合指紋，24 項合約回歸通過。
 - 新增 executable code 竄改、僅 Solidity metadata 尾段竄改、非法／缺漏 Code、摘要後核對失敗、RPC 例外、核對中切帳號、舊帳號 Code 錯誤回應隔離等測試。ERC-20 name／symbol／decimals／supply 不符測試繼續保留。
 - `npm run lint`、`npm run typecheck`、`npm run contracts:typecheck`、`npm run build` 全部通過。build 保留既有 viem/ox externalization 與 >500 kB bundle 提示，未隱藏。
 - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test -- --workers=4`：**186/186 通過**（93 個案例各跑桌面／手機，含 Wallet／Faucet 回歸）。
 - `XDG_CONFIG_HOME=/tmp/dpl-config XDG_CACHE_HOME=/tmp/dpl-cache npm run contracts:compile -- --force`、`node scripts/contracts/runtime-manifest.ts --check` 及同 XDG 設定的 `npm run contracts:test`：通過，合約測試 **24/24**。
 - `git diff --check` 與文件相對連結檢查通過。未新增依賴或修改 lockfile、TeachingToken.sol、三個公開合約地址。
 - 未執行真實 ERC-20 轉帳、合約部署、Pages 發布或 PR 合併。
+
+目前 CI 可重現性與最新測試結果見 [CI 修正紀錄](10-task-06-ci-reproducibility.md)，本節先前本機結果不代表當時 GitHub Actions 已通過。

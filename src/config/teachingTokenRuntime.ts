@@ -6,7 +6,6 @@ export const teachingTokenRuntime = {
   "openZeppelin": "5.6.1",
   "optimizerRuns": 200,
   "evmVersion": "cancun",
-  "buildInfoId": "solc-0_8_38-fc8a1dc7c4a9e654cb264cd82d11067983981c07",
   "packageLockSha256": "1e05da64a5745c6fcd61c4e97a3ce5134e441523c3cfa5e3e9c6833f366e7ece",
   "standardJsonInputSha256": "af43fc36b29a6aa419dfd4b0dea093b911f3361dfd9b76999d1988d74cf6be8a",
   "solcJsSha256": "0b15fcb24fe784ed60f3853afc7f7e133a427bf1ac0d682e3f808d44b8e2fa6c",

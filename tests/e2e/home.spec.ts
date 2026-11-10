@@ -36,6 +36,8 @@ test('Pages 子路徑可載入、重新整理，Wallet 與 Faucet 開放且保�
 
 test('鍵盤可跳至主內容並使用導覽', async ({ page }) => {
   await page.goto('./')
+  // React 初次 render 可晚於 load；待內容可見後才送出不能自動重試的 Tab。
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('link', { name: '跳至主要內容' })).toBeFocused()
   await page.keyboard.press('Enter')
