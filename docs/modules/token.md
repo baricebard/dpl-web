@@ -1,37 +1,45 @@
 # Token：ERC-20 餘額與轉帳
 
-## 責任與範圍
+## Task 06 狀態與公開設定
 
-MVP 負責 DPLT、DPLT-A、DPLT-B 的資產資料、餘額與單筆轉帳。名稱定義見[專案總覽](../00-project-overview.md)。依賴 Wallet 與共用鏈上讀寫層；原生 Sepolia ETH 僅獨立展示 Gas 餘額，不走 ERC-20 `transfer`。
+已實作三種代幣餘額、Gas、單筆 ERC-20 transfer、摘要及結果追蹤。尚未發布，也未執行真實轉帳。地址來自本次任務提供的部署資料；本次環境對 PublicNode RPC 的唯讀請求受阻，不能宣稱完成新的鏈上核對。執行時每個代幣必須通過鏈別、非空 Code、name、symbol、decimals、totalSupply 核對，否則停用該代幣轉帳。成功讀取 metadata 不代表 Etherscan 原始碼驗證或歷史 runtime bytecode 比對已完成。
 
-## 讀取與轉帳流程
+唯一公開設定為 [tokens.ts](../../src/config/tokens.ts)，身份使用 `chainId:lowercaseContractAddress`；symbol 只作顯示。Ethereum Sepolia，Chain ID **11155111**。
 
-- 由公開設定載入三種經驗證的合約地址與 ABI，讀取／核對 symbol、decimals 及帳號餘額。缺地址、無合約或資料不符時停用該資產操作。
-- 學生選擇資產、輸入收款地址與十進位金額。MVP 接受明確地址，不加入名稱解析或任意代幣匯入。
-- 驗證地址格式、拒絕零地址、金額為正、精度不超過 decimals 且不超過代幣餘額；Gas 不足需獨立提示，預估費用不等於最終費用。
-- 送出前顯示網路、代幣、收款地址與金額摘要，由錢包簽署。單純 ERC-20 轉帳無需 `approve`，不得要求無關授權。
-- 依共用交易狀態追蹤 hash／receipt，成功後重新讀取餘額；失敗或結果未知不得假設資產已轉移。
+| Name | Symbol | Contract |
+| --- | --- | --- |
+| DeFi Portfolio Lab Token | DPLT | [0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e](https://sepolia.etherscan.io/token/0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e) |
+| DeFi Portfolio Lab Asset A | DPLT-A | [0x53Ac929866423479c7C5746F76F398e8b3907d6E](https://sepolia.etherscan.io/token/0x53Ac929866423479c7C5746F76F398e8b3907d6E) |
+| DeFi Portfolio Lab Asset B | DPLT-B | [0xA8E2854c62A46329838f9922587adBbEb007072f](https://sepolia.etherscan.io/token/0xA8E2854c62A46329838f9922587adBbEb007072f) |
 
-## 模組介面
+各 18 decimals、固定 1,000,000 tokens（`1000000000000000000000000` 最小單位），無公開 Mint、無特殊管理權限。初始教師持有人為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`，目前餘額不可假設仍為初始供給。合約來源與供給決策見 [Task 05](../06-token-contracts.md)，部署指南歷史資料見 [Task 05C](../07-sepolia-deployment-guide.md)。main 未包含實際部署 receipt／Hash 封存，不能補造證據或因此重新部署。
 
-輸入資產設定、Wallet 狀態及轉帳表單；輸出具資產識別與精度的餘額、讀取狀態及交易結果。供未來 Portfolio 讀取資產資料，交換授權流程歸 Exchange，發幣邏輯歸合約與 Faucet 決策。
+## 操作與模組介面
 
-## 合約設計邊界
+首頁 Token 卡片開啟 `#token` 才載入 ERC-20 查詢；離開入口仍保留本頁交易資料。模組依賴公開 `useWallet()`、`captureTransactionSession()`、Sepolia Public Client 及共用 `useSepoliaBalance()`／RPC 錯誤分類。Wallet 原有連接與 Faucet 流程保持可用。
 
-Task 05 已實作單一 `contracts/TeachingToken.sol`，繼承 OpenZeppelin ERC20，由 constructor 設定名稱、symbol、初始教師持有人及基礎單位供給。三個實例規格如下，皆以 Ethereum Sepolia（11155111）為未來部署目標，**尚未部署**：
+- 顯示連接帳號、目前網路、Sepolia ETH、三種完整精度餘額、最後查詢時間與安全 Etherscan 連結。未連接／錯鏈清除帳號資料；RPC 失敗不顯示零。各代幣核對錯誤獨立顯示，其他通過的代幣仍可操作。
+- 同地址進行中查詢去重，同批合約鏈別核對去重；代幣手動更新最少 30 秒、無自動重試或餘額輪詢。ETH 沿用 Faucet：8 秒逾時、最多重試一次及限流退避。RPC 限流／故障時請稍候手動更新，課堂改用教材與教師示範，不展示假資料。
+- 選擇固定代幣，輸入有效非零 Ethereum 地址與正十進位字串，拒絕負數、NaN、科學記號、超過 18 位小數、零及超額。所有金額使用 bigint、`parseUnits`／`formatUnits`。收款為自己時提示 Gas 消耗。
+- 「檢查轉帳摘要」重新核對錢包帳號／鏈、合約與餘額，使用 `simulateContract`（必須回傳 true）、`estimateContractGas`、`getGasPrice`。Gas limit 與 legacy gas price 各加 20% 整數緩衝，檢查 ETH 足夠支付所顯示上限。預估與實際費用、確認時間有不確定性。
+- 摘要列出完整帳號、網路、合約、收款地址、數量、代幣及 ETH 餘額、Gas limit、gas price 與費用上限。2 分鐘後過期；表單變更、帳號／網路／Provider／工作階段切換均使原摘要失效，切走再切回也不可沿用。
+- 只有明確點「確認並開啟 MetaMask」才進入送出。送出前重做唯讀核對與模擬；Gas 條件超過已確認上限即阻止並要求新摘要。由原本選定的 MetaMask Provider 經 viem `createWalletClient`／`custom`／`writeContract` 發送標準 `transfer(address,uint256)`，停用 transport 重試。無 approve、transferFrom、批次或任意合約輸入。
+- 錢包待確認期間切換帳號／網路時，網站提示拒絕已開啟的請求；網站無法撤回 MetaMask 已呈現的確認視窗。若已廣播，持續保留原始帳號與鏈追蹤，不把新帳號的資料套到舊交易。
 
-| Name | Symbol | Decimals | 初始供給 |
-| --- | --- | --- | --- |
-| DeFi Portfolio Lab Token | DPLT | 18 | 1,000,000 |
-| DeFi Portfolio Lab Asset A | DPLT-A | 18 | 1,000,000 |
-| DeFi Portfolio Lab Asset B | DPLT-B | 18 | 1,000,000 |
+## A-05 交易狀態與確認策略
 
-A-03 已確定：每個實例 `1_000_000n * 10n ** 18n`，constructor 一次 `_mint()` 給明確指定、有效且非零的教師地址，地址／餘額／供給互相獨立。固定供給，無後續 mint、burn、owner、管理員、pause、proxy、稅費、黑名單或凍結；完全沿用 OpenZeppelin 標準餘額與授權邏輯。
+`idle → validating → awaiting-wallet → submitted → confirming → success / failed / unknown`。準備摘要時也使用 validating；準備完成回 idle，必須另行確認。取得 hash 不等於成功。
 
-A-04 已確定：教師使用一般 Sepolia transfer 分發三種教學代幣。沒有 ERC-20 自動 Faucet、批次合約或教師介面，原生 Sepolia ETH 領取指引不代表 ERC-20 領幣。A-05 最低原則為自行錢包確認、hash 不等於成功、至少 receipt status success；拒簽、失敗、RPC 逾時、未知分開呈現且不自動重送，切換帳號／網路不沿用授權。確認數、重組及替換策略於 Task 06 前決定。
+確認使用 `waitForTransactionReceipt`，至少 1 個區塊確認、8 秒查詢間隔、最多 60 秒等待，僅對已發送交易追蹤。成功前重新讀 `getTransactionReceipt`、receipt 區塊、最新高度與實際交易；核對 status success、hash、canonical block hash、from、to、calldata、value = 0。至少 1 個區塊指包含該交易的區塊，並非額外等待一塊，更不是 Ethereum 最終確定性。
 
-工具版本、24 項本機測試、Ignition 模組、部署預檢與待部署紀錄見 [Task 05 合約文件](../06-token-contracts.md)。Token UI 仍未開放，本次沒有前端轉帳實作。
+- Receipt reverted／實際替換或取消不符合原 transfer → failed。
+- repriced／replaced／cancelled 保存原與替換 hash；只有實際交易仍符合原帳號、代幣、收款地址、數量且 receipt 成功才可成功。
+- RPC 逾時、查無 receipt、重組或無法核對 → unknown；禁止新送出，保留原 hash，僅允許手動查原交易。重新核對成功才解除未知狀態；絕不自動重送。
+- 發送階段逾時而無 hash 同樣 unknown，需先人工檢查 MetaMask 活動；本頁鎖定新送出，重新整理不是解決未知交易的方法。
+- 使用者拒簽與前置檢查失敗 → failed，沒有成功交易假象。busy 防重複提交。
+- 成功後重新讀取相關代幣餘額。成功交易仍允許手動查詢；若後續重組、receipt 消失，改為 unknown。無長期背景 finality 監控。
+- 紀錄僅存在本頁記憶體。新交易開始時保留較早交易的 hash／原帳號／鏈，重新整理後不保證保存；學生應另保存 Etherscan 連結，網站不承諾完整歷史。
 
-## 驗證與後續
+## 驗證與待人工驗收
 
-前端驗證整數換算、極小／大額、超精度、非法地址、零餘額、舊帳號結果、拒簽、revert 與 RPC 錯誤。合約階段驗證選定供給規則、轉帳、餘額不足、事件及所有管理權限；本機通過後才安排 Sepolia 整合測試。批次轉帳、資產匯入與管理介面延後。
+[Task 06 驗收紀錄](../08-task-06-validation.md)記錄命令、Mock 案例與鏈上讀取限制。Mock Provider／RPC 與本機 EDR 都不等於真實 Sepolia 交易。正式發布前必須在允許的環境核對三種合約、Etherscan 來源及 runtime 封存，另由使用者授權並親自在 MetaMask 做兩帳號轉帳、拒簽、替換、CORS／RPC 與 30 人課堂演練。手機版僅驗證響應式畫面，手機跨 App 錢包連接仍未支援。Task 06 不新增合約、不發布、不開始 Task 07。

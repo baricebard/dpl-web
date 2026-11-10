@@ -1,7 +1,7 @@
 import { getAddress, isAddress, numberToHex } from 'viem'
 import { sepolia } from 'viem/chains'
 import type { WalletProvider } from '../../../lib/web3/provider'
-import type { WalletState } from '../types'
+import type { TransactionSession, WalletState } from '../types'
 
 const initial: WalletState = {
   address: null, chainId: null, connectionStatus: 'unavailable',
@@ -78,6 +78,14 @@ export function createWalletStore() {
     }
   }
   return {
+    captureTransactionSession(): TransactionSession {
+      if (!provider || !state.canTransact || !state.address) throw new Error('請先連接 MetaMask 並切換 Sepolia。')
+      const target = provider
+      const address = state.address
+      const version = [session, accountRevision, chainRevision].join(':')
+      return { address, chainId: 11155111, provider: target,
+        isCurrent: () => active && state.canTransact && provider === target && address === state.address && version === [session, accountRevision, chainRevision].join(':') }
+    },
     getSnapshot: () => state,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
     attach(target: WalletProvider) {

@@ -1,6 +1,10 @@
 # Task 05C-1：Sepolia 部署準備指南
 
-## 狀態與操作邊界
+## Task 06 現況補記
+
+本指南是 Task 05C-1 的歷史部署準備成果，不是實際部署證據。Task 06 已取得使用者提供的三個 Sepolia 合約地址與初始教師公開地址，見 [Token 設定與驗收狀態](modules/token.md)。下方待部署範本保留作為當時未填的歷史紀錄，不能視為現在需要重新部署。main 未包含實際 receipt／部署 Hash／編譯封存，不虛構補填；Etherscan 原始碼驗證與歷史 runtime bytecode 比對仍未完成。Task 06 僅整合已提供地址，不發送部署或轉帳。
+
+## Task 05C 歷史狀態與操作邊界
 
 本次從最新 `origin/main`（`f9f108c946d0bcb51004da14bb7dd392b41244a0`）建立 `task-05c-deployment-prep`，只準備文件。**尚未部署、未發送任何公用區塊鏈交易，沒有合約地址或交易 Hash，也未開始 Task 06。** 以下部署、簽署與 Etherscan 操作，留給日後另行授權後由使用者親自執行。
 
@@ -139,7 +143,7 @@ TOKEN_CHAIN_ID=11155111 TEACHER_ADDRESS="$teacher_public_address" npm run contra
 - 使用 Remix **At Address** 載入 TeachingToken ABI 或 Etherscan Read Contract；只讀取 `name()`、`symbol()`、`decimals() = 18`、`totalSupply() = 1000000000000000000000000`、`balanceOf(實際 initialHolder) = 1000000000000000000000000`（尚未分發時）。若部署者不同，初始供給仍應屬 initialHolder。
 - Receipt logs 應有該合約的 `Transfer` mint 事件：來源為零地址語意、目的為實際 initialHolder、數量為完整供給。此處零地址是事件語意，不可當 initialHolder 使用。
 
-至少成功 receipt 才能標記「鏈上執行成功」；另記 confirmations／檢查時間，不把一次 receipt 宣稱不可逆 finality。A-05 的課程確認數、重組與替換策略仍待 Task 06 前決定；部署紀錄與教學啟用前需再查 receipt／code 是否仍在主鏈。查詢失敗、資料不一致或重組時改列「待確認」，不分發、不填入前端。
+至少成功 receipt 才能標記「鏈上執行成功」；另記 confirmations／檢查時間，不把一次 receipt 宣稱不可逆 finality。A-05 已由 Task 06 決定至少 1 個區塊與實際交易／canonical block 核對（見 [Token](modules/token.md)）；部署紀錄與教學啟用前需再查 receipt／code 是否仍在主鏈。查詢失敗、資料不一致或重組時改列「待確認」，不分發、不填入前端。
 
 ## 7. Sepolia Etherscan 原始碼驗證
 
@@ -184,7 +188,7 @@ TOKEN_CHAIN_ID=11155111 TEACHER_ADDRESS="$teacher_public_address" npm run contra
 
 ## 9. 尚待確認與檢查紀錄
 
-Remix UI 實際提供的 compiler／config 格式、完整 bytecode 重現、多錢包注入、真實 MetaMask 簽署與 receipt、Sepolia RPC 可用性，以及 Etherscan 對此 build 的支援，皆須由日後部署操作者實測。本次未連接錢包或公用鏈 RPC，未簽署、發交易或驗證已部署合約。替代流程不更改 TeachingToken，但也未執行公用鏈部署。Task 06 與前端地址設定保持未開始。
+Remix UI 實際提供的 compiler／config 格式、完整 bytecode 重現、多錢包注入、真實 MetaMask 簽署與 receipt、Sepolia RPC 可用性，以及 Etherscan 對此 build 的支援，皆須由日後部署操作者實測。本次未連接錢包或公用鏈 RPC，未簽署、發交易或驗證已部署合約。替代流程不更改 TeachingToken，但也未執行公用鏈部署。這是 Task 05C 當時的紀錄；Task 06 現況與公開地址見本文件開頭補記。
 
 本次工作區未安裝 node_modules，執行 `npm run contracts:compile` 回報 `hardhat: not found`，另外嘗試 lint、typecheck、build、contracts:typecheck、contracts:test，也分別因缺少 eslint、tsc 或 hardhat 未能本機執行。依 AGENTS.md 文件工作不安裝套件；既有合約 CI 會在 PR 以 `npm ci` 執行 compile、型別與 24 項本機測試，結果以 PR checks 為準，不沿用 Task 05 結果當成本次通過。文件結構、相對連結、無虛構地址／Hash、版本／三組參數一致性與 `git diff --check` 均已通過。
 

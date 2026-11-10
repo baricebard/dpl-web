@@ -1,6 +1,12 @@
 # Task 05：ERC-20 教學代幣
 
-## 狀態與決策
+## Task 06 現況補記
+
+使用者已提供三個 Ethereum Sepolia 部署地址（11155111），已納入 [Token 公開設定](modules/token.md)，本文件下列 Task 05 未部署敘述屬當時歷史狀態。Task 06 不重新部署合約；本次唯讀 RPC 存取受阻，不能宣稱新鏈上核對完成。main 的 Task 05C 成果只有指南，未封存實際部署 receipt／Hash；Etherscan 原始碼驗證與歷史 runtime bytecode 完整比對仍未完成。
+
+A-05 已於 Task 06 決定至少 1 個區塊確認、canonical block 及實際交易內容核對、替換／取消與未知結果處理，以及記憶體紀錄策略，詳見 [Token](modules/token.md)與 [驗收紀錄](08-task-06-validation.md)。
+
+## Task 05 歷史狀態與決策
 
 Task 05 從包含 Task 01～04 的 `origin/main`（`91ba9de`）建立 `task-05-erc20`。只完成本機合約、測試及部署準備，**尚未部署 Sepolia**，沒有實際合約地址或交易 Hash。Token UI 仍未開放；沒有開始 Task 06、發送公用網路交易、索取或設定私鑰。
 
@@ -118,11 +124,11 @@ TOKEN_CHAIN_ID=11155111 TEACHER_ADDRESS="$teacher_public_address" SEPOLIA_RPC_UR
 
 未來以 Hardhat verify／Ignition verification 提交各地址的完整來源、精確 compiler build、optimizer 200、Cancun 與各自四個 constructor args（供給用整數字串）；如需 Etherscan API Key，從執行環境的秘密管理注入，不能用 `VITE_*`。核對 Sepolia Etherscan 的來源／bytecode 與鏈上部署相符，再更新驗證狀態與連結；驗證失敗不可標記完成。未來應保存 compiler standard JSON／build info 的可追溯交付副本於適當外部產物保存機制，而非將 artifacts 提交到 Git。
 
-## Task 06 依賴與尚未驗證事項
+## Task 06 依賴更新與尚未驗證事項
 
-Task 06 前先完成另行授權的 Sepolia 部署、Etherscan 驗證及紀錄，決定 A-05 的確認數／重組／替換策略，並確認 Task 04 RPC 真實 chain ID、CORS、配額、Gas 與 30 人供給。真實 MetaMask、真實 RPC、課堂演練與鏈上分發均未由本次本機測試驗證。
+Task 06 已使用任務提供的三個 Sepolia 地址建立共用設定、餘額、摘要、轉帳與 Mock 測試，A-05 已完成策略決策，見 [Token 模組](modules/token.md)。本次 RPC 唯讀存取受阻；真實合約 metadata、CORS、配額、Gas 與 30 人供給仍需課前核對。Etherscan 原始碼驗證、歷史 runtime bytecode 及實際部署 receipt 封存未完成，不能用本機測試補作鏈上證據，亦不因此重新部署。
 
-未來前端只引用可追溯的 ERC-20 ABI 子集與 `(chainId, contractAddress, name, symbol, decimals)` 公開設定，核對部署 commit／compiler／驗證紀錄。尚未部署時不得填入假地址；Token 維持未開放。餘額整數換算、交易表單、拒簽、receipt 狀態及過期授權的 UI／整合測試均留給 Task 06。
+前端引用單一標準 ERC-20 ABI 與 `(chainId, contractAddress, name, symbol, decimals)` 公開設定，執行時核對 code、metadata 與供給才開放對應轉帳。真實 MetaMask、真實兩帳號轉帳及課堂分發驗收尚未由本次 Mock／本機 EDR 測試完成。
 
 ## 本次驗證結果（2026-11-10）
 

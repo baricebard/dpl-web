@@ -2,7 +2,7 @@
 
 ## 狀態與系統邊界
 
-本文件描述目標架構；Task 02 已建立前端，Task 03 已實作 Wallet，Task 04 新增 Sepolia ETH 唯讀餘額與外部 Faucet 指引；真實 RPC／CORS 及領幣仍待人工驗證。Task 05 已完成固定供給教學 ERC-20 的本機實作與部署準備，尚未部署；Token UI 及其他鏈上功能仍為後續規劃。固定技術原則見[專案總覽](00-project-overview.md)，MVP 交付邊界由 [MVP 範圍](02-mvp-scope.md)定義。
+本文件描述目標架構；Task 02 已建立前端，Task 03 已實作 Wallet，Task 04 新增 Sepolia ETH 唯讀餘額與外部 Faucet 指引；真實 RPC／CORS 及領幣仍待人工驗證。Task 05 已完成固定供給教學 ERC-20 本機實作；Task 06 依使用者提供的三個 Sepolia 部署地址整合 Token 餘額與單筆轉帳，尚未發布。新的唯讀核對受環境 RPC 存取阻擋，執行時未通過合約核對即停用相應轉帳。Etherscan 原始碼驗證與歷史 runtime bytecode 比對仍未完成。固定技術原則見[專案總覽](00-project-overview.md)，MVP 交付邊界由 [MVP 範圍](02-mvp-scope.md)定義。
 
 ```text
 GitHub Pages（靜態檔案） → 學生瀏覽器：React UI／各功能模組
@@ -40,7 +40,7 @@ GitHub Pages 僅供應靜態內容，無法保密前端設定、執行伺服器�
 
 ## 資料保存與隱私
 
-鏈上餘額與交易結果為資產狀態依據；前端快取只用於展示，需標明載入、失敗或過期，不能將讀取失敗顯示成零。初期不儲存學生身分與成績。重新整理後可重新讀取餘額；本機交易紀錄保存策略待決，不承諾完整歷史。
+鏈上餘額與交易結果為資產狀態依據；前端快取只用於展示，需標明載入、失敗或過期，不能將讀取失敗顯示成零。初期不儲存學生身分與成績。重新整理後可重新讀取餘額；Task 06 交易紀錄僅本頁記憶體保存，不承諾完整歷史，提醒自行保存 Hash。
 
 錢包地址與交易公開可查，課程需說明其可連結性。不得蒐集私鑰、助記詞或錢包匯出檔；部署者金鑰不進入前端、Repository 或建置輸出。
 
@@ -58,11 +58,11 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 
 | ID | 待決問題 | 決策時點／規格負責處 |
 | --- | --- | --- |
-| A-01 | 已確定：MetaMask 擴充功能、EIP-1193、優先 EIP-6963、viem 2.57.17、Context + Hooks、Ethereum Sepolia。延後：其他錢包與行動連接；未實作鏈上讀寫流程 | Task 03；Wallet |
+| A-01 | 已確定：MetaMask 擴充功能、EIP-1193、優先 EIP-6963、viem 2.57.17、Context + Hooks、Ethereum Sepolia。延後：其他錢包與行動連接；Token 已實作受檢查保護的讀寫流程 | Task 03；Wallet |
 | A-02 | Task 04：獨立 viem Public Client，PublicNode Sepolia 為公開設定候選；8 秒逾時、最多重試一次、1 秒退避、手動更新最少 10 秒、同址進行中去重、無輪詢；429 至少冷卻 30 秒並尊重 Retry-After。無 API Key／未驗證備援。環境代理 403，實際鏈別、getBalance、CORS 與供應商配額尚未驗證；授課前必須通過 | 實作已定；外部驗證待完成，見 [Faucet](modules/faucet.md) |
 | A-03 | 已確定：三種各 18 decimals、1,000,000 tokens；constructor 一次分配全部供給至明確教師地址；無額外鑄造、銷毀、管理權限、稅費或升級 | Task 05；[合約規格](06-token-contracts.md) |
 | A-04 | 已確定：教師錢包在 Sepolia 以一般 transfer 分發；不實作自動 ERC-20 Faucet、批次合約或教師 UI；30 人需保留後續練習資產 | Task 05；[合約規格](06-token-contracts.md) |
-| A-05 | 已確定最低原則：錢包自行確認，至少 receipt status success；拒簽、失敗、RPC 逾時、未知分開，不自動重送，切換不沿用授權。確認區塊數、重組／替換與紀錄策略待決 | Task 06 實作前；[詳細決策](06-token-contracts.md) |
+| A-05 | Task 06 已定：idle／validating／awaiting-wallet／submitted／confirming／success／failed／unknown；receipt success、至少 1 個區塊及 canonical block／實際 calldata 核對；替換／取消需核對實際交易；重組／逾時結果未知不重送；原鏈／帳號／Hash 記憶體保留，無持久保存 | [Token 詳細策略](modules/token.md) |
 | A-06 | 固定比率或 AMM 交換、交易對、費率、滑價、授權策略 | Exchange 階段前；Exchange |
 | A-07 | 池模型、初始流動性、LP 權益表示及資金管理 | Liquidity 階段前；Liquidity |
 | A-08 | Portfolio 計價單位、價格來源、歷史資料與績效方法 | Portfolio 階段前；Portfolio |
@@ -75,4 +75,11 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 
 Task 05 採 Hardhat 3／viem Toolbox／Node Test Runner 與 OpenZeppelin 5.x。單一 Solidity 原始碼建立三個獨立實例；`test/contracts/` 與 Playwright `tests/e2e/` 分離，合約使用獨立 NodeNext 型別設定。前端既有依賴與 Wallet／Faucet 邏輯不變。
 
-部署模組與離線參數準備已建立，另有唯讀 RPC chain ID 預檢；目前 Hardhat 僅設定本機 EDR，沒有 HTTP 部署設定、秘密或公用網路部署命令。尚無真實地址、Hash 或 ABI／地址前端整合。版本、部署紀錄格式、合約驗證流程與未完成遠端執行器見 [Task 05](06-token-contracts.md)；部署需另行授權。
+部署模組與離線參數準備已建立，另有唯讀 RPC chain ID 預檢；目前 Hardhat 僅設定本機 EDR，沒有 HTTP 部署設定、秘密或公用網路部署命令。Task 06 公開設定已有使用者提供的三個地址與標準 ERC-20 ABI 整合（見 [Token](modules/token.md)）；main 未包含其實際部署 Hash／receipt 封存，新鏈上核對受阻，不能假設驗證完成。版本、部署紀錄格式、合約驗證流程與未完成遠端執行器見 [Task 05](06-token-contracts.md)；部署需另行授權。
+
+
+## Token 實作與資源策略
+
+`src/config/tokens.ts` 是唯一前端地址與 ABI 來源，使用 viem `erc20Abi` 對應 TeachingToken 繼承的標準 OpenZeppelin ERC20。Wallet 公開 `captureTransactionSession()` 綁定 Provider、帳號、chain ID 與事件版本，前置讀取及送出前均重新核對；事件版本可阻止 A → B → A 後沿用摘要。Token services 不存私鑰，Public Client 無 signer；錢包 transport 不重試發送。
+
+首次開啟 `#token` 才查詢 ERC-20，手動更新至少 30 秒、同址進行中去重及同批 chain ID 去重，無餘額輪詢；Token 與 Faucet 共用 ETH 讀取與 RPC 錯誤分類。只有已廣播交易在最多 60 秒內每 8 秒追蹤 receipt，逾時後改為手動查詢。詳見 [Task 06 驗收紀錄](08-task-06-validation.md)。

@@ -2,29 +2,11 @@ import { getAddress, isAddress } from 'viem'
 import type { Address } from 'viem'
 import { sepoliaRpc } from '../../config/rpc'
 import { sepoliaPublicClient } from './publicClient'
+import { rpcFailure } from './rpcError'
 
 export interface BalanceSnapshot { wei: bigint; updatedAt: number }
 export class BalanceReadError extends Error {
   constructor(message: string, readonly retryAt: number) { super(message) }
-}
-
-function failure(error: unknown) {
-  let current = error
-  let timeout = false
-  let rateLimited = false
-  let retryAfter = 0
-  for (let depth = 0; current && typeof current === 'object' && depth < 12; depth++) {
-    const item = current as { name?: string; status?: number; code?: number; message?: string; cause?: unknown; headers?: Headers }
-    timeout ||= /timeout/i.test(item.name ?? '')
-    rateLimited ||= item.status === 429 || item.code === 429 || item.code === -32005 || /rate limit|too many requests/i.test(item.message ?? '')
-    const header = item.headers?.get('retry-after')
-    if (header) {
-      const seconds = Number(header)
-      retryAfter = Math.max(retryAfter, Number.isFinite(seconds) ? seconds * 1000 : Date.parse(header) - Date.now())
-    }
-    current = item.cause
-  }
-  return { timeout, rateLimited, retryAfter }
 }
 
 // 僅保存進行中請求，完成後移除；不持久保存學生地址／餘額。
@@ -54,7 +36,7 @@ export function readSepoliaBalance(input: Address): Promise<BalanceSnapshot> {
         const wei = await sepoliaPublicClient.getBalance({ address, blockTag: 'latest' })
         return { wei, updatedAt: Date.now() }
       } catch (error) {
-        const { timeout, rateLimited, retryAfter } = failure(error)
+        const { timeout, rateLimited, retryAfter } = rpcFailure(error)
         if (rateLimited) {
           rateLimitUntil = Date.now() + Math.max(sepoliaRpc.rateLimitCooldownMs, retryAfter || 0)
           throw new BalanceReadError('RPC 請求過多，請稍候再重新查詢。', rateLimitUntil)
