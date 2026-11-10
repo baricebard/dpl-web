@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "proposalOnly": true,
+  "enabled": false,
+  "verificationStatus": "blocked",
+  "chainId": 11155111,
+  "networkName": "Ethereum Sepolia",
+  "rpc": {
+    "url": "https://ethereum-sepolia-rpc.publicnode.com",
+    "verificationStatus": "blocked",
+    "browserCorsVerified": false
+  },
+  "explorerBaseUrl": "https://sepolia.etherscan.io",
+  "sourceRecord": "09-sepolia-deployment-record.json",
+  "sourceRecordSha256": "1225d914b6e56086d61431898bd18a1ecb1e89a0004b72a68faf587099f0404b",
+  "contractSourceCommit": "535671d93eea7d3b1ee90ea6f6963cc0431460e5",
+  "declaredArtifactSha256": "4fde06100e81c9ae80dad2d301535fb5f847e89fbd3e78611656162de3d2e284",
+  "artifactVerified": false,
+  "abi": {
+    "format": "human-readable",
+    "status": "proposed-not-artifact-verified",
+    "signatures": [
+      "function name() view returns (string)",
+      "function symbol() view returns (string)",
+      "function decimals() view returns (uint8)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address account) view returns (uint256)",
+      "function transfer(address to, uint256 value) returns (bool)",
+      "event Transfer(address indexed from, address indexed to, uint256 value)"
+    ]
+  },
+  "tokens": [
+    {
+      "id": "DPLT",
+      "chainId": 11155111,
+      "address": "0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e",
+      "name": "DeFi Portfolio Lab Token",
+      "symbol": "DPLT",
+      "decimals": 18,
+      "expectedTotalSupplyBaseUnits": "1000000000000000000000000",
+      "initialHolder": "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+      "deploymentTransactionHash": "0x8b057767a283f111f9864b83c7ea99fa41c188f13468c0feea6d976c0f8f4a00",
+      "reportedDeploymentBlock": "12104800",
+      "explorerUrl": "https://sepolia.etherscan.io/address/0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e",
+      "enabled": false,
+      "verificationStatus": "blocked",
+      "etherscanVerificationStatus": "unknown",
+      "valueSource": "deployment-record-and-pinned-spec-not-onchain-verified"
+    },
+    {
+      "id": "DPLTA",
+      "chainId": 11155111,
+      "address": "0x53Ac929866423479c7C5746F76F398e8b3907d6E",
+      "name": "DeFi Portfolio Lab Asset A",
+      "symbol": "DPLT-A",
+      "decimals": 18,
+      "expectedTotalSupplyBaseUnits": "1000000000000000000000000",
+      "initialHolder": "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+      "deploymentTransactionHash": "0x6ce8ce167eee21220602a9a3192c082a9e6ccfd147b002b8b6541aa7a4d48453",
+      "reportedDeploymentBlock": "12104807",
+      "explorerUrl": "https://sepolia.etherscan.io/address/0x53Ac929866423479c7C5746F76F398e8b3907d6E",
+      "enabled": false,
+      "verificationStatus": "blocked",
+      "etherscanVerificationStatus": "unknown",
+      "valueSource": "deployment-record-and-pinned-spec-not-onchain-verified"
+    },
+    {
+      "id": "DPLTB",
+      "chainId": 11155111,
+      "address": "0xA8E2854c62A46329838f9922587adBbEb007072f",
+      "name": "DeFi Portfolio Lab Asset B",
+      "symbol": "DPLT-B",
+      "decimals": 18,
+      "expectedTotalSupplyBaseUnits": "1000000000000000000000000",
+      "initialHolder": "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+      "deploymentTransactionHash": "0x6a901e28718ddc46c27b916ce8f6336ea85b9cc806af43dbe496937a94b657cd",
+      "reportedDeploymentBlock": "12104809",
+      "explorerUrl": "https://sepolia.etherscan.io/address/0xA8E2854c62A46329838f9922587adBbEb007072f",
+      "enabled": false,
+      "verificationStatus": "blocked",
+      "etherscanVerificationStatus": "unknown",
+      "valueSource": "deployment-record-and-pinned-spec-not-onchain-verified"
+    }
+  ]
+}

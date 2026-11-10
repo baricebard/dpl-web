@@ -2,7 +2,7 @@ name: Local contract checks
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, task-05c-deploy-tool]
   push:
     branches: [main]
 
@@ -25,3 +25,11 @@ jobs:
       - run: node scripts/contracts/runtime-manifest.ts --check
       - run: npm run contracts:typecheck
       - run: npm run contracts:test
+      - run: npm run deploy:test
+      - run: npm run verify:test
+      - run: npm run lint
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run deploy:test:ui
+      - run: npm run verify:test:ui
+      - run: npm test

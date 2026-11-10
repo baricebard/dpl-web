@@ -85,6 +85,8 @@ Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,0
 
 ## 文件入口
 
+Task 05C-3 的[Sepolia 唯讀部署驗證報告](docs/09-sepolia-deployment-verification.md)保留雲端代理 403 與未完成驗證的證據。現提供[Windows／Chrome 本機唯讀驗證工具](docs/10-local-readonly-verifier.md)：`npm run verify:local`，開啟 `http://127.0.0.1:5175/`，匯入公開部署 JSON 後手動查詢／匯出，不需 MetaMask。原始或鎖定版本重建產物的準備方法見指南；本機工具測試不代表三筆真實部署通過。Token 保持未開放，未開始 Task 06。
+
 | 文件 | 責任 |
 | --- | --- |
 | [專案總覽](docs/00-project-overview.md) | 教學目標、名詞與固定原則 |
@@ -115,3 +117,12 @@ npm run contracts:test
 本機合約與準備檢查共 24 項；測試不涉及 Sepolia。Ignition 模組與公開教師地址／chain ID 的部署準備已建立；Hardhat 設定只含本機網路，沒有公用網路部署命令。本次未設定私鑰或執行鏈上部署；Token UI 已於 Task 06 開啟，合約資料未通過執行時核對則停用轉帳。
 
 [合約規格、A-03／A-04／A-05 決策與部署紀錄格式](docs/06-token-contracts.md)包含離線準備、唯讀 RPC 預檢、未來驗證流程及 Task 06 前置條件。Task 06 已決定 receipt success、至少 1 個區塊及 canonical block／實際交易核對；重組／替換與未知結果策略見 [Token](docs/modules/token.md)。
+
+## Task 05C-2 本機部署工具（僅 localhost）
+
+教師專用的獨立 localhost 開發頁面：`npm run deploy:local`，開啟 `http://127.0.0.1:5174/`。使用既有 Hardhat 產物與 MetaMask 逐筆確認，部署者／初始持有人固定為本次指定公開地址；正式 Pages build 不含部署入口或程式碼。完整 Windows 操作、產物追溯、未知交易復原與測試見 [本機部署工具指南](docs/08-local-deployment-tool.md)。工具開發當時未發送 Sepolia 交易；後續使用者提供的部署紀錄與唯讀工具見下方。正式網站保留 Task 06 學生功能，兩個本機工具不會打包。
+
+
+## Task 05C-3 本機唯讀驗證工具
+
+`npm run verify:local` 開啟 `http://127.0.0.1:5175/`，只讀公開 RPC、不連接錢包、不發交易；[指南](docs/10-local-readonly-verifier.md)、[使用者部署紀錄](docs/09-sepolia-deployment-record.json)及[歷史受阻報告](docs/09-sepolia-deployment-verification.md)保留各自證據分級。Task 06 的 runtime 指紋與學生轉帳不會取消本工具的五種唯讀方法限制。兩套工具的 build／preview 仍拒絕，正式 Pages 模組圖與 dist 檢查禁止本機工具、產物或完整 bytecode 流入。

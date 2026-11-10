@@ -75,7 +75,7 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 
 Task 05 採 Hardhat 3／viem Toolbox／Node Test Runner 與 OpenZeppelin 5.x。單一 Solidity 原始碼建立三個獨立實例；`test/contracts/` 與 Playwright `tests/e2e/` 分離，合約使用獨立 NodeNext 型別設定。前端既有依賴與 Wallet／Faucet 邏輯不變。
 
-部署模組與離線參數準備已建立，另有唯讀 RPC chain ID 預檢；目前 Hardhat 僅設定本機 EDR，沒有 HTTP 部署設定、秘密或公用網路部署命令。Task 06 公開設定已有使用者提供的三個地址與標準 ERC-20 ABI 整合（見 [Token](modules/token.md)）；main 未包含其實際部署 Hash／receipt 封存，新鏈上核對受阻，不能假設驗證完成。版本、部署紀錄格式、合約驗證流程與未完成遠端執行器見 [Task 05](06-token-contracts.md)；部署需另行授權。
+部署模組與離線參數準備已建立，另有唯讀 RPC chain ID 預檢；目前 Hardhat 僅設定本機 EDR，沒有 HTTP 部署設定、秘密或公用網路部署命令。Task 06 公開設定已有使用者提供的三個地址與標準 ERC-20 ABI 整合（見 [Token](modules/token.md)）；main 已納入使用者提供的部署紀錄及獨立驗證受阻報告，另有 localhost 部署／唯讀驗證工具；紀錄中的 Hash／receipt 欄位不是新的獨立 RPC 證據，歷史 artifact／build-info 封存與新鏈上核對仍未完成。版本、部署紀錄格式、合約驗證流程與未完成遠端執行器見 [Task 05](06-token-contracts.md)；部署需另行授權。
 
 
 ## Token 實作與資源策略

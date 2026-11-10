@@ -22,7 +22,7 @@ PR #8 初版的「Code／Metadata 核對」只包含 code 非空，以及 ERC-20
 
 [離線產生／檢查工具](../scripts/contracts/runtime-manifest.ts)的步驟：
 
-1. 比對目前 TeachingToken 原始碼、Hardhat 設定、package.json、lockfile 與指定 Git commit 原文完全一致。這個 commit 必須存在於 checkout 歷史中；工具不自動連線取檔或改用其他基線。
+1. 比對目前 TeachingToken 原始碼、Hardhat 設定、lockfile 與指定 Git commit 原文完全一致；package.json 比對 dependencies、devDependencies、engines、packageManager，允許加入本機工具的 npm scripts，而不放寬依賴與 compiler 基線。這個 commit 必須存在於 checkout 歷史中；工具不自動連線取檔或改用其他基線。
 2. 由 TeachingToken artifact 的 buildInfoId 載入其 Standard JSON input，確認 artifact 引用與 build-info 內的 id 相同；buildInfoId 含本機 compiler 絕對路徑，只用作檔案定位，不納入可攜 manifest。核對精確 compiler build、optimizer、EVM、viaIR、metadata 預設與 remapping。逐份比對來源單位內容與本機原始碼／lockfile 安裝的 OpenZeppelin，拒絕未知 source-unit 路徑。
 3. 以 lockfile 的 npm solc **重新編譯整份 input**（保留 source-unit 路徑與全部設定），要求重新生成的 deployedBytecode 與 Hardhat artifact 全文一致。拒絕 link／immutable references；TeachingToken 沒有需要替換的 runtime 欄位，三個 constructor 名稱與供給是 storage 初始化，runtime 本身相同。
 4. 要求存在 Solidity metadata 尾段，對包含尾段的完整 runtime 產生 Keccak-256／長度。manifest 同時記錄來源 commit、compiler、lockfile／Standard JSON input／soljson.js 的 SHA-256，可供審查追溯；不把那些完整資料放進前端。
@@ -55,7 +55,7 @@ verifyToken 本身只負責帳號無關的合約資料。prepareTransfer 在核�
 
 ## 證據限制與發布前獨立驗收
 
-上述結果是**以 Task 05C Git 基線重建的本機預期 runtime**，不是已取得當時操作者封存的歷史部署產物。Task 05C main 中只有操作指南，沒有歷史部署 receipt、Standard JSON 封存及鏈上 full-match 證據；不能因本機重編成功而補稱這些歷史驗收已完成。
+上述結果是**以 Task 05C Git 基線重建的本機預期 runtime**，不是已取得當時操作者封存的歷史部署產物。初始 Task 06 基線只有操作指南；最終 main 整合已有[使用者部署紀錄](09-sepolia-deployment-record.json)與[受阻報告](09-sepolia-deployment-verification.md)，但仍沒有原始 Standard JSON／artifact 封存及新的獨立鏈上 full-match 證據；不能因本機重編成功而補稱這些歷史驗收已完成。
 
 此環境先前對 PublicNode 的唯讀請求遭代理 403，沒有新的三地址鏈上匹配證據。三個地址完全不變，未重新部署。發布前必須在允許的環境執行：
 

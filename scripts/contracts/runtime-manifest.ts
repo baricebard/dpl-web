@@ -10,8 +10,13 @@ const sourceCommit = '1ed599aef60bc3a110c52910700d843e1081ec9b'
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
 const text = (path: string) => readFileSync(path, 'utf8')
 const json = (path: string) => JSON.parse(text(path))
-for (const path of ['contracts/TeachingToken.sol', 'hardhat.config.ts', 'package.json', 'package-lock.json']) {
+for (const path of ['contracts/TeachingToken.sol', 'hardhat.config.ts', 'package-lock.json']) {
   assert.equal(text(path), execFileSync('git', ['show', `${sourceCommit}:${path}`], { encoding: 'utf8' }), `${path} differs from pinned source commit`)
+}
+const pinnedPackage = JSON.parse(execFileSync('git', ['show', `${sourceCommit}:package.json`], { encoding: 'utf8' }))
+const installedPackage = json('package.json')
+for (const field of ['dependencies', 'devDependencies', 'engines', 'packageManager']) {
+  assert.deepEqual(installedPackage[field], pinnedPackage[field], `package.json ${field} differs from pinned toolchain`)
 }
 const artifact = json('artifacts/contracts/TeachingToken.sol/TeachingToken.json')
 assert.equal(artifact.contractName, 'TeachingToken')

@@ -12,7 +12,7 @@
 | DeFi Portfolio Lab Asset A | DPLT-A | [0x53Ac929866423479c7C5746F76F398e8b3907d6E](https://sepolia.etherscan.io/token/0x53Ac929866423479c7C5746F76F398e8b3907d6E) |
 | DeFi Portfolio Lab Asset B | DPLT-B | [0xA8E2854c62A46329838f9922587adBbEb007072f](https://sepolia.etherscan.io/token/0xA8E2854c62A46329838f9922587adBbEb007072f) |
 
-各 18 decimals、固定 1,000,000 tokens（`1000000000000000000000000` 最小單位），無公開 Mint、無特殊管理權限。初始教師持有人為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`，目前餘額不可假設仍為初始供給。合約來源與供給決策見 [Task 05](../06-token-contracts.md)，部署指南歷史資料見 [Task 05C](../07-sepolia-deployment-guide.md)。main 未包含實際部署 receipt／Hash 封存，不能補造證據或因此重新部署。
+各 18 decimals、固定 1,000,000 tokens（`1000000000000000000000000` 最小單位），無公開 Mint、無特殊管理權限。初始教師持有人為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`，目前餘額不可假設仍為初始供給。合約來源與供給決策見 [Task 05](../06-token-contracts.md)，部署指南歷史資料見 [Task 05C](../07-sepolia-deployment-guide.md)。最終整合已納入 main 的[使用者部署紀錄](../09-sepolia-deployment-record.json)、[獨立驗證受阻報告](../09-sepolia-deployment-verification.md)與[本機唯讀驗證工具](../10-local-readonly-verifier.md)。紀錄中的 receipt／Hash 是使用者提供資料，不是本次新取得的鏈上證據；原始 artifact／build-info 封存仍缺，不可因此重新部署。
 
 ## 操作與模組介面
 

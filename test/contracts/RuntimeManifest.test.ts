@@ -61,3 +61,19 @@ it('runtime manifest still rejects a modified committed runtime fingerprint', ()
   writeFileSync(path, changed)
   assert.throws(() => check(directory), /Runtime manifest is stale or modified/)
 }))
+
+it('runtime manifest allows local tool npm scripts without changing pinned compilation inputs', () => fixture(directory => {
+  const path = join(directory, 'package.json')
+  const pkg = JSON.parse(readFileSync(path, 'utf8'))
+  pkg.scripts['integration:test-only'] = 'node --version'
+  writeFileSync(path, JSON.stringify(pkg))
+  assert.match(check(directory), /Runtime manifest verified/)
+}))
+
+it('runtime manifest still rejects compiler dependency changes in package.json', () => fixture(directory => {
+  const path = join(directory, 'package.json')
+  const pkg = JSON.parse(readFileSync(path, 'utf8'))
+  pkg.devDependencies.solc = '0.8.37'
+  writeFileSync(path, JSON.stringify(pkg))
+  assert.throws(() => check(directory), /package.json devDependencies differs from pinned toolchain/)
+}))

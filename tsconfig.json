@@ -14,7 +14,19 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "vite.config.ts", "playwright.config.ts", "tests"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "tests",
+    "tools/deploy",
+    "scripts/deploy",
+    "scripts/verify",
+    "tools/verify",
+    "playwright.deploy.config.ts",
+    "playwright.verify.config.ts"
+  ]
 }

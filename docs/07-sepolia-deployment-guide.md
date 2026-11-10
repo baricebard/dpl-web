@@ -1,8 +1,10 @@
 # Task 05C-1：Sepolia 部署準備指南
 
+> Task 05C-2 更新：已提供[本機 MetaMask 部署工具](08-local-deployment-tool.md)，固定部署者與 initialHolder 為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`。以下保留先前準備紀錄；使用本機工具時以 08 指南的固定地址、產物檢查與安全流程為準。此句為工具開發當時的狀態；最新使用者提供紀錄及獨立驗證限制見下方 Task 06 補記。
+
 ## Task 06 現況補記
 
-本指南是 Task 05C-1 的歷史部署準備成果，不是實際部署證據。Task 06 已取得使用者提供的三個 Sepolia 合約地址與初始教師公開地址，見 [Token 設定與驗收狀態](modules/token.md)。下方待部署範本保留作為當時未填的歷史紀錄，不能視為現在需要重新部署。main 未包含實際 receipt／部署 Hash／編譯封存，不虛構補填；Etherscan 原始碼驗證與歷史 runtime bytecode 比對仍未完成。Task 06 僅整合已提供地址，不發送部署或轉帳。
+本指南是 Task 05C-1 的歷史部署準備成果，不是實際部署證據。Task 06 已取得使用者提供的三個 Sepolia 合約地址與初始教師公開地址，見 [Token 設定與驗收狀態](modules/token.md)。下方待部署範本保留作為當時未填的歷史紀錄，不能視為現在需要重新部署。main 現已保留使用者提供的部署 Hash／receipt 欄位紀錄，來源與獨立驗證限制見 [09 報告](09-sepolia-deployment-verification.md)；原始 artifact／build-info 封存仍缺，不虛構補填；Etherscan 原始碼驗證與歷史 runtime bytecode 比對仍未完成。Task 06 僅整合已提供地址，不發送部署或轉帳。
 
 ## Task 05C 歷史狀態與操作邊界
 

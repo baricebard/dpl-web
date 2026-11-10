@@ -1,8 +1,10 @@
 # Task 05：ERC-20 教學代幣
 
+> Task 05C-2 更新：已提供[本機 MetaMask 部署工具](08-local-deployment-tool.md)，固定部署者與 initialHolder 為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`。以下保留先前準備紀錄；使用本機工具時以 08 指南的固定地址、產物檢查與安全流程為準。此句為工具開發當時的狀態；最新使用者提供紀錄及獨立驗證限制見下方 Task 06 補記。
+
 ## Task 06 現況補記
 
-使用者已提供三個 Ethereum Sepolia 部署地址（11155111），已納入 [Token 公開設定](modules/token.md)，本文件下列 Task 05 未部署敘述屬當時歷史狀態。Task 06 不重新部署合約；本次唯讀 RPC 存取受阻，不能宣稱新鏈上核對完成。main 的 Task 05C 成果只有指南，未封存實際部署 receipt／Hash；Etherscan 原始碼驗證與歷史 runtime bytecode 完整比對仍未完成。
+使用者已提供三個 Ethereum Sepolia 部署地址（11155111），已納入 [Token 公開設定](modules/token.md)，本文件下列 Task 05 未部署敘述屬當時歷史狀態。Task 06 不重新部署合約；本次唯讀 RPC 存取受阻，不能宣稱新鏈上核對完成。main 已合併本機部署與唯讀驗證工具，並保留使用者提供的[部署紀錄](09-sepolia-deployment-record.json)及[獨立驗證受阻報告](09-sepolia-deployment-verification.md)；紀錄不是新取得的 RPC receipt 證據；Etherscan 原始碼驗證與歷史 runtime bytecode 完整比對仍未完成。
 
 A-05 已於 Task 06 決定至少 1 個區塊確認、canonical block 及實際交易內容核對、替換／取消與未知結果處理，以及記憶體紀錄策略，詳見 [Token](modules/token.md)與 [驗收紀錄](08-task-06-validation.md)。
 
