@@ -9,3 +9,6 @@ test-results/
 *.local
 *.tsbuildinfo
 .DS_Store
+artifacts/
+cache/
+ignition/deployments/
