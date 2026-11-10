@@ -2,7 +2,7 @@
 
 ## 狀態與系統邊界
 
-本文件描述目標架構；Task 02 已建立前端，Task 03 已實作 Wallet。其他鏈上功能仍為後續規劃。固定技術原則見[專案總覽](00-project-overview.md)，MVP 交付邊界由 [MVP 範圍](02-mvp-scope.md)定義。
+本文件描述目標架構；Task 02 已建立前端，Task 03 已實作 Wallet，Task 04 新增 Sepolia ETH 唯讀餘額與外部 Faucet 指引；真實 RPC／CORS 及領幣仍待人工驗證。其他鏈上功能仍為後續規劃。固定技術原則見[專案總覽](00-project-overview.md)，MVP 交付邊界由 [MVP 範圍](02-mvp-scope.md)定義。
 
 ```text
 GitHub Pages（靜態檔案） → 學生瀏覽器：React UI／各功能模組
@@ -19,7 +19,7 @@ GitHub Pages 僅供應靜態內容，無法保密前端設定、執行伺服器�
 | --- | --- |
 | App 組裝層 | 導覽、頁面組裝、功能啟用狀態與共用錯誤呈現 |
 | Wallet | 連接狀態、帳號與網路事件；供其他模組讀取可交易狀態 |
-| Faucet | 外部 Gas 領取指引、教學代幣取得說明；不代管資金 |
+| Faucet | Sepolia ETH 餘額、外部 Gas 領取與 Gas 教材；不代管資金 |
 | Token | 三種代幣資料、餘額與 ERC-20 轉帳 |
 | Exchange | 未來報價、授權與交換流程；依賴 Wallet、Token |
 | Liquidity | 未來池狀態、提供／移除流動性與 AMM 教學 |
@@ -54,12 +54,12 @@ GitHub Pages 僅供應靜態內容，無法保密前端設定、執行伺服器�
 
 ## 跨模組待決事項
 
-A-01 與 A-02 的 Task 03 部分已確定；其餘待決部分於對應階段前記錄選項、理由、風險與決策結果，並同步所屬模組文件。
+A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應階段前記錄選項、理由、風險與決策結果，並同步所屬模組文件。
 
 | ID | 待決問題 | 決策時點／規格負責處 |
 | --- | --- | --- |
 | A-01 | 已確定：MetaMask 擴充功能、EIP-1193、優先 EIP-6963、viem 2.57.17、Context + Hooks、Ethereum Sepolia。延後：其他錢包與行動連接；未實作鏈上讀寫流程 | Task 03；Wallet |
-| A-02 | Task 03 已確定：只用錢包 Provider 讀取帳號／網路與請求切換，不建立 Public Client、不配置獨立 RPC 或 API Key。待決：公共 Sepolia RPC 供應商、限流、備援及重試上限 | Task 04/05 整合前；本文件 |
+| A-02 | Task 04：獨立 viem Public Client，PublicNode Sepolia 為公開設定候選；8 秒逾時、最多重試一次、1 秒退避、手動更新最少 10 秒、同址進行中去重、無輪詢；429 至少冷卻 30 秒並尊重 Retry-After。無 API Key／未驗證備援。環境代理 403，實際鏈別、getBalance、CORS 與供應商配額尚未驗證；授課前必須通過 | 實作已定；外部驗證待完成，見 [Faucet](modules/faucet.md) |
 | A-03 | 三種代幣 decimals、供給、鑄造／銷毀權限、管理者及可升級性 | 合約實作前；Token |
 | A-04 | 教學代幣採教師分發或鏈上 Faucet；額度、冷卻與濫用限制 | 合約實作與課前準備前；Faucet |
 | A-05 | receipt 確認數、重組／替換交易處理及本機紀錄 | 交易流程實作前；本文件 |

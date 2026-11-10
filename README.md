@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02 已建立 React／TypeScript／Vite 前端與響應式首頁。Task 03 已開放 MetaMask Wallet 連接與 Sepolia 網路檢查；其餘五張模組卡片保持未開放。沒有獨立 Public RPC、合約、資產交易或模擬連線結果。本次未發布 GitHub Pages。
+Task 02 已建立 React／TypeScript／Vite 前端與響應式首頁。Task 03 已開放 MetaMask Wallet 連接與 Sepolia 網路檢查；Task 04 已開放 Faucet，新增獨立 viem Public Client、Sepolia ETH 餘額查詢與 Gas 教材；其餘四張模組卡片保持未開放。RPC 真實可用性與 CORS 尚未驗證，沒有合約、資產交易或模擬連線結果。本次未發布 GitHub Pages。
 
 ## 本機開發與驗證
 
@@ -36,7 +36,7 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 頁面位於 `src/app/pages/`，共用元件與 CSS 位於 `src/shared/components/`、`src/shared/styles/`，公開教學網路資訊與模組清單位於 `src/config/`。依 Task 01 目錄基線組織，Wallet 位於 `src/modules/wallet/`，Provider 發現適配位於 `src/lib/web3/`。未來功能置於 `src/modules/<module>/`，由 App 組裝；共用層不依賴功能模組。
 
-前端選型、範圍與部署操作見 [Task 02 前端基礎工程](docs/04-frontend-foundation.md)。此交付是路線圖階段 1 的基礎工程部分，Wallet 已由 Task 03 完成，Faucet 指引仍待後續工作。
+前端選型、範圍與部署操作見 [Task 02 前端基礎工程](docs/04-frontend-foundation.md)。此交付是路線圖階段 1 的基礎工程部分，Wallet 已由 Task 03 完成，Faucet 指引與 Sepolia ETH 餘額已由 Task 04 加入。
 
 ## Wallet 操作指引
 
@@ -47,7 +47,15 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 拒絕、未解鎖、請求進行中或切換失敗時，依畫面指引處理後重試。本階段不提供交易或簽章，錢包連接不代表學生身分認證。暫不支援 WalletConnect QR Code 與手機跨 App。
 
-選型、公開 API 與測試限制見 [Wallet 規格](docs/modules/wallet.md)；A-01、A-02 已確定本階段範圍，公共 RPC、限流與備援留至 Task 04/05。自動化使用 Mock Provider，尚未進行真實 MetaMask 授權、解鎖與切換網路驗證。
+選型、公開 API 與測試限制見 [Wallet 規格](docs/modules/wallet.md)；A-01、A-02 已確定本階段範圍，Task 04 的 Public RPC 策略與待人工驗證限制見 [Faucet 規格](docs/modules/faucet.md)。自動化使用 Mock Provider，尚未進行真實 MetaMask 授權、解鎖與切換網路驗證。
+
+## Sepolia ETH 與 Faucet
+
+首頁 Faucet 入口提供目前地址、複製、Sepolia ETH 餘額／完整精度／更新時間、安全 Etherscan 連結與 Gas 教材。先在 Wallet 連接並切換 Sepolia，依外部 Faucet 指引領取後返回點「重新查詢餘額」。網站不代領、不簽名、不轉帳；查詢失敗不顯示為零。
+
+公開 RPC 候選為 PublicNode Sepolia，無金鑰、無自動備援；本環境真實請求遭代理 403，鏈別、餘額與 CORS **尚未驗證**。讀取層每請求 8 秒逾時、最多重試一次；限流不自動重試，至少冷卻 30 秒，一般手動更新間隔最少 10 秒，無輪詢。
+
+[PoW Faucet](https://sepolia-faucet.pk910.de/) 需瀏覽器運算；[Google Cloud Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia) 需登入且其他限制待確認；[Alchemy](https://www.alchemy.com/faucets/ethereum-sepolia) 有主網資產／活動門檻，不適合零主網資產新手。候選均未實際領幣，不能保證全班可用。完整資格與教師 30 人課前準備見 [Faucet 規格](docs/modules/faucet.md)，驗證結果見 [Task 04 紀錄](docs/05-task-04-validation.md)。
 
 ## GitHub Pages
 
@@ -70,4 +78,4 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 模組規格：[Wallet](docs/modules/wallet.md) · [Faucet](docs/modules/faucet.md) · [Token](docs/modules/token.md) · [Exchange](docs/modules/exchange.md) · [Liquidity](docs/modules/liquidity.md) · [Portfolio](docs/modules/portfolio.md) · [Layer 2](docs/modules/layer2.md)。
 
-前端已採 React、TypeScript、Vite、viem 2.57.17；資產讀寫與 Solidity／Hardhat 合約仍屬後續開發。
+前端已採 React、TypeScript、Vite、viem 2.57.17；Sepolia ETH 餘額已實作；ERC-20 讀寫與 Solidity／Hardhat 合約仍屬後續開發。
