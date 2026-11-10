@@ -76,6 +76,8 @@ Playwright 執行前需 production build 與 Chromium，安裝方式沿用 READM
 
 ## 部署準備流程（本次不部署）
 
+Task 05C-1 的 [Remix + MetaMask 操作指南](07-sepolia-deployment-guide.md)補充由使用者錢包自行簽署的部署途徑，不依賴尚未實作的 Hardhat 遠端 signer；仍須先確認實際 chain ID、編譯產物與四個參數，並另行取得部署授權。本次只準備文件，尚未部署。
+
 - `scripts/contracts/spec.ts`：單一代幣規格來源、bigint 供給、目標 chain ID 及公開教師地址驗證。地址必須非零、格式有效；混合大小寫須符合 checksum。
 - `scripts/contracts/prepare.ts`：離線輸出三個 constructor argument sets，不連線、不簽署。
 - `scripts/contracts/preflight.ts`：先驗證輸入，再透過 HTTPS RPC 實際 `eth_chainId` 檢查 11155111，錯鏈或 RPC 失敗直接停止，不重試、不發交易。
