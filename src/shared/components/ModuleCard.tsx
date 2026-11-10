@@ -12,7 +12,7 @@ export function ModuleCard({ module, index }: { module: ModuleDefinition; index:
       <p className="card-title">{module.title}</p>
       <p className="card-description">{module.description}</p>
       <p className="card-topic">{module.topic}</p>
-      {module.id === 'wallet' ? <a className="module-entry module-entry-active" href="#wallet" aria-label="Wallet：開啟錢包介面"><span><span className="status-dot" />開啟錢包介面</span><span aria-hidden="true">↗</span></a> : <button className="module-entry" type="button" disabled aria-label={`${module.name}：尚未開放`}>
+      {module.id === 'wallet' ? <a className="module-entry module-entry-active" href="#wallet" aria-label="Wallet：開啟錢包介面"><span><span className="status-dot" />開啟錢包介面</span><span aria-hidden="true">↗</span></a> : module.id === 'faucet' ? <a className="module-entry module-entry-active" href="#faucet" aria-label="Faucet：開啟領取指引"><span><span className="status-dot" />開啟領取指引</span><span aria-hidden="true">↗</span></a> : <button className="module-entry" type="button" disabled aria-label={`${module.name}：尚未開放`}>
         <span><span className="status-dot" />尚未開放</span>
         <span aria-hidden="true">↗</span>
       </button>}

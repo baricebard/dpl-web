@@ -132,3 +132,16 @@ h1 > span { display: block; }
 .wallet-ready { color: #28553c; }
 .wallet-panel .wallet-note { color: #60746c; font-size: 12px; }
 @media (max-width: 600px) { .wallet-panel { padding: 22px; } }
+
+.faucet-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.faucet-step { min-width: 0; border-top: 1px solid #dce4df; padding-top: 20px; margin-top: 20px; }
+.faucet-step h3, .gas-guide h3 { font-size: 18px; }
+.faucet-address { overflow-wrap: anywhere; font-family: monospace; }
+.faucet-list { padding-left: 20px; }
+.faucet-list li { margin: 18px 0; }
+.faucet-list a { font-size: 14px; font-weight: 600; }
+.balance-label { color: #60746c; }
+.faucet-panel .balance-value { font-size: 28px; font-weight: 600; overflow-wrap: anywhere; }
+.balance-value span { font-size: 14px; }
+.gas-guide { background: #f0f4f0; padding: 22px; border-radius: 8px; margin-top: 24px; }
+@media (max-width: 700px) { .faucet-grid { grid-template-columns: 1fr; gap: 0; } }

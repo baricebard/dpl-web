@@ -1,3 +1,4 @@
+import { FaucetPanel } from '../../modules/faucet'
 import { WalletPanel, useWallet } from '../../modules/wallet'
 import { modules } from '../../config/modules'
 import { teachingNetwork } from '../../config/network'
@@ -31,14 +32,15 @@ export function HomePage() {
       <section className="modules-section" id="modules" aria-labelledby="modules-title">
         <div className="section-heading">
           <div><p className="eyebrow">THE LEARNING MODULES</p><h2 id="modules-title">你的 DeFi 學習地圖</h2></div>
-          <p>六個模組，逐步探索。<br /><span>Wallet 已開放，其餘功能建置中。</span></p>
+          <p>六個模組，逐步探索。<br /><span>Wallet 與 Faucet 已開放，其餘功能建置中。</span></p>
         </div>
         <div className="module-grid">{modules.map((module, index) => <ModuleCard key={module.id} module={module} index={index} />)}</div>
       </section>
       <WalletPanel />
+      <FaucetPanel />
       <section className="about-section" id="about" aria-labelledby="about-title">
         <div><p className="eyebrow">BUILT FOR THE CLASSROOM</p><h2 id="about-title">從理解開始，循序實踐。</h2></div>
-        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。本階段先建立學習入口，後續依序加入經驗證的測試網功能。</p><p className="about-note">目前提供錢包連接與網路檢查，尚未提供資產查詢或鏈上交易。</p></div>
+        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。本階段先建立學習入口，後續依序加入經驗證的測試網功能。</p><p className="about-note">目前提供錢包連接、Sepolia ETH 餘額查詢與 Faucet 指引，尚未提供鏈上交易。</p></div>
       </section>
     </main>
   )
