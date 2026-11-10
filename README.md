@@ -67,6 +67,8 @@ Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允�
 
 ## 文件入口
 
+Task 05C-3 的[Sepolia 唯讀部署驗證報告](docs/09-sepolia-deployment-verification.md)保留雲端代理 403 與未完成驗證的證據。現提供[Windows／Chrome 本機唯讀驗證工具](docs/10-local-readonly-verifier.md)：`npm run verify:local`，開啟 `http://127.0.0.1:5175/`，匯入公開部署 JSON 後手動查詢／匯出，不需 MetaMask。原始或鎖定版本重建產物的準備方法見指南；本機工具測試不代表三筆真實部署通過。Token 保持未開放，未開始 Task 06。
+
 | 文件 | 責任 |
 | --- | --- |
 | [專案總覽](docs/00-project-overview.md) | 教學目標、名詞與固定原則 |

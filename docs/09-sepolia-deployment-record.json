@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "chainId": 11155111,
+  "deployer": "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+  "initialHolder": "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+  "tokens": [
+    {
+      "id": "DPLT",
+      "name": "DeFi Portfolio Lab Token",
+      "symbol": "DPLT",
+      "constructorArgs": [
+        "DeFi Portfolio Lab Token",
+        "DPLT",
+        "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+        "1000000000000000000000000"
+      ],
+      "deploymentDataHash": "0xce26f952e49c482cbcea715dd186735902d43c3c5fc968ec2f655276613ef84a"
+    },
+    {
+      "id": "DPLTA",
+      "name": "DeFi Portfolio Lab Asset A",
+      "symbol": "DPLT-A",
+      "constructorArgs": [
+        "DeFi Portfolio Lab Asset A",
+        "DPLT-A",
+        "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+        "1000000000000000000000000"
+      ],
+      "deploymentDataHash": "0xa3ae88420ef7b81132fcebab5181f4bf16b3b7d9fd8702de6b8c0242a29be72d"
+    },
+    {
+      "id": "DPLTB",
+      "name": "DeFi Portfolio Lab Asset B",
+      "symbol": "DPLT-B",
+      "constructorArgs": [
+        "DeFi Portfolio Lab Asset B",
+        "DPLT-B",
+        "0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02",
+        "1000000000000000000000000"
+      ],
+      "deploymentDataHash": "0xe0ee1bcafe91c9893044611a950a7bb8364b2e0705f8138bc3faac64bb7f6fb8"
+    }
+  ],
+  "provenance": {
+    "commit": "535671d93eea7d3b1ee90ea6f6963cc0431460e5",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "openZeppelin": "5.6.1",
+    "lockfileSha256": "4152782b32115016d0eacdfecc733e51c28aa05268f16b482fec5588a95e6304",
+    "artifactSha256": "4fde06100e81c9ae80dad2d301535fb5f847e89fbd3e78611656162de3d2e284",
+    "inputSha256": "4ea312520c129ac53d723197799bbc3d87bf04e858f6cb9878a8292a1f707731",
+    "buildInfoId": "solc-0_8_38-d97106e1c05dd988503605fd6aa6b0abbd7a656a",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": [
+        "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.6.1/"
+      ]
+    }
+  },
+  "records": {
+    "DPLT": {
+      "status": "成功",
+      "attempted": true,
+      "message": "Receipt、code 與部署區塊狀態已核對；仍須後續確認及 Etherscan 驗證",
+      "provenance": {
+        "commit": "535671d93eea7d3b1ee90ea6f6963cc0431460e5",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "openZeppelin": "5.6.1",
+        "lockfileSha256": "4152782b32115016d0eacdfecc733e51c28aa05268f16b482fec5588a95e6304",
+        "artifactSha256": "4fde06100e81c9ae80dad2d301535fb5f847e89fbd3e78611656162de3d2e284",
+        "inputSha256": "4ea312520c129ac53d723197799bbc3d87bf04e858f6cb9878a8292a1f707731",
+        "buildInfoId": "solc-0_8_38-d97106e1c05dd988503605fd6aa6b0abbd7a656a",
+        "settings": {
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode.linkReferences",
+                "evm.bytecode.object",
+                "evm.bytecode.opcodes",
+                "evm.bytecode.sourceMap",
+                "evm.deployedBytecode.immutableReferences",
+                "evm.deployedBytecode.linkReferences",
+                "evm.deployedBytecode.object",
+                "evm.deployedBytecode.opcodes",
+                "evm.deployedBytecode.sourceMap",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "remappings": [
+            "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.6.1/"
+          ]
+        }
+      },
+      "deploymentDataHash": "0xce26f952e49c482cbcea715dd186735902d43c3c5fc968ec2f655276613ef84a",
+      "hash": "0x8b057767a283f111f9864b83c7ea99fa41c188f13468c0feea6d976c0f8f4a00",
+      "receiptStatus": "success",
+      "blockNumber": "12104800",
+      "blockHash": "0xb22e442288ed4548dbbe40b5664c36a203fca00f132333ee9755e9439de8b2fc",
+      "gasUsed": "3399680",
+      "effectiveGasPrice": "73",
+      "checkedAt": "2026-11-10T13:02:52.149Z",
+      "contractAddress": "0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e"
+    },
+    "DPLTA": {
+      "status": "成功",
+      "attempted": true,
+      "message": "Receipt、code 與部署區塊狀態已核對；仍須後續確認及 Etherscan 驗證",
+      "provenance": {
+        "commit": "535671d93eea7d3b1ee90ea6f6963cc0431460e5",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "openZeppelin": "5.6.1",
+        "lockfileSha256": "4152782b32115016d0eacdfecc733e51c28aa05268f16b482fec5588a95e6304",
+        "artifactSha256": "4fde06100e81c9ae80dad2d301535fb5f847e89fbd3e78611656162de3d2e284",
+        "inputSha256": "4ea312520c129ac53d723197799bbc3d87bf04e858f6cb9878a8292a1f707731",
+        "buildInfoId": "solc-0_8_38-d97106e1c05dd988503605fd6aa6b0abbd7a656a",
+        "settings": {
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode.linkReferences",
+                "evm.bytecode.object",
+                "evm.bytecode.opcodes",
+                "evm.bytecode.sourceMap",
+                "evm.deployedBytecode.immutableReferences",
+                "evm.deployedBytecode.linkReferences",
+                "evm.deployedBytecode.object",
+                "evm.deployedBytecode.opcodes",
+                "evm.deployedBytecode.sourceMap",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "remappings": [
+            "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.6.1/"
+          ]
+        }
+      },
+      "deploymentDataHash": "0xa3ae88420ef7b81132fcebab5181f4bf16b3b7d9fd8702de6b8c0242a29be72d",
+      "hash": "0x6ce8ce167eee21220602a9a3192c082a9e6ccfd147b002b8b6541aa7a4d48453",
+      "receiptStatus": "success",
+      "blockNumber": "12104807",
+      "blockHash": "0x304ae1ec8d918906c3e8a9016bc0dbc5d93322cfc09a4a8a602c02eccc448a0c",
+      "gasUsed": "3399728",
+      "effectiveGasPrice": "70",
+      "checkedAt": "2026-11-10T13:04:15.347Z",
+      "contractAddress": "0x53Ac929866423479c7C5746F76F398e8b3907d6E"
+    },
+    "DPLTB": {
+      "status": "成功",
+      "attempted": true,
+      "message": "Receipt、code 與部署區塊狀態已核對；仍須後續確認及 Etherscan 驗證",
+      "provenance": {
+        "commit": "535671d93eea7d3b1ee90ea6f6963cc0431460e5",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "openZeppelin": "5.6.1",
+        "lockfileSha256": "4152782b32115016d0eacdfecc733e51c28aa05268f16b482fec5588a95e6304",
+        "artifactSha256": "4fde06100e81c9ae80dad2d301535fb5f847e89fbd3e78611656162de3d2e284",
+        "inputSha256": "4ea312520c129ac53d723197799bbc3d87bf04e858f6cb9878a8292a1f707731",
+        "buildInfoId": "solc-0_8_38-d97106e1c05dd988503605fd6aa6b0abbd7a656a",
+        "settings": {
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode.linkReferences",
+                "evm.bytecode.object",
+                "evm.bytecode.opcodes",
+                "evm.bytecode.sourceMap",
+                "evm.deployedBytecode.immutableReferences",
+                "evm.deployedBytecode.linkReferences",
+                "evm.deployedBytecode.object",
+                "evm.deployedBytecode.opcodes",
+                "evm.deployedBytecode.sourceMap",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "remappings": [
+            "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.6.1/"
+          ]
+        }
+      },
+      "deploymentDataHash": "0xe0ee1bcafe91c9893044611a950a7bb8364b2e0705f8138bc3faac64bb7f6fb8",
+      "hash": "0x6a901e28718ddc46c27b916ce8f6336ea85b9cc806af43dbe496937a94b657cd",
+      "receiptStatus": "success",
+      "blockNumber": "12104809",
+      "blockHash": "0xea35ba5d2e07d5b3e443affe077a4e5e019a64f676708e11d17bc4f343e5423a",
+      "gasUsed": "3399728",
+      "effectiveGasPrice": "70",
+      "checkedAt": "2026-11-10T13:09:22.591Z",
+      "contractAddress": "0xA8E2854c62A46329838f9922587adBbEb007072f"
+    }
+  }
+}
