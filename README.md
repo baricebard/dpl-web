@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，尚未發布或執行真實轉帳。三種合約必須在執行時通過唯讀核對才可轉帳；本次環境對 RPC 的讀取受阻，不能宣稱鏈上驗證完成。Exchange、Liquidity、Portfolio 仍未開放。
+Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，尚未發布或執行真實轉帳。三種合約必須在執行時通過完整 runtime 指紋（含 Solidity metadata）及 ERC-20 欄位唯讀核對才可轉帳；本次環境對 RPC 的讀取受阻，不能宣稱鏈上驗證完成。Exchange、Liquidity、Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -20,6 +20,8 @@ npm run dev
 開啟 Vite 顯示的 `/dpl-web/` 網址。首次建立或有意更新依賴時使用 `npm install`，並一併審查 lockfile。
 
 ```sh
+npm run contracts:compile
+node scripts/contracts/runtime-manifest.ts --check
 npm run lint
 npm run typecheck
 npm run build
@@ -30,7 +32,7 @@ npm run preview
 
 Linux 若缺少瀏覽器系統依賴，依執行環境規則安裝，或在允許的環境使用 `npx playwright install --with-deps chromium`。已有 Chromium 時可用 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test`。
 
-`build` 先檢查型別再輸出 `dist/`；`test` 以 production preview 驗證桌面與手機的子路徑、重新整理、未開放入口、Wallet Mock Provider 流程與鍵盤導覽，執行前須先 build。測試產物、依賴目錄與建置產物不提交。
+`build` 先檢查型別再輸出 `dist/`；前端測試使用本機 Hardhat runtime 作為 Node 端 Mock fixture，請先執行 `npm run contracts:compile` 與 `node scripts/contracts/runtime-manifest.ts --check`。`test` 以 production preview 驗證桌面與手機的子路徑、重新整理、未開放入口、Wallet Mock Provider 流程與鍵盤導覽，執行前須先 build。測試產物、依賴目錄與建置產物不提交。
 
 ## 結構與後續擴充
 
@@ -71,7 +73,7 @@ Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,0
 
 唯一設定為 [src/config/tokens.ts](src/config/tokens.ts)，ABI 使用 viem 的標準 `erc20Abi`，對應 TeachingToken 繼承的 OpenZeppelin ERC20。Etherscan 原始碼驗證、歷史 runtime bytecode 比對及部署 receipt 封存尚未完成，不因已有地址而假設完成。完整規格及 Mock／鏈上證據差異見 [Token](docs/modules/token.md)與 [Task 06 驗收紀錄](docs/08-task-06-validation.md)。
 
-已安裝既有依賴後可執行唯讀工具 `node scripts/contracts/read-deployed.ts`，核對 RPC chain ID、三份 code 與 metadata；不含部署或簽署。本次工具因 RPC 存取受阻失敗。此工具不取代 runtime bytecode 完整匹配、Etherscan 原始碼驗證或人工兩帳號轉帳測試。
+已安裝既有依賴後可執行唯讀工具 `node scripts/contracts/read-deployed.ts`，核對 RPC chain ID、三份 code 與 metadata；不含部署或簽署。本次工具因 RPC 存取受阻失敗。此工具現在以完整 runtime 指紋（含 Solidity metadata）核對 Code，同時核對 ERC-20 欄位；前端只攜帶精簡指紋，不打包完整 artifact。來源 commit／compiler、離線重現與 CI 檢查見 [完整性審查修正](docs/09-task-06-runtime-integrity.md)。本機重現與執行時比對機制不等於已完成三地址鏈上匹配、歷史產物封存、Etherscan 原始碼驗證或人工兩帳號測試。
 
 ## GitHub Pages
 

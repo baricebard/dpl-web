@@ -2,7 +2,7 @@
 
 ## Task 06 狀態與公開設定
 
-已實作三種代幣餘額、Gas、單筆 ERC-20 transfer、摘要及結果追蹤。尚未發布，也未執行真實轉帳。地址來自本次任務提供的部署資料；本次環境對 PublicNode RPC 的唯讀請求受阻，不能宣稱完成新的鏈上核對。執行時每個代幣必須通過鏈別、非空 Code、name、symbol、decimals、totalSupply 核對，否則停用該代幣轉帳。成功讀取 metadata 不代表 Etherscan 原始碼驗證或歷史 runtime bytecode 比對已完成。
+已實作三種代幣餘額、Gas、單筆 ERC-20 transfer、摘要及結果追蹤。尚未發布，也未執行真實轉帳。地址來自本次任務提供的部署資料；本次環境對 PublicNode RPC 的唯讀請求受阻，不能宣稱完成新的鏈上核對。執行時每個代幣必須通過鏈別、完整 runtime 指紋（包含 Solidity metadata）及 name、symbol、decimals、totalSupply 核對，否則停用該代幣轉帳。本機預期 runtime 由 Task 05C 固定 Git 基線重建；執行時指紋核對不代表已補齊 Etherscan 原始碼驗證或歷史部署 runtime 封存證據。完整方法與發布前獨立驗收見 [完整性審查修正](../09-task-06-runtime-integrity.md)。
 
 唯一公開設定為 [tokens.ts](../../src/config/tokens.ts)，身份使用 `chainId:lowercaseContractAddress`；symbol 只作顯示。Ethereum Sepolia，Chain ID **11155111**。
 
@@ -21,7 +21,7 @@
 - 顯示連接帳號、目前網路、Sepolia ETH、三種完整精度餘額、最後查詢時間與安全 Etherscan 連結。未連接／錯鏈清除帳號資料；RPC 失敗不顯示零。各代幣核對錯誤獨立顯示，其他通過的代幣仍可操作。
 - 同地址進行中查詢去重，同批合約鏈別核對去重；代幣手動更新最少 30 秒、無自動重試或餘額輪詢。ETH 沿用 Faucet：8 秒逾時、最多重試一次及限流退避。RPC 限流／故障時請稍候手動更新，課堂改用教材與教師示範，不展示假資料。
 - 選擇固定代幣，輸入有效非零 Ethereum 地址與正十進位字串，拒絕負數、NaN、科學記號、超過 18 位小數、零及超額。所有金額使用 bigint、`parseUnits`／`formatUnits`。收款為自己時提示 Gas 消耗。
-- 「檢查轉帳摘要」重新核對錢包帳號／鏈、合約與餘額，使用 `simulateContract`（必須回傳 true）、`estimateContractGas`、`getGasPrice`。Gas limit 與 legacy gas price 各加 20% 整數緩衝，檢查 ETH 足夠支付所顯示上限。預估與實際費用、確認時間有不確定性。
+- 「檢查轉帳摘要」重新核對錢包帳號／鏈、合約完整 runtime（含 metadata）及 ERC-20 欄位與餘額，使用 `simulateContract`（必須回傳 true）、`estimateContractGas`、`getGasPrice`。Gas limit 與 legacy gas price 各加 20% 整數緩衝，檢查 ETH 足夠支付所顯示上限。預估與實際費用、確認時間有不確定性。
 - 摘要列出完整帳號、網路、合約、收款地址、數量、代幣及 ETH 餘額、Gas limit、gas price 與費用上限。2 分鐘後過期；表單變更、帳號／網路／Provider／工作階段切換均使原摘要失效，切走再切回也不可沿用。
 - 只有明確點「確認並開啟 MetaMask」才進入送出。送出前重做唯讀核對與模擬；Gas 條件超過已確認上限即阻止並要求新摘要。由原本選定的 MetaMask Provider 經 viem `createWalletClient`／`custom`／`writeContract` 發送標準 `transfer(address,uint256)`，停用 transport 重試。無 approve、transferFrom、批次或任意合約輸入。
 - 錢包待確認期間切換帳號／網路時，網站提示拒絕已開啟的請求；網站無法撤回 MetaMask 已呈現的確認視窗。若已廣播，持續保留原始帳號與鏈追蹤，不把新帳號的資料套到舊交易。

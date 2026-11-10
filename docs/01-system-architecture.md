@@ -80,6 +80,6 @@ Task 05 採 Hardhat 3／viem Toolbox／Node Test Runner 與 OpenZeppelin 5.x。�
 
 ## Token 實作與資源策略
 
-`src/config/tokens.ts` 是唯一前端地址與 ABI 來源，使用 viem `erc20Abi` 對應 TeachingToken 繼承的標準 OpenZeppelin ERC20。Wallet 公開 `captureTransactionSession()` 綁定 Provider、帳號、chain ID 與事件版本，前置讀取及送出前均重新核對；事件版本可阻止 A → B → A 後沿用摘要。Token services 不存私鑰，Public Client 無 signer；錢包 transport 不重試發送。
+`src/config/tokens.ts` 是唯一前端地址與 ABI 來源，使用 viem `erc20Abi` 對應 TeachingToken 繼承的標準 OpenZeppelin ERC20。Wallet 公開 `captureTransactionSession()` 綁定 Provider、帳號、chain ID 與事件版本，前置讀取及送出前均重新核對；事件版本可阻止 A → B → A 後沿用摘要。Token services 不存私鑰，Public Client 無 signer；錢包 transport 不重試發送。PR #8 審查修正新增完整 runtime（含 Solidity metadata）的 Keccak-256／長度核對，精簡 manifest 可追溯至 Task 05C Git 基線與 compiler；不打包 artifact 或原始編譯資料。離線重現、CI 門檻與尚缺的真實部署驗收見 [完整性驗證](09-task-06-runtime-integrity.md)。
 
 首次開啟 `#token` 才查詢 ERC-20，手動更新至少 30 秒、同址進行中去重及同批 chain ID 去重，無餘額輪詢；Token 與 Faucet 共用 ETH 讀取與 RPC 錯誤分類。只有已廣播交易在最多 60 秒內每 8 秒追蹤 receipt，逾時後改為手動查詢。詳見 [Task 06 驗收紀錄](08-task-06-validation.md)。

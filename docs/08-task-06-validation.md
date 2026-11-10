@@ -1,5 +1,9 @@
 # Task 06：實作與驗收紀錄
 
+## PR #8 完整性審查修正
+
+初版 Code 檢查僅非空，不代表 bytecode 身分已核對。後續修正加入完整 runtime（含 Solidity metadata）指紋驗證及固定編譯基線可重現工具，詳見 [修正紀錄與新驗證結果](09-task-06-runtime-integrity.md)。以下 164 項前端測試與命令是初版紀錄，新的完整回歸結果以上述修正紀錄為準。鏈上三地址及歷史 runtime 封存仍未宣稱驗收完成。
+
 ## 範圍與基線
 
 2026-11-10，從最新 `origin/main`（`fb7af5b`，包含 Task 01～05C）建立 `task-06-token`。工作目錄起始乾淨，沒有下層 AGENTS.md。閱讀專案總覽、架構、MVP、路線圖、Wallet／Faucet、TeachingToken、Task 05 合約規格與 Task 05C 部署指南及既有 prepare／preflight 工具。main 沒有實際部署結果封存或部署後 metadata 驗證工具。

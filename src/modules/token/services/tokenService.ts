@@ -1,5 +1,7 @@
 import { BaseError, getAddress, isAddress, parseUnits, zeroAddress } from 'viem'
 import type { Address } from 'viem'
+import { teachingTokenRuntime } from '../../../config/teachingTokenRuntime'
+import { matchesRuntime } from '../../../lib/web3/runtimeIntegrity'
 import { teachingTokenAbi, tokens, tokenSupply } from '../../../config/tokens'
 import type { TeachingToken } from '../../../config/tokens'
 import { sepoliaPublicClient } from '../../../lib/web3/publicClient'
@@ -27,9 +29,11 @@ async function checkChain(client: TokenClient) {
 export async function verifyToken(token: TeachingToken, client: TokenClient = sepoliaPublicClient) {
   if (!tokens.some(item => item.id === token.id && item.address === token.address && item.chainId === token.chainId)) throw new Error('代幣合約不在公開設定中。')
   if (await checkChain(client) !== token.chainId) throw new Error('RPC 網路不符，已停用轉帳。')
-  const code = await client.getCode({ address: token.address })
+  const blockNumber = await client.getBlockNumber({ cacheTime: 0 })
+  const code = await client.getCode({ address: token.address, blockNumber })
   if (!code || code === '0x') throw new Error('合約 Code 不存在，已停用此代幣轉帳。')
-  const read = (functionName: 'name' | 'symbol' | 'decimals' | 'totalSupply') => client.readContract({ address: token.address, abi: teachingTokenAbi, functionName })
+  if (!matchesRuntime(code, teachingTokenRuntime)) throw new Error('合約完整 Runtime Bytecode（含 Solidity Metadata）不符，已停用此代幣轉帳。')
+  const read = (functionName: 'name' | 'symbol' | 'decimals' | 'totalSupply') => client.readContract({ address: token.address, abi: teachingTokenAbi, functionName, blockNumber })
   const [name, symbol, decimals, supply] = await Promise.all([read('name'), read('symbol'), read('decimals'), read('totalSupply')])
   if (name !== token.name || symbol !== token.symbol || decimals !== token.decimals || supply !== tokenSupply) throw new Error('合約 name／symbol／decimals／totalSupply 不符，已停用此代幣轉帳。')
 }
@@ -55,6 +59,7 @@ export async function prepareTransfer(session: TransactionSession, input: Transf
   const token = tokens.find(token => token.id === input.tokenId)
   if (!token) throw new Error('未知合約，已停用轉帳。')
   await verifyToken(token, client)
+  await assertSession(session)
   const [balance, ethBalance] = await Promise.all([
     client.readContract({ address: token.address, abi: teachingTokenAbi, functionName: 'balanceOf', args: [session.address] }),
     client.getBalance({ address: session.address }),

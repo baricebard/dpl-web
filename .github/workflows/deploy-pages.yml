@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
@@ -29,6 +31,10 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Verify pinned runtime manifest (offline)
+        run: |
+          npm run contracts:compile
+          node scripts/contracts/runtime-manifest.ts --check
       - name: Lint
         run: npm run lint
       - name: Type check and build
