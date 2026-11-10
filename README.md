@@ -97,3 +97,7 @@ npm run contracts:test
 本機合約與準備檢查共 24 項；測試不涉及 Sepolia。Ignition 模組與公開教師地址／chain ID 的部署準備已建立；Hardhat 設定只含本機網路，沒有公用網路部署命令。本次未設定私鑰、未執行鏈上部署，Token UI 保持未開放。
 
 [合約規格、A-03／A-04／A-05 決策與部署紀錄格式](docs/06-token-contracts.md)包含離線準備、唯讀 RPC 預檢、未來驗證流程及 Task 06 前置條件。至少 receipt status success 才可標記交易成功；進一步確認數／重組／替換策略須在 Task 06 前決定。
+
+## Task 05C-2 本機部署工具（尚未部署）
+
+教師專用的獨立 localhost 開發頁面：`npm run deploy:local`，開啟 `http://127.0.0.1:5174/`。使用既有 Hardhat 產物與 MetaMask 逐筆確認，部署者／初始持有人固定為本次指定公開地址；正式 Pages build 不含部署入口或程式碼。完整 Windows 操作、產物追溯、未知交易復原與測試見 [本機部署工具指南](docs/08-local-deployment-tool.md)。本次只開發與本機測試，沒有 Sepolia 交易、真實合約地址或 Hash，未開始 Task 06。
