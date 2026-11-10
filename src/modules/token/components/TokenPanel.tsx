@@ -40,12 +40,12 @@ export function TokenPanel() {
       <article className="token-asset"><h3>Sepolia ETH / Gas</h3><p>{ready && eth.data ? `${formatEther(eth.data.wei)} Sepolia ETH` : ready && eth.status === 'loading' ? 'Gas 餘額查詢中…' : '尚無可顯示的 Gas 餘額'}</p>{ready && eth.error && <p role="alert">{eth.error}</p>}</article>
       {tokens.map(token => {
         const item = ready ? balances.data?.balances.find(item => item.token.id === token.id) : undefined
-        return <article className="token-asset" key={token.id}><h3>{token.symbol}</h3><p className="token-amount" data-testid={`balance-${token.symbol}`}>{item?.balance !== undefined ? `${formatUnits(item.balance, token.decimals)} ${token.symbol}` : ready && balances.loading ? '查詢中…' : '尚無可顯示的餘額'}</p>{item?.error && <p role="alert">{item.error}</p>}<a href={token.explorerUrl} target="_blank" rel="noopener noreferrer">{token.symbol} Sepolia Etherscan ↗</a><p className="wallet-address">{token.address}</p></article>
+        return <article className="token-asset" key={token.id}><h3>{token.symbol}</h3><p>{token.name}</p><p className="token-amount" data-testid={`balance-${token.symbol}`}>{item?.balance !== undefined ? `${formatUnits(item.balance, token.decimals)} ${token.symbol}` : ready && balances.loading ? '查詢中…' : '尚無可顯示的餘額'}</p>{item?.error && <p role="alert">{item.error}</p>}<a href={token.explorerUrl} target="_blank" rel="noopener noreferrer">{token.symbol} Sepolia Etherscan ↗</a><p className="wallet-address">{token.address}</p>{item?.balance !== undefined && balances.data && <p>最後查詢：<time dateTime={new Date(balances.data.updatedAt).toISOString()}>{new Date(balances.data.updatedAt).toLocaleString('zh-TW')}</time></p>}</article>
       })}
     </div>
-    {ready && balances.data && <p>代幣最後查詢：<time dateTime={new Date(balances.data.updatedAt).toISOString()}>{new Date(balances.data.updatedAt).toLocaleString('zh-TW')}</time>（失敗項目不代表零餘額）</p>}
+
     <button className="wallet-button secondary" disabled={!ready || balances.loading || now < balances.retryAt || busy} onClick={() => { void balances.refresh(); void eth.refresh() }}>重新查詢代幣餘額</button>
-    <p className="wallet-note">無背景餘額輪詢，手動查詢間隔至少 30 秒；RPC 失敗時請稍候，或閱讀教材、觀看教師示範。合約資料無法核對時停用對應代幣。</p>
+    <p className="wallet-note">無背景餘額輪詢，手動查詢間隔至少 30 秒；RPC 失敗時請稍候，或閱讀教材、觀看教師示範。餘額查詢失敗時暫停對應轉帳；送出前重新查餘額並檢查帳號、網路、Gas 與模擬結果。</p>
     <form className="token-form" onSubmit={event => { event.preventDefault(); if (ready && !busy && !unknown) { try { void store.prepare(wallet.captureTransactionSession(), { tokenId, recipient, amount }) } catch (error) { store.rejectPreparation(error) } } }}>
       <h3>1. 填寫轉帳</h3>
       <label htmlFor="token-choice">教學代幣</label><select id="token-choice" value={tokenId} disabled={busy || unknown} onChange={event => { setTokenId(event.target.value); store.invalidateSummary() }}>{tokens.map(token => <option key={token.id} value={token.id}>{token.symbol}</option>)}</select>

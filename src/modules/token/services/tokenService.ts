@@ -1,7 +1,5 @@
 import { BaseError, getAddress, isAddress, parseUnits, zeroAddress } from 'viem'
 import type { Address } from 'viem'
-import { teachingTokenRuntime } from '../../../config/teachingTokenRuntime'
-import { matchesRuntime } from '../../../lib/web3/runtimeIntegrity'
 import { teachingTokenAbi, tokens, tokenSupply } from '../../../config/tokens'
 import type { TeachingToken } from '../../../config/tokens'
 import { sepoliaPublicClient } from '../../../lib/web3/publicClient'
@@ -9,7 +7,7 @@ import { rpcFailure } from '../../../lib/web3/rpcError'
 import type { TransactionSession } from '../../wallet/types'
 import type { TransferInput, TransferSummary } from '../types'
 
-export type TokenClient = Pick<typeof sepoliaPublicClient, 'getChainId' | 'getCode' | 'readContract' | 'getBalance' | 'simulateContract' | 'estimateContractGas' | 'getGasPrice' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getBlock' | 'getBlockNumber' | 'getTransaction'>
+export type TokenClient = Pick<typeof sepoliaPublicClient, 'getChainId' | 'readContract' | 'getBalance' | 'simulateContract' | 'estimateContractGas' | 'getGasPrice' | 'waitForTransactionReceipt' | 'getTransactionReceipt' | 'getBlock' | 'getBlockNumber' | 'getTransaction'>
 export function tokenError(error: unknown): string {
   const { timeout, rateLimited } = rpcFailure(error)
   const description = error instanceof BaseError ? error.walk().message : error instanceof Error ? error.message : String(error)
@@ -26,16 +24,10 @@ async function checkChain(client: TokenClient) {
   if (!check) { check = client.getChainId().finally(() => chainChecks.delete(client)); chainChecks.set(client, check) }
   return check
 }
+// 學生流程僅核對固定地址與 Sepolia；runtime／metadata 留給獨立診斷工具。
 export async function verifyToken(token: TeachingToken, client: TokenClient = sepoliaPublicClient) {
   if (!tokens.some(item => item.id === token.id && item.address === token.address && item.chainId === token.chainId)) throw new Error('代幣合約不在公開設定中。')
   if (await checkChain(client) !== token.chainId) throw new Error('RPC 網路不符，已停用轉帳。')
-  const blockNumber = await client.getBlockNumber({ cacheTime: 0 })
-  const code = await client.getCode({ address: token.address, blockNumber })
-  if (!code || code === '0x') throw new Error('合約 Code 不存在，已停用此代幣轉帳。')
-  if (!matchesRuntime(code, teachingTokenRuntime)) throw new Error('合約完整 Runtime Bytecode（含 Solidity Metadata）不符，已停用此代幣轉帳。')
-  const read = (functionName: 'name' | 'symbol' | 'decimals' | 'totalSupply') => client.readContract({ address: token.address, abi: teachingTokenAbi, functionName, blockNumber })
-  const [name, symbol, decimals, supply] = await Promise.all([read('name'), read('symbol'), read('decimals'), read('totalSupply')])
-  if (name !== token.name || symbol !== token.symbol || decimals !== token.decimals || supply !== tokenSupply) throw new Error('合約 name／symbol／decimals／totalSupply 不符，已停用此代幣轉帳。')
 }
 export function validateTransfer(input: TransferInput, balance: bigint) {
   const token = tokens.find(token => token.id === input.tokenId)
