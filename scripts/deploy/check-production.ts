@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import assert from 'node:assert/strict'
 const forbidden = ['eth_sendTransaction', 'encodeDeployData', 'dpl-sepolia-deployment-v1', 'DPL 本機 Sepolia 部署工具', 'C6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02', 'teaching-artifact', 'tools/deploy', '608060405234801561000f575f5ffd5b50604051610b53']
+forbidden.push('DPL 本機唯讀部署驗證', 'verification-artifact', 'tools/verify', 'localhost-readonly-deployment-check', '1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e', '53Ac929866423479c7C5746F76F398e8b3907d6E', 'A8E2854c62A46329838f9922587adBbEb007072f')
 function check(dir: string) {
   for (const file of readdirSync(dir, { withFileTypes: true })) {
     const path = resolve(dir, file.name)

@@ -24,6 +24,9 @@
     "tests",
     "tools/deploy",
     "scripts/deploy",
-    "playwright.deploy.config.ts"
+    "scripts/verify",
+    "tools/verify",
+    "playwright.deploy.config.ts",
+    "playwright.verify.config.ts"
   ]
 }

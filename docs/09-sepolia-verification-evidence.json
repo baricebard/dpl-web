@@ -1,0 +1,75 @@
+{
+  "recordSha256": "1225d914b6e56086d61431898bd18a1ecb1e89a0004b72a68faf587099f0404b",
+  "results": [
+    {
+      "label": "chainId",
+      "url": "https://ethereum-sepolia-rpc.publicnode.com",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_chainId",
+        "params": []
+      },
+      "checkedAt": "2026-11-10T13:18:08.398596+00:00",
+      "errorType": "URLError",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "label": "receipts",
+      "url": "https://ethereum-sepolia-rpc.publicnode.com",
+      "request": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "eth_getTransactionReceipt",
+          "params": [
+            "0x8b057767a283f111f9864b83c7ea99fa41c188f13468c0feea6d976c0f8f4a00"
+          ]
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "eth_getTransactionReceipt",
+          "params": [
+            "0x6ce8ce167eee21220602a9a3192c082a9e6ccfd147b002b8b6541aa7a4d48453"
+          ]
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "eth_getTransactionReceipt",
+          "params": [
+            "0x6a901e28718ddc46c27b916ce8f6336ea85b9cc806af43dbe496937a94b657cd"
+          ]
+        }
+      ],
+      "checkedAt": "2026-11-10T13:18:08.399524+00:00",
+      "errorType": "URLError",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "label": "DPLT-etherscan",
+      "url": "https://sepolia.etherscan.io/address/0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e#code",
+      "request": null,
+      "checkedAt": "2026-11-10T13:18:08.400137+00:00",
+      "errorType": "URLError",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "label": "DPLTA-etherscan",
+      "url": "https://sepolia.etherscan.io/address/0x53Ac929866423479c7C5746F76F398e8b3907d6E#code",
+      "request": null,
+      "checkedAt": "2026-11-10T13:18:08.400577+00:00",
+      "errorType": "URLError",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "label": "DPLTB-etherscan",
+      "url": "https://sepolia.etherscan.io/address/0xA8E2854c62A46329838f9922587adBbEb007072f#code",
+      "request": null,
+      "checkedAt": "2026-11-10T13:18:08.401345+00:00",
+      "errorType": "URLError",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ]
+}

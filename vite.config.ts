@@ -6,7 +6,7 @@ export default defineConfig({
     name: 'exclude-local-deployment-tool',
     generateBundle() {
       for (const id of this.getModuleIds()) {
-        if (/[/\\](tools[/\\]deploy|scripts[/\\](deploy|contracts))[/\\]/.test(id) || id.includes('teaching-artifact')) {
+        if (/[/\\](tools[/\\](deploy|verify)|scripts[/\\](deploy|verify|contracts))[/\\]/.test(id) || id.includes('teaching-artifact') || id.includes('verification-artifact')) {
           this.error(`Local deployment module cannot enter production: ${id}`)
         }
       }
