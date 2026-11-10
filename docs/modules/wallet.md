@@ -45,3 +45,7 @@ A-02 已確定：Task 03 只使用錢包 Provider，呼叫 `eth_accounts`、`eth
 尚未完成真實 MetaMask 擴充功能測試：實際解鎖、授權視窗、使用者拒絕、不同錢包共同安裝、實際 Sepolia 切換、4902 指引及錢包端撤銷權限需人工驗證。手機測試僅驗證響應式與 Mock Provider，不代表支援手機跨 App 連接。共用 receipt 策略仍屬 A-05，交易與其他模組未提前實作。
 
 本次驗證結果：`npm ci`、`npm run lint`、`npm run typecheck`、`npm run build`、`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test` 全部通過；16 個案例各於 desktop／mobile 執行，共 32 passed。build 有 viem 間接依賴 ox 的 `node:worker_threads` 瀏覽器 externalization 提示；本模組未使用該功能，production preview 瀏覽器測試通過。
+
+## Task 06 交易工作階段介面
+
+`useWallet().captureTransactionSession()` 僅在目前可操作 Sepolia 時回傳 `TransactionSession`（address、chainId、原本選定的 provider、isCurrent），否則拒絕。Token 透過此公開介面使用同一個 MetaMask，不重新發現或改用另一個注入 Provider。`isCurrent()` 綁定 Provider／工作階段、帳號事件版本與網路事件版本，切換再切回也會失效；送出前仍需重新讀 eth_accounts／eth_chainId，不能只憑 React 狀態送出。此介面不自動簽署或發送。

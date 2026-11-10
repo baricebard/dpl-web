@@ -44,7 +44,7 @@ npm run deploy:local
 
 `deploy:local` 會先再次執行 Hardhat compile，再啟動獨立 Vite 開發伺服器。開啟 **http://127.0.0.1:5174/**；也可使用 http://localhost:5174/，但應固定同一 origin，因為部署紀錄按 origin 保存。不要使用普通 `npm run dev` 尋找部署入口。結束時在 PowerShell 按 Ctrl+C。
 
-工具只允許 loopback 連線與 localhost Host，頁面另檢查 DEV 及 hostname；不設定 LAN、公開 tunnel 或遠端瀏覽器。不提供 build／preview；嘗試以本機部署設定 build 會直接失敗。正式 `npm run build` 的唯一入口仍為學生網站，完全不 import 此工具、ABI 或 deployment bytecode，且自動掃描 dist 防止洩漏。
+工具只允許 loopback 連線與 localhost Host，頁面另檢查 DEV 及 hostname；不設定 LAN、公開 tunnel 或遠端瀏覽器。不提供 build／preview；嘗試以本機部署設定 build 會直接失敗。正式 `npm run build` 的唯一入口仍為學生網站，不 import 此工具、其 Hardhat artifact／部署 ABI 或完整 deployment/runtime bytecode，且檢查模組圖與 dist 防止洩漏。Task 06 的標準 ERC-20 ABI、固定地址與學生 transfer 屬正式功能，不是本機工具入口。
 
 產物缺少、來源過期、合約／Hardhat 設定／lockfile 未提交、依賴或編譯器版本不符時，停止使用。先取得審查過的乾淨 commit，再 `npm ci`、重新 compile；不要略過檢查、手改 bytecode 或改用瀏覽器 compiler。
 
@@ -126,7 +126,7 @@ npm test
 
 `deploy:test` 使用 Mock EIP-1193 包住 in-process Hardhat EDR，僅將**本機模擬** chain ID 設成 11155111，以測試 Sepolia 守門；沒有 HTTP 公用鏈、真實錢包或遠端簽署。`deploy:test:ui` 只注入 Mock MetaMask，測連接、準備、明確確認、拒簽與 Host 限制。正式網站原有 Playwright 測試仍只跑 production preview。
 
-正式 build 自動檢查 `dist/` 沒有部署入口、sender、持久鎖識別字及 TeachingToken bytecode；部署工具的 Vite config 拒絕 build。這些測試不代表真實 MetaMask、Sepolia RPC、Etherscan 或 Windows 實機已驗收。
+正式 build 自動檢查模組圖與 `dist/` 沒有本機部署／驗證入口、持久鎖識別字、artifact、Solidity 來源及完整 TeachingToken creation/runtime bytecode；學生 transfer 的一般錢包 RPC 方法不作為本機工具洩漏依據；部署工具的 Vite config 拒絕 build。這些測試不代表真實 MetaMask、Sepolia RPC、Etherscan 或 Windows 實機已驗收。
 
 ## 9. 本次驗證紀錄
 

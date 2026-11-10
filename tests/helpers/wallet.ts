@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 export const address = '0x1111111111111111111111111111111111111111'
 export const secondAddress = '0x2222222222222222222222222222222222222222'
-interface MockOptions { authorized?: boolean; chain?: string; connectError?: number; switchError?: number; delay?: number; legacy?: boolean }
+interface MockOptions { authorized?: boolean; chain?: string; connectError?: number; switchError?: number; delay?: number; legacy?: boolean; sendHash?: string; sendError?: number }
 export async function mockWallet(page: Page, options: MockOptions = {}) {
   await page.addInitScript(({ options, address }) => {
     const listeners = new Map<string, Set<(value: unknown) => void>>()
@@ -25,6 +25,11 @@ export async function mockWallet(page: Page, options: MockOptions = {}) {
           if (options.connectError) throw { code: options.connectError }
           accounts = [address]
           return accounts
+        }
+        if (method === 'eth_sendTransaction') {
+          if (options.sendError) throw { code: options.sendError, message: 'User rejected request' }
+          if (options.sendHash) return options.sendHash
+          throw new Error('Mock send disabled')
         }
         if (method === 'wallet_switchEthereumChain') {
           if (options.switchError) throw { code: options.switchError }

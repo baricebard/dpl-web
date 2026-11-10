@@ -145,3 +145,14 @@ h1 > span { display: block; }
 .balance-value span { font-size: 14px; }
 .gas-guide { background: #f0f4f0; padding: 22px; border-radius: 8px; margin-top: 24px; }
 @media (max-width: 700px) { .faucet-grid { grid-template-columns: 1fr; gap: 0; } }
+
+.token-balances { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }
+.token-asset { min-width: 0; padding: 18px; border: 1px solid #dce4df; border-radius: 8px; }
+.token-amount { overflow-wrap: anywhere; font-weight: 600; }
+.token-form { display: grid; gap: 10px; max-width: 640px; margin: 24px 0; }
+.token-form label { font-size: 13px; font-weight: 600; }
+.token-form input, .token-form select { min-width: 0; width: 100%; border: 1px solid #9db5a6; border-radius: 6px; padding: 12px; background: #f6f8f7; color: #183c35; font: inherit; }
+.token-form input:focus-visible, .token-form select:focus-visible { outline: 3px solid #3a7865; outline-offset: 2px; }
+.token-summary dd, .token-transaction { overflow-wrap: anywhere; }
+.token-transaction { margin-top: 24px; padding-top: 20px; border-top: 1px solid #dce4df; }
+@media (max-width: 700px) { .token-balances { grid-template-columns: 1fr; } }

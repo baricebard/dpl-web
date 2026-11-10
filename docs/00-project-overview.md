@@ -17,7 +17,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）服務大學區�
 | DPLT-B | 教學資產 B，ERC-20 代幣 |
 | Sepolia ETH | Ethereum Sepolia 的原生測試網 Gas 資產，並非自訂 ERC-20 |
 
-三種代幣預計部署於 Ethereum Sepolia，皆不具真實金融價值；代幣名稱不暗示價格、兌換比率、治理權或供給機制。平台不處理真實資產、法幣買賣、主網交易或收益承諾。
+三種代幣已有任務提供的 Ethereum Sepolia 部署地址（見 [Token](modules/token.md)，本次新的 RPC 核對仍受阻），皆不具真實金融價值；代幣名稱不暗示價格、兌換比率、治理權或供給機制。平台不處理真實資產、法幣買賣、主網交易或收益承諾。
 
 ## 已確認原則
 

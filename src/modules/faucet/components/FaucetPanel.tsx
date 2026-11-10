@@ -66,7 +66,7 @@ export function FaucetPanel() {
       <p>Gas 是執行區塊鏈操作所需的計算工作量；Gas Fee 是支付這些工作與網路資源的費用，也用來降低垃圾交易。費用會隨操作與網路狀況改變，沒有固定價格。</p>
       <p>Ethereum Sepolia 使用原生的 Sepolia ETH 支付 Gas。它不具有主網 ETH 的實際金融價值，請勿購買測試幣。</p>
       <p>DPLT 等 ERC-20 教學代幣是合約管理的資產，不是 Gas Token。即使只轉帳 DPLT，也需要 Sepolia ETH 支付 Gas；持有 DPLT 不能代替 Gas。</p>
-      <p>本頁查詢餘額一般不需要支付鏈上 Gas，因為只是讀取資料，沒有送出交易。Token 發放方式仍待後續 Task 決定。</p>
+      <p>本頁查詢餘額一般不需要支付鏈上 Gas，因為只是讀取資料，沒有送出交易。教學代幣由教師透過一般 transfer 分發，網站不提供公開 Mint 或自助領取。</p>
     </aside>
   </section>
 }

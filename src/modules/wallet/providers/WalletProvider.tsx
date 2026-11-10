@@ -11,5 +11,5 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const stop = discoverMetaMask(store.attach)
     return () => { stop(); store.destroy() }
   }, [store])
-  return <WalletContext.Provider value={{ ...state, connect: store.connect, disconnect: store.disconnect, switchToSepolia: store.switchToSepolia }}>{children}</WalletContext.Provider>
+  return <WalletContext.Provider value={{ ...state, captureTransactionSession: store.captureTransactionSession, connect: store.connect, disconnect: store.disconnect, switchToSepolia: store.switchToSepolia }}>{children}</WalletContext.Provider>
 }

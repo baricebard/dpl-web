@@ -1,3 +1,5 @@
+import { teachingTokenRuntime } from '../../src/config/teachingTokenRuntime.ts'
+import { matchesRuntime } from '../../src/lib/web3/runtimeIntegrity.ts'
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { artifacts, network } from 'hardhat'
@@ -24,7 +26,7 @@ describe('TeachingToken — local EDR only', async () => {
     describe(spec.symbol, () => {
       it('deploys bytecode with the exact name and symbol', async () => {
         const token = await viem.deployContract('TeachingToken', [spec.name, spec.symbol, holder, INITIAL_SUPPLY])
-        assert.notEqual(await client.getCode({ address: token.address }), '0x')
+        assert.equal(matchesRuntime(await client.getCode({ address: token.address }), teachingTokenRuntime), true)
         assert.equal(await token.read.name(), spec.name)
         assert.equal(await token.read.symbol(), spec.symbol)
       })

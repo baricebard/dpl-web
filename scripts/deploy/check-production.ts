@@ -1,17 +1,32 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import assert from 'node:assert/strict'
-const forbidden = ['eth_sendTransaction', 'encodeDeployData', 'dpl-sepolia-deployment-v1', 'DPL 本機 Sepolia 部署工具', 'C6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02', 'teaching-artifact', 'tools/deploy', '608060405234801561000f575f5ffd5b50604051610b53']
-forbidden.push('DPL 本機唯讀部署驗證', 'verification-artifact', 'tools/verify', 'localhost-readonly-deployment-check', '1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e', '53Ac929866423479c7C5746F76F398e8b3907d6E', 'A8E2854c62A46329838f9922587adBbEb007072f')
-function check(dir: string) {
-  for (const file of readdirSync(dir, { withFileTypes: true })) {
-    const path = resolve(dir, file.name)
-    if (file.isDirectory()) check(path)
-    else {
-      const content = readFileSync(path, 'utf8')
-      for (const marker of forbidden) assert(!content.includes(marker), `Deployment code leaked into production: ${path} (${marker})`)
+
+// 學生 Token 的 transfer/RPC 方法與公開地址是正式功能；禁止的是本機工具與其產物。
+const forbidden = ['dpl-sepolia-deployment-v1', 'DPL 本機 Sepolia 部署工具', 'teaching-artifact', 'tools/deploy',
+  'DPL 本機唯讀部署驗證', 'verification-artifact', 'tools/verify', 'localhost-readonly-deployment-check',
+  'hh3-artifact-1', 'pragma solidity 0.8.38']
+export function checkProduction(directory = 'dist') {
+  const artifact = JSON.parse(readFileSync('artifacts/contracts/TeachingToken.sol/TeachingToken.json', 'utf8'))
+  const bytecodes = [artifact.bytecode, artifact.deployedBytecode].map((code: string) => {
+    assert.match(code, /^0x(?:[\da-f]{2})+$/i)
+    return code.slice(2).toLowerCase()
+  })
+  function check(dir: string) {
+    for (const file of readdirSync(dir, { withFileTypes: true })) {
+      const path = resolve(dir, file.name)
+      if (file.isDirectory()) check(path)
+      else {
+        const content = readFileSync(path, 'utf8')
+        for (const marker of forbidden) assert(!content.includes(marker), `Local tool leaked into production: ${path} (${marker})`)
+        for (const code of bytecodes) assert(!content.toLowerCase().includes(code), `Full TeachingToken bytecode leaked into production: ${path}`)
+      }
     }
   }
+  check(directory)
 }
-check('dist')
-console.log('Production output contains no deployment entry, transaction sender, or TeachingToken bytecode')
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  checkProduction()
+  console.log('Production output contains no local deployment/verifier entry, artifact, source or complete TeachingToken bytecode')
+}

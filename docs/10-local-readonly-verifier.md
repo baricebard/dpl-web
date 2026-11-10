@@ -90,7 +90,7 @@ npm run contracts:compile
 
 工具程式只允許 `eth_chainId`、`eth_getBlockByNumber`、`eth_getTransactionReceipt`、`eth_getCode`、`eth_call` 五種方法。沒有 injected provider 探索或 Wallet Client，不呼叫帳號授權、eth_sendTransaction、eth_sendRawTransaction、personal_sign 或 typed-data 簽署。本機 RPC 參數只含公開地址、hash、區塊及唯讀 call data。
 
-獨立 Vite root 使用 port 5175、loopback 綁定、Host 與連線來源檢查、`publicDir=false`、關閉跨來源 CORS；config 拒絕 build／preview，頁面另檢查 DEV 和 localhost hostname。不要將此服務綁定 LAN 或公開 tunnel。正式學生網站 build 的模組圖禁止引用 tools/verify、scripts/verify 或虛擬產物；dist 掃描驗證入口標記、三個地址與 runtime 標記，防止發佈到 Pages。沒有變更 Pages 發佈流程或觸發正式發佈。
+獨立 Vite root 使用 port 5175、loopback 綁定、Host 與連線來源檢查、`publicDir=false`、關閉跨來源 CORS；config 拒絕 build／preview，頁面另檢查 DEV 和 localhost hostname。不要將此服務綁定 LAN 或公開 tunnel。正式學生網站 build 的模組圖禁止引用 tools/verify、scripts/verify 或虛擬產物；Task 06 整合後，正式建置允許三個公開代幣地址及學生 transfer，但模組圖拒絕本機工具／artifact 匯入，dist 掃描兩工具的專用入口／產物標記、Solidity 來源及完整 creation/runtime bytecode，防止本機功能發佈到 Pages。五種唯讀方法的引擎與 transport 邊界保持不變。沒有變更 Pages 發佈流程或觸發正式發佈。
 
 ## 測試與交付
 
