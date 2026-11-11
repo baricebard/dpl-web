@@ -1,5 +1,7 @@
 # Task 07A：DPL Exchange 固定匯率合約
 
+> 本文保留 Task 07A／07B 當時的工作紀錄。Task 07C 已由使用者提供部署地址 `0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`（Sepolia），並完成學生前端；目前狀態及人工待驗收見 [Task 07C](14-exchange-frontend.md)。下方「未部署／未開放」描述的是歷史任務，不要求重新部署。
+
 ## 狀態與教學概念
 
 已建立合約、本機 EDR 測試、Ignition 模組與離線公開參數計畫，未部署 Sepolia、未轉移教師資產，首頁 Exchange 保持未開放。TeachingToken 與 Task 06 Token 功能不變。

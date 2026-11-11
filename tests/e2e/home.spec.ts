@@ -16,12 +16,13 @@ test('Pages 子路徑可載入、重新整理，Wallet 與 Faucet 開放且保�
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('DeFi Portfolio Lab.')
   await expect(page.getByRole('heading', { name: 'Ethereum Sepolia' })).toBeVisible()
   await expect(page.getByText('零真實資金，專注理解。')).toBeVisible()
-  for (const name of ['Exchange', 'Liquidity', 'Portfolio']) {
+  for (const name of ['Liquidity', 'Portfolio']) {
     await expect(page.getByRole('button', { name: `${name}：尚未開放`, exact: true })).toBeDisabled()
   }
   await expect(page.getByRole('link', { name: 'Wallet：開啟錢包介面' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Faucet：開啟領取指引' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Token：開啟代幣介面' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Exchange：開啟交換介面' })).toBeVisible()
   await expect(page.getByText('尚未連接網路')).toBeVisible()
   await page.getByRole('link', { name: '探索學習模組' }).click()
   await expect(page).toHaveURL(/\/dpl-web\/#modules$/)

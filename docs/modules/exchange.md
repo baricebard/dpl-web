@@ -1,12 +1,14 @@
 # Exchange：DPL Exchange
 
-## 責任與階段
+## 責任與目前狀態
 
-Task 07A 依使用者決策完成 A-06 的固定匯率合約、本機測試與部署準備。首頁 Exchange 仍未開放，尚未部署 Sepolia，Task 07B／07C 尚未開始。完整 API、安全、部署及驗證見 [固定匯率交換](../12-fixed-rate-exchange.md)。
+Task 07A PR #10 與 Task 07B PR #11 已合併。Task 07C 從最新 main `55549d43bcc9b8c89ec27a95a9e8e77dd5467e48` 實作學生前端，首頁 `#exchange` 開放固定匯率交換。部署地址由使用者在 Task 07C 提供：Ethereum Sepolia（11155111）`0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`。這是使用者提供的部署／注入紀錄，本次沒有獨立聲稱完成真實 RPC、MetaMask 或鏈上人工驗收。
 
-此平台用 DPLT／DPLT-A／DPLT-B 模擬 USD／TWD／CNY，價格為教學自訂，不連接真實外匯市場、不代表真實資產價格。交換使用教師準備的庫存，沒有 AMM 定價曲線、池或 LP 份額；[Liquidity](liquidity.md) 仍是獨立未來模組。
+學生操作、測試結果與人工驗收見 [Task 07C 前端指南](../14-exchange-frontend.md)；合約 API 與本機合約測試見 [Task 07A](../12-fixed-rate-exchange.md)，教師 localhost 工具見 [Task 07B](../13-exchange-deployment.md)。本次不修改 Solidity、不部署、不注入庫存、不執行真實 approve 或 swap，也不發布網站。
 
-## A-06 已決定的規格
+## 六方向與限制
+
+DPLT／DPLT-A／DPLT-B 模擬 USD／TWD／CNY，是教學自訂比例，不是真實行情。
 
 | 輸入 → 輸出 | 精確比例 |
 | --- | --- |
@@ -17,23 +19,28 @@ Task 07A 依使用者決策完成 A-06 的固定匯率合約、本機測試與�
 | DPLT → DPLT-B | 20/3 |
 | DPLT-B → DPLT | 3/20 |
 
-三種資產均為標準 18 decimals ERC-20。合約地址、比例不可修改，無交換費用。以最小單位整數乘分子再除分母、無條件捨去，拒絕零輸入／零輸出。往返捨入不增加代幣。
+三種資產皆為 18 decimals；金額使用 bigint、parseUnits、formatUnits。正式報價一律讀合約 `quote()`，最小單位向下取整，零輸出拒絕。單筆上限為 10 DPLT、300 DPLT-A、`floor(600e18/9)` 個 DPLT-B 最小單位（66.666666666666666666 DPLT-B）；Max 取錢包餘額與上限較小值。禁止相同代幣及任意地址。
 
-每筆輸入最多 10 DPLT 等值：10 DPLT、300 DPLT-A、200/3 DPLT-B。B 的精確比較為 `amountIn * 9 <= 600 * 10^18`，實作用等價的 `amountIn <= floor(600 * 10^18 / 9)` 避免溢位。非每日／身分配額，多筆仍可累積交換。
+合約比例不可修改，交換手續費 0%，仍需 Gas。教師庫存支應輸出；owner 可暫停／提領庫存。沒有 AMM 曲線、流動性池或 LP 份額，[Liquidity](liquidity.md) 保持未開放。
 
-`DPLFixedExchange` 使用 IERC20、SafeERC20、Ownable、Pausable、ReentrancyGuard。明確 constructor 管理者與部署者分離；只可管理內部庫存，不能從學生錢包任意扣款，也不能修改三代幣供給。管理者可 pause／unpause／withdrawReserve，暫停期間仍可提領；學生須自行 approve 並呼叫 swap。
+## 使用與交易契約
 
-## 合約與未來介面
+1. 重用 `useWallet()` 及 Transaction Session，確認 MetaMask 與 RPC 皆為 Sepolia。
+2. 初次開啟 Exchange 才查三種 balanceOf、reserveOf、allowance、ETH 與 paused；同帳號進行中查詢去重、成功快取 30 秒，無背景輪詢。手動更新間隔 30 秒，失敗清除可顯示資料並明確提示，不補零。
+3. 選擇不同資產、輸入正數及最多 18 位小數，按「查詢合約報價」。報價有效 2 分鐘，變更數量／代幣／帳號／網路即失效。
+4. allowance 不足先檢查 approve 摘要，核對 spender 為固定 Exchange、本次 amountIn、既有額度與 Gas，再明確確認開啟 MetaMask。標準 OpenZeppelin ERC20 的 approve 覆寫既有非零額度，不需要先歸零，不要求無限授權。
+5. approve receipt success、至少 1 個區塊並核對原始交易後才顯示授權成功，重新讀取 allowance；查詢失敗或仍不足不得進入 swap。授權成功不代表交換成功，不自動呼叫 swap。
+6. allowance 已足夠可跳過 approve。swap 準備及送出前均重查 quote、輸入餘額、allowance、輸出庫存、paused，執行 simulateContract、Gas 估算與 ETH 檢查。minAmountOut 等於摘要中的 quote，報價或 Gas 增加／摘要過期需重新確認。
+7. 明確確認後僅呼叫 Exchange `swap(tokenIn, tokenOut, amountIn, minAmountOut)`；不以 ERC-20 transfer 取代交換。
+8. approve 與 swap 分別追蹤 idle／validating／awaiting-wallet／submitted／confirming／success／failed／unknown。Hash 不代表成功；Receipt 成功且至少 1 個區塊、canonical block 與實際 from／to／calldata／value 核對通過，swap 還須有符合的 Swap 事件，才顯示成功。這不是 Ethereum finality。
+9. 交換成功重新查三資產餘額、allowance、庫存及 ETH；顯示實際收到量、原帳號／鏈／Exchange／Hash／Receipt 與 Etherscan。
 
-- `quote(tokenIn, tokenOut, amountIn)`：唯讀精確報價，同時驗證代幣、數量及單筆額度；不保證庫存、allowance 或未暫停。
-- `swap(tokenIn, tokenOut, amountIn, minAmountOut)`：驗證最低輸出與真實庫存後，原子執行 transferFrom／transfer，發出 Swap。
-- `reserveOf(token)`：實際 balanceOf；只接受三個白名單資產。
-- `withdrawReserve(token, amount, recipient)`：僅 owner、非零數量與收款地址；發出 ReserveWithdrawn。
+結果未知保留 Hash、不自動重送，阻止新授權與交換，允許手動查原交易。送出回應遺失而無 Hash 時，先查 MetaMask 活動，不提供繞過未知鎖定。帳號／鏈切換使未送摘要失效，已送交易仍保留原帳號與鏈追蹤；原帳號查詢不會覆蓋新帳號資料。紀錄只存本頁記憶體，重新整理前保存 Hash。
 
-Task 07C 預期依賴 Wallet 與 Token 公開介面。先核對帳號、Sepolia、正式合約地址、最新餘額、Gas、庫存與暫停狀態，讀 quote，再清楚顯示 spender、數量與摘要。標準 `approve(exchange, amountIn)` 預設只授權本次量；approve 與 swap 是兩筆獨立交易，approve 不會交換代幣。交換失敗時既有授權可能仍保留，應提供查詢／撤銷說明。切換帳號／網路、金額變更使摘要失效；receipt 前不得顯示成功，不自動重送。
+approve 成功但未交換／交換失敗時可能仍有授權。提供 allowance 查詢與 Sepolia Etherscan 支付代幣 `approve(exchange, 0)` 的手動撤銷說明，撤銷另需 Gas；本次不建立授權管理平台。
 
-## 驗證及後續
+## 模組邊界
 
-本機 EDR 測試涵蓋六方向、精度、額度邊界、授權／餘額／庫存／最低輸出不足、權限、暫停、提領、事件、資產守恆、輸出失敗回滾及重入。測試使用本機部署實例，不以真實 Sepolia 地址作替身。
+`src/config/exchange.ts` 集中固定地址、鏈、ABI、顯示比例及輸入上限，ABI 只保留學生方法、事件與相關 custom errors，追溯合約來源 PR #10 commit。前端不載入 artifact、creation bytecode、Solidity source 或 localhost 工具。
 
-Task 07B 待另行授權：部署／來源驗證、公開紀錄、人工庫存注入及鏈上核對。Task 07C 待另行授權：報價／最小授權／交換介面、receipt 與失敗流程、真實兩帳號驗收。本次未執行上述工作。
+`src/modules/exchange/` 包含入口／介面、簡單服務／交易 store 與型別。重用 Wallet 公開 API、Token 公開的 Task 06 Session／錯誤工具、既有代幣設定／ERC-20 ABI 及唯一 Sepolia Public Client，不新增 Provider 或 RPC 基礎架構。Token transfer 邏輯不變。
