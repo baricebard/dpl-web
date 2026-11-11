@@ -6,6 +6,9 @@ import { sepolia } from 'viem/chains'
 import type { WalletProvider } from '../../src/lib/web3/provider.ts'
 import { constructorArgs, DEPLOYER, INITIAL_SUPPLY, SEPOLIA_CHAIN_ID, TOKENS, type TokenId } from './config.ts'
 
+import { EXCHANGE_ARGS } from './exchange-config.ts'
+
+export type DeploymentId = TokenId | 'exchange'
 export interface DeploymentArtifact {
   abi: Abi; bytecode: Hex; deployedBytecode: Hex
   provenance: { commit: string; compiler: string; openZeppelin: string; [key: string]: unknown }
@@ -16,7 +19,7 @@ class DeploymentCheckError extends Error {}
 export interface RecordEntry {
   receiptStatus?: 'success' | 'reverted'
   status: Status; hash?: Hex; contractAddress?: string; blockNumber?: string; blockHash?: Hex
-  gasUsed?: string; effectiveGasPrice?: string; checkedAt?: string; message?: string
+  gasUsed?: string; effectiveGasPrice?: string; checkedAt?: string; deployedAt?: string; message?: string
   // Any attempt locks this token permanently, except explicit wallet rejection (4001).
   attempted?: boolean
   provenance?: DeploymentArtifact['provenance']; deploymentDataHash?: Hex
@@ -24,10 +27,10 @@ export interface RecordEntry {
 interface Prepared { data: Hex; gas: bigint; gasPrice: bigint; balance: bigint; revision: number; at: number }
 export const JOURNAL_KEY = `dpl-sepolia-deployment-v1:${DEPLOYER}`
 export interface Journal { read(): string | null; write(value: string): void }
-const empty = (): Record<TokenId, RecordEntry> => Object.fromEntries(TOKENS.map(t => [t.id, { status: '尚未部署' }])) as Record<TokenId, RecordEntry>
+const empty = (): Record<DeploymentId, RecordEntry> => Object.fromEntries([...TOKENS, { id: 'exchange' }].map(t => [t.id, { status: '尚未部署' }])) as Record<DeploymentId, RecordEntry>
 const json = (value: unknown) => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)
 const statuses: Status[] = ['尚未部署', '等待使用者確認', '等待 MetaMask 簽署', '已送出交易', '等待 Receipt', '成功', '失敗', '結果未知']
-function rejected(error: unknown): boolean {
+export function rejected(error: unknown): boolean {
   if (typeof error !== 'object' || !error) return false
   if ('code' in error && error.code === 4001) return true
   return 'cause' in error && rejected(error.cause)
@@ -39,11 +42,16 @@ export function deadline<T>(operation: Promise<T>, milliseconds = 12000): Promis
   })
 }
 
-export function createDeploymentTool(provider: WalletProvider, artifact: DeploymentArtifact, journal: Journal, receiptTimeout = 60000) {
+export function createDeploymentTool(provider: WalletProvider, artifact: DeploymentArtifact, journal: Journal, receiptTimeout = 60000, mode: 'tokens' | 'exchange' = 'tokens') {
   // This transport has no HTTP endpoint, signer, automatic send retry or fallback wallet.
   const client = createPublicClient({ chain: sepolia, transport: custom({ request: args => deadline(provider.request(args)) }, { retryCount: 0 }) })
+  const items = mode === 'exchange' ? [{ id: 'exchange' as const }] : TOKENS
+  const argsFor = (id: DeploymentId) => {
+    if (!items.some(t => t.id === id)) throw new DeploymentCheckError('部署種類不符')
+    return id === 'exchange' ? EXCHANGE_ARGS : constructorArgs(id)
+  }
   let records = empty()
-  let prepared: Partial<Record<TokenId, Prepared>> = {}
+  let prepared: Partial<Record<DeploymentId, Prepared>> = {}
   let revision = 0
   let busy = false
   let connected = false
@@ -54,27 +62,27 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
     snapshot = { records: { ...records }, busy, connected, balance, prepared: { ...prepared } }
     listeners.forEach(listener => listener())
   }
-  function readJournal() {
+  function readJournal(restoring = false) {
     const raw = journal.read()
     if (!raw) return empty()
     const stored = JSON.parse(raw)
-    if (stored.chainId !== SEPOLIA_CHAIN_ID || stored.deployer !== DEPLOYER || stored.version !== 1) throw new DeploymentCheckError('部署紀錄不相容；請先人工核對，勿清除後重送')
+    if (stored.chainId !== SEPOLIA_CHAIN_ID || stored.deployer !== DEPLOYER || stored.version !== 1 || (stored.mode ?? 'tokens') !== mode) throw new DeploymentCheckError('部署紀錄不相容；請先人工核對，勿清除後重送')
     const result = empty()
-    for (const { id } of TOKENS) {
+    for (const { id } of items) {
       const r = stored.records[id] as RecordEntry
       if (!r || !statuses.includes(r.status) || (r.hash && !isHash(r.hash)) || (r.contractAddress && !isAddress(r.contractAddress))) throw new DeploymentCheckError('部署紀錄損壞，停止部署')
       if ((r.attempted !== undefined && typeof r.attempted !== 'boolean') || (r.hash && !r.attempted) || (['等待 MetaMask 簽署', '已送出交易', '等待 Receipt', '成功', '結果未知'].includes(r.status) && !r.attempted)) throw new DeploymentCheckError('部署紀錄狀態不一致，停止部署')
       result[id] = { ...r }
-      if (r.attempted && !['成功', '失敗'].includes(r.status)) result[id].status = '結果未知'
+      if (r.attempted && ((restoring && mode === 'exchange' && r.status === '成功') || !['成功', '失敗'].includes(r.status))) result[id].status = '結果未知'
       if (!r.attempted) result[id].status = '尚未部署'
     }
     return result
   }
-  records = readJournal() // Fail closed if storage is corrupted/unavailable.
+  records = readJournal(true) // Fail closed if storage is corrupted/unavailable.
   function persist() {
-    journal.write(json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, records }))
+    journal.write(json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, mode, records }))
   }
-  function set(id: TokenId, patch: Partial<RecordEntry>) {
+  function set(id: DeploymentId, patch: Partial<RecordEntry>) {
     records = { ...records, [id]: { ...records[id], ...patch } }
     persist(); notify()
   }
@@ -99,8 +107,8 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
       connected = true
     } finally { busy = false; notify() }
   }
-  const dataFor = (id: TokenId) => encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: constructorArgs(id) })
-  async function estimate(id: TokenId) {
+  const dataFor = (id: DeploymentId) => encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: argsFor(id) })
+  async function estimate(id: DeploymentId) {
     await identity()
     const data = dataFor(id)
     const [estimate, gasPrice, eth] = await Promise.all([
@@ -112,7 +120,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
     balance = eth
     return { data, gas, gasPrice, balance: eth, revision, at: Date.now() }
   }
-  async function prepare(id: TokenId) {
+  async function prepare(id: DeploymentId) {
     if (busy) return
     records = readJournal()
     if (records[id].attempted) throw new DeploymentCheckError('此代幣已有部署嘗試；僅可查詢原交易')
@@ -128,7 +136,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
       throw error
     } finally { busy = false; notify() }
   }
-  async function verifyReceipt(id: TokenId, hash: Hex, receipt: TransactionReceipt) {
+  async function verifyReceipt(id: DeploymentId, hash: Hex, receipt: TransactionReceipt) {
     if (receipt.transactionHash.toLowerCase() !== hash.toLowerCase() || getAddress(receipt.from) !== DEPLOYER || receipt.to !== null) throw new DeploymentCheckError('Receipt 交易身分不符')
     const tx = await client.getTransaction({ hash })
     if (tx.to !== null || getAddress(tx.from) !== DEPLOYER || tx.value !== 0n || tx.input !== dataFor(id)) throw new DeploymentCheckError('鏈上交易參數不符')
@@ -136,6 +144,22 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
     if (receipt.status === 'reverted') { set(id, { ...details, status: '失敗', message: 'Receipt revert；不自動重送' }); return }
     if (!receipt.contractAddress || !isAddress(receipt.contractAddress)) throw new DeploymentCheckError('缺少 contractAddress')
     const address = getAddress(receipt.contractAddress)
+    if (id === 'exchange') {
+      // Latest-state checks only: no archive RPC, bytecode or metadata audit.
+      const code = await client.getCode({ address })
+      if (!code || code === '0x') throw new DeploymentCheckError('Exchange 地址沒有合約')
+      const read = (functionName: string, args?: readonly unknown[]) => client.readContract({ address, abi: artifact.abi, functionName, args })
+      const values = await Promise.all(['dplt', 'assetA', 'assetB', 'owner', 'paused'].map(name => read(name)))
+      if (values.slice(0, 4).some((v, i) => typeof v !== 'string' || getAddress(v) !== EXCHANGE_ARGS[i]) || values[4] !== false) throw new DeploymentCheckError('Exchange Token／owner／paused 未驗證')
+      const pairs = [[0, 1, 30n * 10n ** 18n], [0, 2, 20n * 10n ** 18n / 3n], [1, 0, 10n ** 18n / 30n], [1, 2, 2n * 10n ** 18n / 9n], [2, 0, 3n * 10n ** 18n / 20n], [2, 1, 9n * 10n ** 18n / 2n]] as const
+      for (const [i, j, expected] of pairs) {
+        if (await read('quote', [EXCHANGE_ARGS[i], EXCHANGE_ARGS[j], 10n ** 18n]) !== expected) throw new DeploymentCheckError('固定匯率未驗證')
+      }
+      await identity()
+      const block = await client.getBlock({ blockNumber: receipt.blockNumber })
+      set(id, { ...details, status: '成功', contractAddress: address, deployedAt: new Date(Number(block.timestamp) * 1000).toISOString(), message: '必要鏈上檢查通過；不代表最終性' })
+      return
+    }
     const code = await client.getCode({ address, blockNumber: receipt.blockNumber })
     if (!code || code.toLowerCase() !== artifact.deployedBytecode.toLowerCase()) throw new DeploymentCheckError('鏈上 runtime bytecode 不符')
     const read = (functionName: string, args?: readonly unknown[]) => client.readContract({ address, abi: artifact.abi, functionName, args, blockNumber: receipt.blockNumber })
@@ -147,17 +171,17 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
     await identity()
     set(id, { ...details, status: '成功', contractAddress: address, message: 'Receipt、code 與部署區塊狀態已核對；仍須後續確認及 Etherscan 驗證' })
   }
-  async function track(id: TokenId, hash: Hex) {
+  async function track(id: DeploymentId, hash: Hex) {
     try {
       await identity()
       set(id, { status: '等待 Receipt' })
       const receipt = await client.waitForTransactionReceipt({ hash, timeout: receiptTimeout, pollingInterval: 1000, retryCount: 0, checkReplacement: false })
       await verifyReceipt(id, hash, receipt)
     } catch {
-      set(id, { status: '結果未知', message: 'Receipt／鏈上核對未完成，請查詢原 Hash；禁止重新送出' })
+      set(id, { status: '結果未知', message: '未驗證：Receipt／鏈上核對未完成，請查詢原 Hash；禁止重新送出' })
     }
   }
-  async function confirm(id: TokenId) {
+  async function confirm(id: DeploymentId) {
     if (busy) return
     const p = prepared[id]
     records = readJournal() // Cross-tab guard; UI also holds a Web Lock.
@@ -173,7 +197,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
       await identity()
       if (version !== revision) throw new DeploymentCheckError('錢包已變更，請重新準備')
       const tx = { from: DEPLOYER, chainId: numberToHex(SEPOLIA_CHAIN_ID), data: dataFor(id), value: '0x0', gas: numberToHex(p.gas), gasPrice: numberToHex(p.gasPrice) }
-      if ('to' in tx || tx.value !== '0x0' || tx.data !== p.data || constructorArgs(id)[2] !== DEPLOYER) throw new DeploymentCheckError('Contract creation invariant failed')
+      if ('to' in tx || tx.value !== '0x0' || tx.data !== p.data || argsFor(id)[id === 'exchange' ? 3 : 2] !== DEPLOYER) throw new DeploymentCheckError('Contract creation invariant failed')
       // Durable write BEFORE send: crashes, reloads and uncertain send errors never permit a retry.
       set(id, { status: '等待 MetaMask 簽署', attempted: true, message: undefined, provenance: artifact.provenance, deploymentDataHash: keccak256(tx.data) })
       submitted = true
@@ -190,7 +214,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
       })
     } finally { busy = false; notify() }
   }
-  async function reconcile(id: TokenId, suppliedHash?: string) {
+  async function reconcile(id: DeploymentId, suppliedHash?: string) {
     if (busy) return
     records = readJournal()
     const hash = records[id].hash ?? suppliedHash
@@ -208,7 +232,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
   return {
     connect, prepare, confirm, reconcile, getSnapshot: () => snapshot,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
-    exportRecord: () => json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, initialHolder: DEPLOYER, tokens: TOKENS.map(t => ({ ...t, constructorArgs: constructorArgs(t.id), deploymentDataHash: keccak256(dataFor(t.id)) })), provenance: artifact.provenance, records }),
+    exportRecord: () => json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, initialHolder: DEPLOYER, mode, exchange: mode === 'exchange' ? { contract: 'DPLFixedExchange', constructorArgs: EXCHANGE_ARGS } : undefined, tokens: mode === 'tokens' ? TOKENS.map(t => ({ ...t, constructorArgs: constructorArgs(t.id), deploymentDataHash: keccak256(dataFor(t.id)) })) : undefined, provenance: artifact.provenance, records }),
     destroy() { provider.removeListener('accountsChanged', invalidate); provider.removeListener('chainChanged', invalidate); provider.removeListener('disconnect', invalidate); listeners.clear() },
   }
 }

@@ -25,7 +25,8 @@
     "deploy:test:ui": "playwright test --config playwright.deploy.config.ts",
     "verify:local": "vite --config tools/verify/vite.config.ts",
     "verify:test": "node --experimental-strip-types --test --test-concurrency=1 tests/verify/*.test.ts",
-    "verify:test:ui": "playwright test --config playwright.verify.config.ts"
+    "verify:test:ui": "playwright test --config playwright.verify.config.ts",
+    "contracts": "npm run contracts:compile && npm run contracts:typecheck && npm run contracts:test"
   },
   "dependencies": {
     "react": "19.3.1",

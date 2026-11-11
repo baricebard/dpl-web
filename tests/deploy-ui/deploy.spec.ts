@@ -74,7 +74,7 @@ test('cross-tab unknown attempt and Web Lock block duplicate sends', async ({ co
   }, `dpl-sepolia-deployment-v1:${DEPLOYER}`)
   await expect.poll(() => first.evaluate(() => 'releaseDeploymentLock' in window)).toBe(true)
   await second.getByRole('button', { name: '連接／重新核對 MetaMask 與餘額' }).click()
-  await expect(second.getByRole('alert')).toContainText('另一分頁正在處理部署')
+  await expect(second.getByRole('alert').first()).toContainText('另一分頁正在處理部署')
   await first.evaluate(() => (window as unknown as { releaseDeploymentLock(): void }).releaseDeploymentLock())
   await first.getByRole('button', { name: '連接／重新核對 MetaMask 與餘額' }).click()
   await first.getByRole('button', { name: '準備部署 DPLT', exact: true }).click()
@@ -83,9 +83,46 @@ test('cross-tab unknown attempt and Web Lock block duplicate sends', async ({ co
   await expect(first.getByRole('status').first()).toHaveText('結果未知')
   await second.getByRole('button', { name: '連接／重新核對 MetaMask 與餘額' }).click()
   await second.getByRole('button', { name: '準備部署 DPLT', exact: true }).click()
-  await expect(second.getByRole('alert')).toContainText('已有部署嘗試')
+  await expect(second.getByRole('alert').first()).toContainText('已有部署嘗試')
   expect(await second.evaluate(() => (window as unknown as { calls: string[] }).calls.filter(c => c === 'eth_sendTransaction'))).toHaveLength(0)
   await first.reload()
   await expect(first.getByRole('status').first()).toHaveText('結果未知')
   await expect(first.getByRole('button', { name: '準備部署 DPLT', exact: true })).toBeDisabled()
+})
+
+test('Exchange requires a separate explicit acknowledgment; loading and reload never send', async ({ page }) => {
+  await page.addInitScript(({ deployer }) => {
+    const calls: string[] = []
+    const provider = {
+      async request({ method }: { method: string }) {
+        calls.push(method)
+        if (method === 'eth_requestAccounts' || method === 'eth_accounts') return [deployer]
+        if (method === 'eth_chainId') return '0xaa36a7'
+        if (method === 'eth_getBalance') return '0xde0b6b3a7640000'
+        if (method === 'eth_estimateGas') return '0x1e8480'
+        if (method === 'eth_gasPrice') return '0x3b9aca00'
+        if (method === 'eth_sendTransaction') throw { code: 4001 }
+        throw new Error('Unexpected RPC ' + method)
+      }, on() {}, removeListener() {},
+    }
+    Object.assign(window, { calls })
+    window.addEventListener('eip6963:requestProvider', () => window.dispatchEvent(new CustomEvent('eip6963:announceProvider', { detail: { info: { rdns: 'io.metamask' }, provider } })))
+  }, { deployer: DEPLOYER })
+  await page.goto('/')
+  const panel = page.getByRole('region', { name: 'DPL Exchange 部署及庫存' })
+  await expect(panel.getByRole('heading', { name: 'DPL Exchange — DPLFixedExchange' })).toBeVisible()
+  const calls = () => page.evaluate(() => (window as unknown as { calls: string[] }).calls)
+  expect(await calls()).toEqual([])
+  for (const name of ['DPLT', 'DPLT-A', 'DPLT-B']) await expect(panel.getByRole('button', { name: `準備注入 ${name}`, exact: true })).toBeDisabled()
+  await panel.getByRole('button', { name: '連接／核對 Exchange 教師錢包' }).click()
+  await panel.getByRole('button', { name: '準備部署 DPL Exchange', exact: true }).click()
+  const confirm = panel.getByRole('button', { name: '確認部署 DPL Exchange（請求 MetaMask）' })
+  await expect(confirm).toBeDisabled()
+  expect((await calls()).filter(c => c === 'eth_sendTransaction')).toHaveLength(0)
+  await panel.getByRole('checkbox').check(); await confirm.click()
+  await expect(panel.getByRole('status')).toHaveText('失敗')
+  expect((await calls()).filter(c => c === 'eth_sendTransaction')).toHaveLength(1)
+  await page.reload()
+  await expect(panel.getByRole('status')).toHaveText('尚未部署')
+  expect(await calls()).toEqual([])
 })

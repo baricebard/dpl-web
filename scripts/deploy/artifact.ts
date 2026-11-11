@@ -10,14 +10,14 @@ const read = (path: string) => readFileSync(resolve(root, path), 'utf8')
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
 
 /** Read only Hardhat's existing output. Never compile in a browser or substitute bytecode. */
-export function loadDeploymentArtifact() {
-  const path = 'artifacts/contracts/TeachingToken.sol/TeachingToken.json'
+export function loadDeploymentArtifact(contract: 'TeachingToken' | 'DPLFixedExchange' = 'TeachingToken') {
+  const path = `artifacts/contracts/${contract}.sol/${contract}.json`
   if (!existsSync(resolve(root, path))) throw new Error('Run npm run contracts:compile first')
   const artifact = JSON.parse(read(path))
   const infoPath = `artifacts/build-info/${artifact.buildInfoId}.json`
   const info = JSON.parse(read(infoPath))
   const output = JSON.parse(read(`artifacts/build-info/${artifact.buildInfoId}.output.json`))
-  const compiled = output.output.contracts['project/contracts/TeachingToken.sol'].TeachingToken
+  const compiled = output.output.contracts[`project/contracts/${contract}.sol`][contract]
   const solc = require('solc') as { version(): string }
   const oz = JSON.parse(read('node_modules/@openzeppelin/contracts/package.json')).version
   if (info.solcVersion !== '0.8.38' || solc.version() !== '0.8.38+commit.1835d247.Emscripten.clang' || oz !== '5.6.1') {
