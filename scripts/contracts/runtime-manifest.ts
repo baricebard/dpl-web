@@ -24,7 +24,22 @@ assert.deepEqual(artifact.deployedLinkReferences, {})
 assert.deepEqual(artifact.immutableReferences, {})
 const build = json(`artifacts/build-info/${artifact.buildInfoId}.json`)
 assert.equal(build.id, artifact.buildInfoId, 'Artifact build-info reference mismatch')
-const input = build.input
+// Hardhat may merge unrelated roots into this compilation job. Preserve the
+// reviewed TeachingToken-only standard JSON input and its existing fingerprint.
+// This list is the complete import closure for the pinned TeachingToken/OZ source.
+const tokenSources = [
+  'npm/@openzeppelin/contracts@5.6.1/interfaces/draft-IERC6093.sol',
+  'npm/@openzeppelin/contracts@5.6.1/token/ERC20/ERC20.sol',
+  'npm/@openzeppelin/contracts@5.6.1/token/ERC20/extensions/IERC20Metadata.sol',
+  'npm/@openzeppelin/contracts@5.6.1/token/ERC20/IERC20.sol',
+  'npm/@openzeppelin/contracts@5.6.1/utils/Context.sol',
+  'project/contracts/TeachingToken.sol',
+]
+for (const path of tokenSources) assert.ok(build.input.sources[path], `Missing TeachingToken source unit: ${path}`)
+const input = {
+  ...build.input,
+  sources: Object.fromEntries(tokenSources.map(path => [path, build.input.sources[path]])),
+}
 assert.equal(build.solcLongVersion, '0.8.38+commit.1835d247')
 assert.equal(solc.version(), '0.8.38+commit.1835d247.Emscripten.clang')
 assert.equal(input.settings.evmVersion, 'cancun')
