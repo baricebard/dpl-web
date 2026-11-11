@@ -6,7 +6,7 @@ export default defineConfig({
     name: 'exclude-local-deployment-tool',
     generateBundle() {
       for (const id of this.getModuleIds()) {
-        if (/[/\\](tools[/\\](deploy|verify)|scripts[/\\](deploy|verify|contracts)|artifacts)[/\\]/.test(id) || id.includes('teaching-artifact') || id.includes('verification-artifact') || id.endsWith('.sol')) {
+        if (/[/\\](tools[/\\](deploy|verify)|scripts[/\\](deploy|verify|contracts)|artifacts)[/\\]/.test(id) || id.includes('exchange-artifact') || id.includes('teaching-artifact') || id.includes('verification-artifact') || id.endsWith('.sol')) {
           this.error(`Local deployment module cannot enter production: ${id}`)
         }
       }

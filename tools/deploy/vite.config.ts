@@ -19,8 +19,11 @@ export default defineConfig(({ command, mode }) => {
           next()
         })
       },
-      resolveId(id) { if (id === 'virtual:teaching-artifact') return '\0teaching-artifact' },
-      load(id) { if (id === '\0teaching-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact())}` },
+      resolveId(id) { if (id === 'virtual:teaching-artifact' || id === 'virtual:exchange-artifact') return '\0' + id.slice(8) },
+      load(id) {
+        if (id === '\0teaching-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact())}`
+        if (id === '\0exchange-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact('DPLFixedExchange'))}`
+      },
     }],
     server: { host: '127.0.0.1', port: 5174, strictPort: true, allowedHosts: ['localhost'], cors: false,
       fs: { allow: [resolve(import.meta.dirname, '../..')] },

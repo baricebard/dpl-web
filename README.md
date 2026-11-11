@@ -132,3 +132,7 @@ npm run contracts:test
 已建立 DPLFixedExchange、本機 EDR 測試、Ignition 模組及離線公開參數檢查。DPLT／DPLT-A／DPLT-B 模擬 USD／TWD／CNY，六方向採精確整數比例，單筆最多 10 DPLT 等值；教師庫存提供交換，沒有 AMM 定價曲線或 LP 份額。具備最小授權流程、minAmountOut、SafeERC20、重入防護、暫停及 owner 庫存提領。
 
 完整 [固定匯率規格、API、安全與部署準備](docs/12-fixed-rate-exchange.md)及[公開參數計畫](docs/12-fixed-exchange-plan.json)；`node scripts/contracts/prepare-exchange.ts` 只做離線檢查。Exchange 真實地址待填，沒有執行 Sepolia 部署、approve、轉帳或庫存注入。首頁 Exchange 仍未開放，Task 07B／07C 待另行授權。既有 TeachingToken、Token UI 與 runtime 指紋保持原範圍。
+
+## Task 07B：本機 Exchange 部署與庫存工具
+
+沿用 `npm run deploy:local`，開啟 `http://127.0.0.1:5174/` 的 DPL Exchange 區域，以教師 MetaMask 逐筆確認部署與三種庫存 transfer。支援必要鏈上檢查、持久嘗試鎖、原 Hash 唯讀復原、reserveOf 差額補充及公開 JSON 匯出。既有 ERC-20 已部署，不需重部署；工具不會包含於 Pages build。Windows 操作與未知結果處理見 [Exchange 部署指南](docs/13-exchange-deployment.md)。本次僅開發與本機測試，沒有 Sepolia 部署、庫存注入或 Task 07C。

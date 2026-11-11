@@ -132,8 +132,12 @@ Hardhat 在本環境以 `XDG_CONFIG_HOME=/tmp/dpl-config XDG_CACHE_HOME=/tmp/dpl
 
 新增測試涵蓋六方向精確報價與小數、六方向往返、每方向限額內正常交換與一單位超限、零輸入／輸出、所有身份與權限、庫存／餘額／allowance／minAmountOut 不足、資產與供給守恆、事件、pause／unpause、暫停提領、輸出失敗完整回滾、swap／withdraw 重入阻擋、真正 Ignition 模組本機部署、離線參數驗證。
 
+## Task 07B 本機工具
+
+已沿用 localhost + MetaMask 工具新增 Exchange 部署與逐筆庫存 transfer，操作見 [Windows 部署與庫存指南](13-exchange-deployment.md)。本次只開發與本機測試，不發送 Sepolia 交易。驗證僅需 chain ID、receipt、地址有 code、三 Token getter、owner、paused 與固定 quote；不加入完整 bytecode／metadata、Archive RPC 或 Etherscan 自動稽核。正式 Exchange 地址仍為 null，目標庫存 1,000／30,000／6,666 尚未注入，學生 Exchange UI 尚未開放。
+
 ## 後續任務與人工確認
 
-- Task 07B：另行授權部署；確認參數／管理者、遠端 chain guard、教師簽署流程、來源／產物追溯、Sepolia receipt 與 Etherscan 驗證，填正式地址；教師自行確認庫存 transfer，鏈上核對庫存及權限。
+- Task 07B 人工待辦：教師於 Windows localhost 核對參數／管理者與 Sepolia，親自在 MetaMask 核准部署及每筆庫存 transfer，保存公開 JSON 並查詢 reserveOf。此工具開發沒有執行上述真實操作。
 - Task 07C：另行授權前端；報價、精確最小授權、swap 摘要／模擬／receipt、庫存提示、錯網路／切換帳號／拒簽／未知結果、剩餘 allowance 撤銷說明，以及兩帳號人工驗收。
 - 本次到 Task 07A 停止，未啟用 Exchange UI、未部署、未做 Sepolia approve 或轉帳。
