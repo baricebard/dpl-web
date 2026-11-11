@@ -77,3 +77,26 @@ it('runtime manifest still rejects compiler dependency changes in package.json',
   writeFileSync(path, JSON.stringify(pkg))
   assert.throws(() => check(directory), /package.json devDependencies differs from pinned toolchain/)
 }))
+
+it('runtime manifest ignores unrelated compilation roots while preserving the pinned token fingerprint', () => fixture(directory => {
+  const artifact = JSON.parse(readFileSync(join(directory, artifactPath), 'utf8'))
+  const path = join(directory, `artifacts/build-info/${artifact.buildInfoId}.json`)
+  const build = JSON.parse(readFileSync(path, 'utf8'))
+  build.input.sources['project/contracts/Unrelated.sol'] = { content: 'pragma solidity 0.8.38; contract Unrelated {}' }
+  writeFileSync(path, JSON.stringify(build))
+  assert.match(check(directory), /Runtime manifest verified/)
+}))
+
+it('runtime manifest still rejects missing or modified TeachingToken dependencies in a merged build', () => fixture(directory => {
+  const artifact = JSON.parse(readFileSync(join(directory, artifactPath), 'utf8'))
+  const path = join(directory, `artifacts/build-info/${artifact.buildInfoId}.json`)
+  const build = JSON.parse(readFileSync(path, 'utf8'))
+  const source = 'npm/@openzeppelin/contracts@5.6.1/token/ERC20/ERC20.sol'
+  const original = build.input.sources[source]
+  delete build.input.sources[source]
+  writeFileSync(path, JSON.stringify(build))
+  assert.throws(() => check(directory), /Missing TeachingToken source unit/)
+  build.input.sources[source] = { content: original.content + '\n// changed dependency\n' }
+  writeFileSync(path, JSON.stringify(build))
+  assert.throws(() => check(directory), /Source content mismatch/)
+}))

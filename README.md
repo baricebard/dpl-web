@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，本次未執行真實轉帳。本次修正將學生餘額查詢與 runtime 診斷解耦：確認固定地址及 Sepolia 後直接讀 balanceOf；轉帳保留帳號／鏈、最新餘額、Gas、模擬與明確確認，完整 runtime／metadata 比對只供開發診斷。此修正尚未合併／發布，真實轉帳仍待人工驗收。Exchange、Liquidity、Portfolio 仍未開放。
+Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，本次未執行真實轉帳。本次修正將學生餘額查詢與 runtime 診斷解耦：確認固定地址及 Sepolia 後直接讀 balanceOf；轉帳保留帳號／鏈、最新餘額、Gas、模擬與明確確認，完整 runtime／metadata 比對只供開發診斷。此修正已透過 PR #9 合併 main，真實轉帳仍待人工驗收。Exchange、Liquidity、Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -126,3 +126,9 @@ npm run contracts:test
 ## Task 05C-3 本機唯讀驗證工具
 
 `npm run verify:local` 開啟 `http://127.0.0.1:5175/`，只讀公開 RPC、不連接錢包、不發交易；[指南](docs/10-local-readonly-verifier.md)、[使用者部署紀錄](docs/09-sepolia-deployment-record.json)及[歷史受阻報告](docs/09-sepolia-deployment-verification.md)保留各自證據分級。學生轉帳與獨立 runtime 診斷不會取消本工具的五種唯讀方法限制。兩套工具的 build／preview 仍拒絕，正式 Pages 模組圖與 dist 檢查禁止本機工具、產物或完整 bytecode 流入。
+
+## Task 07A：固定匯率交換合約
+
+已建立 DPLFixedExchange、本機 EDR 測試、Ignition 模組及離線公開參數檢查。DPLT／DPLT-A／DPLT-B 模擬 USD／TWD／CNY，六方向採精確整數比例，單筆最多 10 DPLT 等值；教師庫存提供交換，沒有 AMM 定價曲線或 LP 份額。具備最小授權流程、minAmountOut、SafeERC20、重入防護、暫停及 owner 庫存提領。
+
+完整 [固定匯率規格、API、安全與部署準備](docs/12-fixed-rate-exchange.md)及[公開參數計畫](docs/12-fixed-exchange-plan.json)；`node scripts/contracts/prepare-exchange.ts` 只做離線檢查。Exchange 真實地址待填，沒有執行 Sepolia 部署、approve、轉帳或庫存注入。首頁 Exchange 仍未開放，Task 07B／07C 待另行授權。既有 TeachingToken、Token UI 與 runtime 指紋保持原範圍。
