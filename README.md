@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Task 08C 現已加入 Liquidity 的 AMM Swap／Add／Remove 與 LP 權益；Portfolio 仍未開放。
+Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Task 08C 現已加入 Liquidity 的 AMM Swap／Add／Remove 與 LP 權益；Task 09 已開放唯讀 Portfolio 投資組合。
 
 ## 本機開發與驗證
 
@@ -168,3 +168,9 @@ npm run contracts:test
 `npm ci` → `npm run contracts:compile` → `npm run deploy:local`，開啟 `http://127.0.0.1:5174/` 上方 AMM 區域。重用 MetaMask、Journal 與 Web Locks，逐筆部署、精確 approve 100 DPLT／3000 DPLT-A，再獨立確認首次 addLiquidity；檢查實際池餘額為零，阻擋捐贈及重複初始化，支援原 Hash Reconcile 與公開 JSON。既有 ERC-20／Exchange 工具收合，避免誤操作。
 
 完整繁中 Windows 指南、精確 LP 計算、未知結果與人工待辦見 [AMM 部署與首次流動性](docs/16-amm-deployment.md)。只完成工具與本機測試；沒有真實 Sepolia 交易，Pool 地址仍為 null。部署工具不包含於 Pages，學生 Liquidity 入口與 Task 08C 尚未開放。
+
+## Portfolio（Task 09）
+
+首頁 Portfolio 開啟單一 Dashboard，彙整 DPLT／A／B、DPL-LP 底層權益、教學總估值、五類配置、AMM 現貨價比較及獨立 Sepolia ETH。A-08 採 DPLT 教學單位：DPLT = 1、A = 1/30、B = 3/20 DPLT，非真實貨幣價值。LP 按持有量／總供給拆解兩項儲備後估值，不再加 LP 面額。
+
+只讀既有 Public Client、指定同一區塊編號；手動更新、30 秒冷卻、無背景輪詢。失敗不補零、依賴缺失的總估值不可計算，切帳號／鏈立即清空。完整公式、操作、更新限制、Mock 與人工待辦見 [Portfolio 規格](docs/modules/portfolio.md)及 [Task 09 指南](docs/18-portfolio-dashboard.md)。沒有歷史績效、損益、真實行情、交易或自動管理，不包含合約部署及 Layer 2。

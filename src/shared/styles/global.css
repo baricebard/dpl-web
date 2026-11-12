@@ -180,3 +180,15 @@ h1 > span { display: block; }
 .amm-next, .amm-authorized { color: #18523c; font-weight: 700; }
 .amm-workflow h4 { margin-bottom: 12px; }
 .amm-result dd { margin-left: 0; margin-bottom: 12px; }
+
+.portfolio-panel { margin-block: 3rem; padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--border, #d9ded9); border-radius: 16px; background: #fff; scroll-margin-top: 2rem; overflow-wrap: anywhere; }
+.portfolio-total { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; color: #27634c; }
+.portfolio-assets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; }
+.portfolio-asset { border: 1px solid #d9ded9; border-radius: 10px; padding: 1rem; }
+.portfolio-panel h3 { margin-top: 2rem; }
+.portfolio-panel button { padding: .7rem 1rem; cursor: pointer; }
+.portfolio-panel button:disabled { cursor: default; opacity: .6; }
+.portfolio-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; }
+.portfolio-allocation { margin-block: .8rem; }
+.portfolio-track { height: .6rem; background: #e8ede9; border-radius: 1rem; overflow: hidden; margin-top: .3rem; }
+.portfolio-track > div { height: 100%; background: #39775b; }
