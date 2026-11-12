@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Liquidity、Portfolio 仍未開放。
+Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Task 08C 現已加入 Liquidity 的 AMM Swap／Add／Remove 與 LP 權益；Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -84,6 +84,16 @@ Exchange：Ethereum Sepolia（11155111）`0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B00195
 報價／摘要 2 分鐘過期，輸入／帳號／網路變更使摘要失效；送出前重查餘額、allowance、reserveOf、paused、quote、模擬與 Gas。Hash 不等於成功，未知結果保留 Hash、允許手動查原交易並阻止重送。查詢失敗不補零。完整操作、授權撤銷教學、測試與真實 Sepolia 人工驗收見 [Task 07C 指南](docs/14-exchange-frontend.md)及 [Exchange 規格](docs/modules/exchange.md)。
 
 本機驗證：lint、typecheck、build（含正式產物隔離）通過；Exchange、Wallet、Token、Faucet、首頁桌面／手機 Mock 測試 **292 passing、0 failing**，其中 Exchange 132 項（58 個服務案例及 8 個 UI 案例，各跑桌面／手機兩設定）。沒有真實 Sepolia approve／swap；人工驗收仍待執行。
+
+## DPL AMM／Liquidity（Task 08C）
+
+首頁 Liquidity → AMM Swap／Add Liquidity／Remove Liquidity。Pool 為使用者提供的 Sepolia `0x58841DBfDBa420B52fedbEe07AC9414E74E382F2`，支援 DPLT／DPLT-A；即時儲備、LP、餘額與正式 quoteSwap 報價都讀自 RPC，不將 100／3000 初始化紀錄當作即時值。
+
+Swap 提供 0.3% Fee、Price Impact、0.5% 預設滑價（可自訂 0～5%）、最低量、交易前後價格與固定匯率合約 quote 比較；不自動選路。Add 依 Solidity 比例及整數捨入估算兩項使用量與 LP，兩筆精確 approve 與 add 各自確認；Remove 按個人 LP 快捷百分比取回資產，不需 LP approve。LP 份額 = 個人 LP／總供給；最低量以 bigint 向下取整，實際執行由 Receipt／事件核對。
+
+未送出摘要隨輸入／帳號／網路變更失效；未知結果保留原 Hash 並禁止重送，可手動查原交易，缺 Hash 可由 MetaMask 補回並核對。Gas／模擬與工作階段在確認前再次檢查。手動更新間隔 30 秒，無背景餘額輪詢；記憶體交易紀錄重載前請保存 Hash。
+
+本機 lint／typecheck／build／產物隔離通過；AMM Mock **124 passing**，既有功能回歸 **292 passing**。完整公式、操作、測試、無常損失教材與**尚待執行**的兩帳號 Sepolia 人工驗收見 [Task 08C 指南](docs/17-amm-frontend.md)與 [Liquidity 規格](docs/modules/liquidity.md)。本次只有前端與 Mock 測試，沒有合約修改／部署、真實 approve／swap／流動性操作或網站發布。
 
 ## GitHub Pages
 

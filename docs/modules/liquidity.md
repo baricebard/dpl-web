@@ -1,23 +1,20 @@
 # Liquidity：流動性池與 AMM
 
-## 責任與階段
+Task 08A／08B 已合併；Task 08C 提供學生 AMM Swap、Add Liquidity、Remove Liquidity 與 LP 權益介面。此為 MVP 之外的後續教學模組；真實 Sepolia 兩帳號人工驗收與網站發布仍待完成。
 
-Task 08A 已建立 DPLAMMPool Solidity 合約、EDR 本機測試與 Ignition 模組。未部署 Sepolia，正式 Pool 地址為 `null`；Task 08B 已提供 [localhost 教師部署與首次流動性工具](../16-amm-deployment.md)，Task 08C 學生 UI 尚未實作，Liquidity 入口保持未開放。本模組不屬於原 MVP，既有 DPL Exchange 固定匯率功能保持獨立。
+A-07 已決定單一 DPLT／DPLT-A 常數乘積池、18 decimals ERC-20 DPL-LP、0.3% 輸入費用全部留池、永久鎖定 1000 LP 最小單位。無管理者任意提領、獎勵挖礦或收益保證；合約規則見 [Task 08A](../15-amm-pool.md)。
 
-## A-07 已決定機制
+使用者提供 Pool `0x58841DBfDBa420B52fedbEe07AC9414E74E382F2`（Sepolia 11155111）。初始化紀錄不當作即時儲備；學生頁不提供首次初始化，也不部署合約。唯一前端設定為 [amm.ts](../../src/config/amm.ts)，最小 ABI 摘自合約，查詢核對資產／initialProvider／LP 精度。
 
-單一 DPLT／DPLT-A 常數乘積池 `x * y = k`，兩種資產 18 decimals。預計教師初始注入 100 DPLT + 3,000 DPLT-A；初次提供者實際設定價格，合約不保證 1:30。Constructor 增加非零 immutable initialProvider，預定教師為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`；totalSupply 為零時只有此地址能在鏈上執行首次 addLiquidity，成功後所有帳號皆可注資，失敗不解鎖。詳見 [Task 08A 初始化政策](../15-amm-pool.md#初始化與搶先風險)。此一次性限制不賦予 owner、任意提領或正常 swap 管理權。
+## 操作與權益
 
-輸入費率 0.3%，全留池，無平台分潤。Pool 本身為 ERC-20 DPL-LP，18 decimals；首次 `floor(sqrt(x*y))` 扣 1000 最小 LP 單位永久鎖定，其餘給提供者。後續依實際儲備比例提供，僅扣實際用量，按兩邊比例較小值向下鑄造 LP；移除只 burn 呼叫者自己的 LP，按總供給／實際資產份額向下取整。無 Factory、Router、Oracle、挖礦、治理、Proxy、管理員提款或任意公開 mint。
+- AMM Swap 兩方向正式報價來自 quoteSwap，精確本次 approve 與 swap 分別確認；提供滑價、最低量、價格、Fee、Price Impact、Gas 與獨立 Fixed Exchange 合約報價比較，不自動選路。
+- Add 以目前儲備比例計算另一資產 desired 上限，再完全依 Solidity 整數分支估計實際量與 LP。兩種代幣各自授權，addLiquidity 才提供流動性；不以 transfer 代替。
+- Remove 按個人 LP 的 25%、50%、75%、100% 或輸入數量，估計 `floor(liquidity * reserve / supply)`；不需 LP approve，只銷毀自己的 LP，不移除永久鎖定份額。
+- LP 權益為持有量／totalSupply，包含費用與捐贈。交換改變池比例，移除數量可不同於注入；無常損失是相較持有原資產的價值差異，不因尚未提領而不存在，費用不保證彌補。
 
-初始化前直接轉入不能建立價格或取得 LP；成功首次注入後，既有捐贈歸初始 LP 與鎖定份額。初始化後儲備直接讀兩種 balanceOf，費用與不可退回的直接捐贈立即反映在報價及既有 LP 權益，新注資不能使用過期儲備。transfer 不等於 addLiquidity。兩儲備上限為 `2^112-1` 個最小單位，遠大於既有教學資產總供給。
+## 安全、測試與待辦
 
-## 介面與學習流程
+重用 Wallet TransactionSession、Public Client、Token ABI 與既有交易模式。金額使用 bigint，報價／摘要 2 分鐘有效，deadline 約 10 分鐘；送出前重新讀取、模擬、估算 Gas 與核對工作階段。Receipt success、至少一個區塊、canonical block／實際交易／事件核對後更新權益；未知交易保留原身份與 Hash，禁止重送，無 Hash 可從 MetaMask 補回並核對。查詢失敗不補零。
 
-`getReserves()`、`quoteSwap(tokenIn, amountIn)` 提供儲備與雙向報價；ERC-20 totalSupply／balanceOf 提供 LP 份額資料。swap 支援 minAmountOut／deadline；addLiquidity 支援兩資產最低用量／minLiquidity／deadline；removeLiquidity 支援兩最低收到量／deadline。三操作皆 nonReentrant、SafeERC20、失敗完整回滾。
-
-未初始化顯示「尚未提供初始流動性」，不能顯示假價格。後續 UI 觀察交易前後儲備／即時價格、執行均價、Price Impact、費用、LP 份額與資產權益；區分 Price Impact 與使用者設定的 Slippage Tolerance，並解釋無常損失。教學代幣無真實金融價值，LP 收費不保證獲利。
-
-## 本機驗證與未完成項目
-
-EDR 測試涵蓋首次／後續注資、比例／精度／捨入、永久鎖定、LP 移轉與移除、雙向報價／交易、費用與 k、輸入／期限／最低量保護、上限、回滾／重入、直接捐贈及混合多 LP 操作。完整 API、公式、風險、驗證結果及 Task 08B／08C 人工待辦見 [DPL AMM 規格](../15-amm-pool.md)。本機通過不代表已部署或完成 MetaMask／Sepolia 驗收。
+Mock 覆蓋報價、精度、比例、LP、授權／交易、拒簽、逾時恢復、切換、防重複及桌面／320px 手機。詳細公式、狀態、限制與兩帳號人工驗收見 [Task 08C 操作指南](../17-amm-frontend.md)。固定匯率 Exchange 維持獨立；Portfolio 尚未開放。

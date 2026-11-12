@@ -1,5 +1,7 @@
 # Task 08A：DPL AMM 常數乘積池
 
+> 後續狀態：本文件保留當次任務紀錄。Task 08C 已依使用者提供的 Sepolia Pool 地址整合學生前端；最新操作、驗證與人工待辦見 [AMM 前端指南](17-amm-frontend.md)。下文「未部署／未開放」為當時狀態。
+
 ## 狀態與 A-07 決策
 
 本次由已合併 PR #12 的 main 建立 Solidity 合約、EDR 本機測試及 Ignition 準備，沒有 Sepolia 部署、教師／學生真實資產移動或前端 UI。Pool 正式地址為 **null**。Task 08B 部署工具與 Task 08C 學生介面尚未完成，Liquidity 入口保持未開放。
