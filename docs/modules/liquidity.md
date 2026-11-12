@@ -17,4 +17,4 @@ A-07 已決定單一 DPLT／DPLT-A 常數乘積池、18 decimals ERC-20 DPL-LP�
 
 重用 Wallet TransactionSession、Public Client、Token ABI 與既有交易模式。金額使用 bigint，報價／摘要 2 分鐘有效，deadline 約 10 分鐘；送出前重新讀取、模擬、估算 Gas 與核對工作階段。Receipt success、至少一個區塊、canonical block／實際交易／事件核對後更新權益；未知交易保留原身份與 Hash，禁止重送，無 Hash 可從 MetaMask 補回並核對。查詢失敗不補零。
 
-Mock 覆蓋報價、精度、比例、LP、授權／交易、拒簽、逾時恢復、切換、防重複及桌面／320px 手機。詳細公式、狀態、限制與兩帳號人工驗收見 [Task 08C 操作指南](../17-amm-frontend.md)。固定匯率 Exchange 維持獨立；Portfolio 尚未開放。
+Mock 覆蓋報價、精度、比例、LP、授權／交易、拒簽、逾時恢復、切換、防重複及桌面／320px 手機。詳細公式、狀態、限制與兩帳號人工驗收見 [Task 08C 操作指南](../17-amm-frontend.md)。固定匯率 Exchange 維持獨立；Portfolio 已於 Task 09 開放唯讀資產／LP 估值，見 [Portfolio 規格](portfolio.md)。

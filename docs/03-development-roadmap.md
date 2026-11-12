@@ -9,7 +9,7 @@
 | 2：教學代幣與 MVP | 先決定 A-03、A-04、A-05；Solidity／Hardhat 本機測試後，另行執行 Sepolia 部署工作；整合 Token | 三種地址與 ABI 有紀錄，兩帳號轉帳與全部 [MVP 驗收](02-mvp-scope.md)通過，完成 30 人演練後再發布 |
 | 3：DPL Exchange | Task 07A 已決定 A-06：六方向不可變固定匯率、教師庫存、10 DPLT 等值單筆額度；完成合約及本機測試 | 07A／07B 已合併；使用者提供部署地址，07C 前端與 Mock 測試完成、首頁入口開放；真實人工驗收與發布仍待辦 |
 | 4：Liquidity／AMM | Task 08A 已決定 A-07：單池 DPLT／A 常數乘積、0.3% 留池、ERC-20 LP、無管理權限；完成合約與本機測試 | 08A／08B 已合併，08C 學生 AMM Swap／LP 操作與 Mock 已實作；使用者提供 Sepolia 地址，真實兩帳號人工驗收與發布待辦，見 [08C](17-amm-frontend.md) |
-| 5：Portfolio | 決定 A-08；依估值範圍整合 Token、Exchange／Liquidity 資料 | 單位與價格來源可解釋，缺價或過期不產生誤導績效 |
+| 5：Portfolio | Task 09 已決定 A-08：DPLT 固定教學參考價、LP 底層拆解、不重複計值 | 唯讀 Dashboard 與 Mock 驗證已實作；真實 RPC／MetaMask 人工驗收待辦，見 [Task 09](18-portfolio-dashboard.md) |
 | 6：Layer 2 與課程擴充 | 決定 A-09；教材可獨立進行，鏈上實驗需另訂網路與資源規格 | 明確區分概念、模擬及實際交易；課程流程經試教 |
 
 ## 推進規則
@@ -49,3 +49,7 @@ Task 07A PR #10、Task 07B PR #11 已合併，07C 由最新 main 開發，依使
 ## Task 08C 完成範圍
 
 由 main `753c7c4` 開發學生 AMM Swap／Add／Remove、精確授權、LP 權益、Fee／Price Impact／Slippage 與 Fixed quote 比較，附 Mock 與手機版面驗證。[人工驗收指南](17-amm-frontend.md)保留真實兩帳號／MetaMask／Sepolia 待辦；本次沒有合約修改、部署、真實交易、合併或發布，也不開始 Portfolio。
+
+## Task 09 完成範圍
+
+Portfolio 開放當前資產、LP 權益、固定教學估值、五類配置、AMM 儲備比例比較及獨立 ETH。A-08 的價格與捨入、資料一致性限制、刷新／錯誤及後續績效分析範圍見 [Portfolio 規格](modules/portfolio.md)。沒有合約修改、部署、簽署、學生資產操作、歷史績效或 Layer 2；真實帳號及課堂 RPC 人工驗收仍待完成。

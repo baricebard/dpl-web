@@ -23,7 +23,7 @@ GitHub Pages 僅供應靜態內容，無法保密前端設定、執行伺服器�
 | Token | 三種代幣資料、餘額與 ERC-20 轉帳 |
 | Exchange | Task 07C：固定匯率 quote、精確 approve、swap、庫存與 Receipt；依賴 Wallet、Token 公開介面 |
 | Liquidity | Task 08C：AMM 合約報價、獨立授權／Swap、加減流動性、LP 權益與教學；重用 Wallet／Token 公開介面 |
-| Portfolio | 未來資產彙整與教學估值；不負責簽署交易 |
+| Portfolio | Task 09：唯讀資產／LP 彙整、固定 DPLT 教學估值、配置及 AMM 現價比較；不簽署交易 |
 | Layer 2 | 未來概念教材；獨立於 Sepolia MVP 交易流程 |
 | 共用基礎層 | 型別、公開鏈設定、RPC／錢包適配、金額轉換、交易狀態 |
 
@@ -65,7 +65,7 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 | A-05 | Task 06 已定：idle／validating／awaiting-wallet／submitted／confirming／success／failed／unknown；receipt success、至少 1 個區塊及 canonical block／實際 calldata 核對；替換／取消需核對實際交易；重組／逾時結果未知不重送；原鏈／帳號／Hash 記憶體保留，無持久保存 | [Token 詳細策略](modules/token.md) |
 | A-06 | Task 07A 已定：三資產六方向不可變固定有理數匯率、無費用、教師庫存、10 DPLT 等值單筆限制、minAmountOut、最小必要 approve；owner 暫停／提領；非 AMM | [Exchange](modules/exchange.md)；合約／本機工具已合併，07C 前端與 Mock 已完成；真實人工驗收待辦 |
 | A-07 | Task 08A 已定：DPLT／A 單池常數乘積、0.3% 留池、ERC-20 LP／永久鎖定、實際餘額及捐贈政策、無管理權限；immutable initialProvider 限定教師首次初始化，成功後公開注資 | [Liquidity](modules/liquidity.md)；[合約與本機驗證](15-amm-pool.md)；08B 已合併，08C 學生前端與 Mock 已實作，真實人工驗收見 [08C](17-amm-frontend.md) |
-| A-08 | Portfolio 計價單位、價格來源、歷史資料與績效方法 | Portfolio 階段前；Portfolio |
+| A-08 | Task 09 已決定 DPLT 固定教學參考價、LP 底層拆解、不重複計值；本版僅當前持倉，不含歷史績效 | 見 [Portfolio](modules/portfolio.md) |
 | A-09 | Layer 2 教材深度、是否實作及對應測試網 | Layer 2 階段前；Layer 2 |
 | A-10 | Pages 發布來源／流程、依賴版本、合約地址與部署紀錄格式 | 相應工具鏈或發布前；本文件 |
 
@@ -95,4 +95,4 @@ Task 07A／07B 已合併；使用者提供 Exchange 地址 `0xd0bc9E38a7fA59C9ee
 
 `src/modules/liquidity/` 組裝 AMM Swap／Add／Remove，`src/config/amm.ts` 記錄使用者提供 Sepolia Pool 與合約最小 ABI。所有快照按單一區塊讀取，quoteSwap 使用相同區塊；固定匯率比較讀其獨立 quote／庫存，失敗不阻擋 AMM。估算與最低量採 bigint；Receipt 事件提供實際執行結果。
 
-單一交易 store 保留各次操作、原帳號／鏈／目標／calldata／Hash；未知時鎖住新操作，手動核對原交易，無 Hash 時可從 MetaMask 補回。成功需一個區塊及原交易／事件／canonical block 核對，重讀 LP／供給／儲備／餘額／allowance；未送出摘要受 Session 版本保護。詳細公式、RPC 策略、記憶體保存限制與人工待辦見 [08C](17-amm-frontend.md)。本次不修改合約或新增後端；Portfolio 保持未開放。
+單一交易 store 保留各次操作、原帳號／鏈／目標／calldata／Hash；未知時鎖住新操作，手動核對原交易，無 Hash 時可從 MetaMask 補回。成功需一個區塊及原交易／事件／canonical block 核對，重讀 LP／供給／儲備／餘額／allowance；未送出摘要受 Session 版本保護。詳細公式、RPC 策略、記憶體保存限制與人工待辦見 [08C](17-amm-frontend.md)。Task 08C 不修改合約或新增後端；Portfolio 已於後續 Task 09 開放，見 [Portfolio](modules/portfolio.md)。
