@@ -44,6 +44,9 @@ for (const operation of ['swap', 'add', 'remove'] as const) test(`${operation} �
   const decoded = decodeFunctionData({ abi: ammAbi, data: f.sends[0].data })
   expect(decoded.functionName).toBe(operation === 'add' ? 'addLiquidity' : operation === 'remove' ? 'removeLiquidity' : 'swap')
   expect(decoded.args?.at(-1)).toBe(s.deadline)
+  expect(state.transaction?.before?.balances[0]).toBe(100n * unit)
+  expect(state.transaction?.before?.lp).toBe(50n * unit)
+  expect(state.transaction?.after).toEqual(state.snapshot)
   if (operation === 'add') { expect(state.snapshot?.lp).toBe(55n * unit); expect(state.snapshot?.supply).toBe(505n * unit); expect(share(state.snapshot!.lp, state.snapshot!.supply)).toBe('10.891089') }
   if (operation === 'remove') { expect(state.snapshot?.lp).toBe(49n * unit); expect(state.snapshot?.supply).toBe(499n * unit) }
   if (operation === 'swap') expect(state.snapshot?.balances[0]).toBe(99n * unit)
@@ -209,4 +212,57 @@ test('授權 Receipt 成功但 allowance 不足仍阻擋 Swap，更新 RPC 失�
   expect(f.store.getSnapshot().status).toBe('failed'); expect(f.sends).toHaveLength(1)
   f.c.rpcFailure = true; await f.store.refresh(f.session, true)
   expect(f.store.getSnapshot().snapshot).toBeUndefined()
+})
+
+test('成功後重新查詢失敗不能沿用上一份交易後快照', async () => {
+  const f = ammFixture(); f.c.allowances = [100n * unit, 3000n * unit]
+  await f.store.prepare('swap', f.session, swapInput)
+  await f.store.confirm(f.store.getSnapshot().summary!)
+  expect(f.store.getSnapshot().transaction?.after?.balances[0]).toBe(99n * unit)
+  f.c.rpcFailure = true
+  await f.store.track()
+  expect(f.store.getSnapshot().status).toBe('success')
+  expect(f.store.getSnapshot().transaction?.actual).toBeDefined()
+  expect(f.store.getSnapshot().transaction?.after).toBeUndefined()
+  expect(f.store.getSnapshot().transaction?.before?.balances[0]).toBe(100n * unit)
+})
+test('切換操作封存已完成紀錄，不沿用結果；未知交易繼續鎖定', async () => {
+  const f = ammFixture(); f.c.allowances = [100n * unit, 3000n * unit]
+  await f.store.prepare('swap', f.session, swapInput)
+  await f.store.confirm(f.store.getSnapshot().summary!)
+  f.store.invalidate()
+  expect(f.store.getSnapshot().status).toBe('idle')
+  expect(f.store.getSnapshot().transaction).toBeUndefined()
+  expect(f.store.getSnapshot().history[0].originalHash).toBe(hash)
+  f.resetReceipt(); f.c.waitTimeout = true
+  await f.store.prepare('add', f.session, { ...swapInput, operation: 'add' })
+  await f.store.confirm(f.store.getSnapshot().summary!)
+  f.store.invalidate(true)
+  expect(f.store.getSnapshot().status).toBe('unknown')
+  expect(f.store.getSnapshot().transaction?.originalHash).toBe(hash)
+  await f.store.prepare('remove', f.session, { ...swapInput, operation: 'remove' })
+  expect(f.store.getSnapshot().summary).toBeUndefined()
+  expect(f.sends).toHaveLength(2)
+})
+
+test('前快照取確認送出前的新餘額，不沿用準備摘要的舊餘額', async () => {
+  const f = ammFixture(); f.c.allowances = [100n * unit, 3000n * unit]
+  await f.store.prepare('swap', f.session, swapInput)
+  const summary = f.store.getSnapshot().summary!
+  f.c.balances[0] = 90n * unit
+  await f.store.confirm(summary)
+  expect(f.store.getSnapshot().transaction?.before?.balances[0]).toBe(90n * unit)
+  expect(f.store.getSnapshot().transaction?.after?.balances[0]).toBe(89n * unit)
+})
+test('交易後 RPC 區塊早於 Receipt 時不顯示前後比較', async () => {
+  const f = ammFixture(); f.c.allowances = [100n * unit, 3000n * unit]
+  const receipt = f.client.getTransactionReceipt
+  let mined = false, blocksAfterReceipt = 0
+  f.client.getTransactionReceipt = async () => { const result = await receipt(); mined = true; return result }
+  f.client.getBlockNumber = async () => mined && blocksAfterReceipt++ > 0 ? 99n : 100n
+  await f.store.prepare('swap', f.session, swapInput)
+  await f.store.confirm(f.store.getSnapshot().summary!)
+  expect(f.store.getSnapshot().status).toBe('success')
+  expect(f.store.getSnapshot().transaction?.actual).toBeDefined()
+  expect(f.store.getSnapshot().transaction?.after).toBeUndefined()
 })

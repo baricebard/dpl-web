@@ -38,13 +38,16 @@ export function createAmmStore(client: TokenClient = sepoliaPublicClient) {
   const listeners = new Set<() => void>()
   const update = (patch: Partial<AmmState>) => { state = { ...state, ...patch }; listeners.forEach(listener => listener()) }
   const unresolved = () => ['unknown', 'submitted', 'confirming', 'awaiting-wallet'].includes(state.status)
+  const archiveCompleted = () => {
+    if (!state.busy && !unresolved() && state.transaction) update({ history: [...state.history, state.transaction], transaction: undefined, status: 'idle', message: undefined })
+  }
   async function refresh(session: TransactionSession, fresh = false) {
     if (state.loading) return
     const ticket = ++reading
     update({ loading: true, snapshot: undefined, error: undefined })
     try {
       const snapshot = await readAmmSnapshot(session, client, fresh)
-      if (ticket === reading && session.isCurrent()) update({ snapshot })
+      if (ticket === reading && session.isCurrent()) { update({ snapshot }); return snapshot }
     } catch (error) { if (ticket === reading) update({ error: '查詢失敗：' + ammError(error), snapshot: undefined }) }
     finally { if (ticket === reading) update({ loading: false }) }
   }
@@ -69,14 +72,15 @@ export function createAmmStore(client: TokenClient = sepoliaPublicClient) {
         update({ status: 'failed', transaction: { ...record, receiptStatus: receipt.status }, message: '交易失敗：Receipt reverted。可重新準備，仍需獨立確認。' }); return
       }
       const actual = actualResult(record, receipt.logs)
-      update({ status: 'success', transaction: { ...record, receiptStatus: receipt.status, actual }, preview: undefined,
+      update({ status: 'success', transaction: { ...record, receiptStatus: receipt.status, actual, after: undefined }, preview: record.kind.startsWith('approve') && record.summary.session.isCurrent() ? record.summary : undefined,
         message: 'Receipt success，至少 1 個區塊確認；不代表最終確定性。' + (record.kind.startsWith('approve') ? ' 授權成功不等於交換或注資成功，請另行準備下一筆交易。' : ' 實際成交結果以事件為準。') })
       if (record.summary.session.isCurrent()) {
-        await refresh(record.summary.session, true)
-        if (record.kind.startsWith('approve') && state.snapshot) {
+        const after = await refresh(record.summary.session, true)
+        if (after && record.summary.session.isCurrent() && after.blockNumber >= receipt.blockNumber) update({ transaction: { ...state.transaction!, after } })
+        if (record.kind.startsWith('approve') && after) {
           const i = record.kind === 'approveDPLT' ? 0 : 1
           const needed = record.summary.input.operation === 'add' ? record.summary.desired[i] : record.summary.amount
-          if (state.snapshot.allowances[i] < needed) update({ error: '授權 Receipt 已成功，但目前 allowance 仍不足；請重新查詢。' })
+          if (after.allowances[i] < needed) update({ error: '授權 Receipt 已成功，但目前 allowance 仍不足；請重新查詢。' })
         }
       }
     } catch (error) { update({ status: 'unknown', message: ammError(error) + ' 保留原交易資訊，請手動查詢，不要重送。' }) }
@@ -88,12 +92,14 @@ export function createAmmStore(client: TokenClient = sepoliaPublicClient) {
     invalidate(clear = false) {
       revision++
       if (clear) { reading++; update({ snapshot: undefined, loading: false }) }
+      archiveCompleted()
       update({ summary: undefined, preview: undefined, error: undefined })
     },
     reject(error: unknown) { update({ error: ammError(error) }) },
     refresh,
     async preview(session: TransactionSession, input: AmmInput) {
       if (state.busy || unresolved()) return
+      archiveCompleted()
       const ticket = revision
       update({ busy: true, preview: undefined, summary: undefined, error: undefined })
       try {
@@ -104,6 +110,7 @@ export function createAmmStore(client: TokenClient = sepoliaPublicClient) {
     },
     async prepare(kind: AmmKind, session: TransactionSession, input: AmmInput) {
       if (state.busy || unresolved()) return
+      archiveCompleted()
       const ticket = revision
       update({ busy: true, status: 'validating', summary: undefined, error: undefined, message: '正在核對餘額、allowance、模擬與 Gas。' })
       try {
@@ -127,7 +134,7 @@ export function createAmmStore(client: TokenClient = sepoliaPublicClient) {
         await assertSession(summary.session); validateDeadline(summary.deadline)
         if (ticket !== revision || !summary.session.isCurrent()) throw new Error('摘要已失效，請重新準備。')
         if (state.transaction) update({ history: [...state.history, state.transaction] })
-        const record: AmmTransaction = { kind: summary.kind, account: summary.session.address, chainId: 11155111, to: summary.to, data: summary.data, summary }
+        const record: AmmTransaction = { kind: summary.kind, account: summary.session.address, chainId: 11155111, to: summary.to, data: summary.data, summary, before: fresh.snapshot }
         update({ status: 'awaiting-wallet', transaction: record, message: '請親自確認 MetaMask。帳號或網路變更時，請拒絕未送出的請求。' })
         const wallet = createWalletClient({ chain: sepolia, transport: custom(summary.session.provider, { retryCount: 0 }) })
         requested = true
