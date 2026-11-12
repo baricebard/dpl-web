@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。本次不修改或部署合約、不發送真實交易、不合併或發布網站；Liquidity、Portfolio 仍未開放。
+Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Liquidity、Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -146,3 +146,9 @@ npm run contracts:test
 ## Task 07B：本機 Exchange 部署與庫存工具
 
 沿用 `npm run deploy:local`，開啟 `http://127.0.0.1:5174/` 的 DPL Exchange 區域，以教師 MetaMask 逐筆確認部署與三種庫存 transfer。支援必要鏈上檢查、持久嘗試鎖、原 Hash 唯讀復原、reserveOf 差額補充及公開 JSON 匯出。既有 ERC-20 已部署，不需重部署；工具不會包含於 Pages build。Windows 操作與未知結果處理見 [Exchange 部署指南](docs/13-exchange-deployment.md)。本次僅開發與本機測試，沒有 Sepolia 部署、庫存注入或 Task 07C。
+
+## Task 08A：DPL AMM 合約
+
+已建立單一 DPLT／DPLT-A 常數乘積池，0.3% 輸入費留池，Pool 發行 ERC-20 DPL-LP（18 decimals），首次鎖定 1000 最小 LP 單位；後續按比例注資、LP 持有人自行移除。無 owner 或管理員提領入口。實際餘額為初始化後儲備，直接轉帳是沒有 LP 的不可退回捐贈。既有 TeachingToken 與固定匯率 Exchange 合約未修改。
+
+預計教師首次注入 100 DPLT + 3,000 DPLT-A；首次提供者設定價格，合約不保證 1:30，公開初始化有搶先風險。Pool 正式地址為 **null**，沒有 Sepolia 部署、真實 approve／swap／流動性操作或新 UI。Task 08B 先審查初始化保護並完成 localhost 部署工具，08C 才整合學生介面；兩者均尚未開始。本機合約測試 **115 passing、0 failing**（AMM 35 項），指定編譯／型別／lint／build 檢查通過。完整公式、ABI、LP／捐贈帳務、測試結果、無常損失及人工待辦見 [DPL AMM 規格](docs/15-amm-pool.md)。教學代幣無真實金融價值，沒有收益保證。
