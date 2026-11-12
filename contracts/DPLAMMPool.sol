@@ -16,6 +16,7 @@ contract DPLAMMPool is ERC20, ReentrancyGuard {
 
     address public immutable dplt;
     address public immutable assetA;
+    address public immutable initialProvider;
     uint256 public constant MINIMUM_LIQUIDITY = 1000;
     address public constant LOCKED_LIQUIDITY_ADDRESS = address(0xdead);
     uint256 public constant MAX_RESERVE = type(uint112).max;
@@ -23,6 +24,8 @@ contract DPLAMMPool is ERC20, ReentrancyGuard {
 
     error InvalidToken(address token);
     error DuplicateToken();
+    error InvalidInitialProvider();
+    error UnauthorizedInitialProvider(address caller);
     error UnsupportedToken(address token);
     error InvalidAmount();
     error UninitializedPool();
@@ -39,7 +42,9 @@ contract DPLAMMPool is ERC20, ReentrancyGuard {
     event RemoveLiquidity(address indexed provider, uint256 amountDPLT, uint256 amountDPLTA, uint256 liquidity);
     event ReservesUpdated(uint256 reserveDPLT, uint256 reserveDPLTA);
 
-    constructor(address dplt_, address assetA_) ERC20("DPL AMM Liquidity Provider Token", "DPL-LP") {
+    constructor(address dplt_, address assetA_, address initialProvider_) ERC20("DPL AMM Liquidity Provider Token", "DPL-LP") {
+        if (initialProvider_ == address(0)) revert InvalidInitialProvider();
+        initialProvider = initialProvider_;
         if (dplt_ == assetA_) revert DuplicateToken();
         _validateToken(dplt_);
         _validateToken(assetA_);
@@ -93,6 +98,8 @@ contract DPLAMMPool is ERC20, ReentrancyGuard {
         if (amountDPLTDesired == 0 || amountDPLTADesired == 0) revert InvalidAmount();
         if (amountDPLTDesired > MAX_RESERVE || amountDPLTADesired > MAX_RESERVE) revert ReserveLimitExceeded();
         uint256 supply = totalSupply();
+        // One-time on-chain gate; a reverted initialization leaves totalSupply at zero.
+        if (supply == 0 && msg.sender != initialProvider) revert UnauthorizedInitialProvider(msg.sender);
         // Before initialization, donated balances do not establish a price or earn LP tokens.
         // They accrue to the initial provider and permanent lock only after successful initialization.
         (uint256 x, uint256 y) = _balances();

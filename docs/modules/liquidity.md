@@ -6,7 +6,7 @@ Task 08A 已建立 DPLAMMPool Solidity 合約、EDR 本機測試與 Ignition 模
 
 ## A-07 已決定機制
 
-單一 DPLT／DPLT-A 常數乘積池 `x * y = k`，兩種資產 18 decimals。預計教師初始注入 100 DPLT + 3,000 DPLT-A；初次提供者實際設定價格，合約不保證 1:30。公開初始化有搶先風險，後續部署須先審查原子部署／初始化等最小保護方案，詳見 [Task 08A 初始化政策](../15-amm-pool.md#初始化與搶先風險)。本次不加 owner 或教師特權。
+單一 DPLT／DPLT-A 常數乘積池 `x * y = k`，兩種資產 18 decimals。預計教師初始注入 100 DPLT + 3,000 DPLT-A；初次提供者實際設定價格，合約不保證 1:30。Constructor 增加非零 immutable initialProvider，預定教師為 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`；totalSupply 為零時只有此地址能在鏈上執行首次 addLiquidity，成功後所有帳號皆可注資，失敗不解鎖。詳見 [Task 08A 初始化政策](../15-amm-pool.md#初始化與搶先風險)。此一次性限制不賦予 owner、任意提領或正常 swap 管理權。
 
 輸入費率 0.3%，全留池，無平台分潤。Pool 本身為 ERC-20 DPL-LP，18 decimals；首次 `floor(sqrt(x*y))` 扣 1000 最小 LP 單位永久鎖定，其餘給提供者。後續依實際儲備比例提供，僅扣實際用量，按兩邊比例較小值向下鑄造 LP；移除只 burn 呼叫者自己的 LP，按總供給／實際資產份額向下取整。無 Factory、Router、Oracle、挖礦、治理、Proxy、管理員提款或任意公開 mint。
 

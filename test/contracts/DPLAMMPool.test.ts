@@ -31,7 +31,7 @@ describe('DPLAMMPool — local EDR only', async () => {
       adversarial ? viem.deployContract('AMMTestToken', [holder]) :
         viem.deployContract('TeachingToken', [name, name, holder, supply])))
     const tokens = await Promise.all(deployedTokens.map((t) => viem.getContractAt('TeachingToken', t.address)))
-    const pool = await viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[1].address])
+    const pool = await viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[1].address, holder])
     for (const token of tokens) {
       await send(token.write.transfer([user, 10_000n * U], { account: teacher.account }))
       for (const wallet of [teacher, student]) await send(token.write.approve([pool.address, maxUint256], { account: wallet.account }))
@@ -61,6 +61,7 @@ describe('DPLAMMPool — local EDR only', async () => {
     const { pool, tokens } = await fixture(false)
     assert.equal(await pool.read.dplt(), getAddress(tokens[0].address))
     assert.equal(await pool.read.assetA(), getAddress(tokens[1].address))
+    assert.equal(await pool.read.initialProvider(), getAddress(holder))
     assert.equal(await pool.read.name(), 'DPL AMM Liquidity Provider Token')
     assert.equal(await pool.read.symbol(), 'DPL-LP')
     assert.equal(await pool.read.decimals(), 18)
@@ -72,13 +73,45 @@ describe('DPLAMMPool — local EDR only', async () => {
       for (const bad of [zeroAddress, user, nonToken.address, wrongScale.address]) {
         const args = tokens.map((t) => t.address)
         args[pos] = bad
-        await fail(viem.deployContract('DPLAMMPool', [args[0], args[1]]), pool, 'InvalidToken')
+        await fail(viem.deployContract('DPLAMMPool', [args[0], args[1], holder]), pool, 'InvalidToken')
       }
     }
-    await fail(viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[0].address]), pool, 'DuplicateToken')
+    await fail(viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[0].address, holder]), pool, 'DuplicateToken')
     await fail(pool.read.quoteSwap([tokens[0].address, U]), pool, 'UninitializedPool')
     await fail(pool.write.swap([tokens[0].address, U, 0n, maxUint256]), pool, 'UninitializedPool')
     await fail(pool.write.removeLiquidity([1n, 0n, 0n, maxUint256]), pool, 'UninitializedPool')
+  })
+
+  it('rejects zero initialProvider at deployment', async () => {
+    const { tokens, pool } = await fixture(false)
+    await fail(viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[1].address, zeroAddress]), pool, 'InvalidInitialProvider')
+  })
+
+  it('enforces the initial provider on chain, then opens deposits and swaps to everyone', async () => {
+    const f = await fixture(false)
+    const { pool, tokens } = f
+    const args = [U, 30n * U, 0n, 0n, 0n, maxUint256] as const
+    const before = await snapshot(f)
+    for (const wallet of [student, outsider]) {
+      await fail(pool.write.addLiquidity(args, { account: wallet.account }), pool, 'UnauthorizedInitialProvider')
+      assert.deepEqual(await snapshot(f), before)
+    }
+    await send(pool.write.addLiquidity(args, { account: teacher.account }))
+    await send(pool.write.addLiquidity(args, { account: student.account }))
+    assert.ok(await pool.read.balanceOf([user]) > 0n)
+    await send(pool.write.swap([tokens[0].address, U / 10n, 0n, maxUint256], { account: student.account }))
+    await consistent(f)
+  })
+
+  it('uses the immutable provider rather than implicitly trusting the deployer', async () => {
+    const { tokens } = await fixture(false)
+    const pool = await viem.deployContract('DPLAMMPool', [tokens[0].address, tokens[1].address, user])
+    const args = [U, 30n * U, 0n, 0n, 0n, maxUint256] as const
+    await fail(pool.write.addLiquidity(args, { account: teacher.account }), pool, 'UnauthorizedInitialProvider')
+    for (const token of tokens) await send(token.write.approve([pool.address, maxUint256], { account: student.account }))
+    await send(pool.write.addLiquidity(args, { account: student.account }))
+    assert.equal(await pool.read.initialProvider(), getAddress(user))
+    assert.ok(await pool.read.balanceOf([user]) > 0n)
   })
 
   it('initializes at 1:30, floors sqrt, locks exactly 1000 units and emits deposit/reserves', async () => {
@@ -98,9 +131,9 @@ describe('DPLAMMPool — local EDR only', async () => {
     await consistent(f)
   })
 
-  it('allows the first provider to choose a different price without hidden teacher privileges', async () => {
+  it('allows the designated initial provider to choose a different price', async () => {
     const { pool } = await fixture(false)
-    await send(pool.write.addLiquidity([U, 7n * U, 0n, 0n, 0n, maxUint256], { account: student.account }))
+    await send(pool.write.addLiquidity([U, 7n * U, 0n, 0n, 0n, maxUint256], { account: teacher.account }))
     assert.deepEqual(await pool.read.getReserves(), [U, 7n * U])
   })
 
@@ -300,6 +333,11 @@ describe('DPLAMMPool — local EDR only', async () => {
     const before = await snapshot(f)
     await viem.assertions.revertWithCustomError(f.pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256]), f.tokens[1], 'ERC20InsufficientAllowance')
     assert.deepEqual(await snapshot(f), before)
+    await fail(f.pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256], { account: student.account }), f.pool, 'UnauthorizedInitialProvider')
+    assert.deepEqual(await snapshot(f), before)
+    await send(f.tokens[1].write.approve([f.pool.address, 30n * U]))
+    await send(f.pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256]))
+    await send(f.pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256], { account: student.account }))
   })
 
   it('handles exact reserve cap, one-unit excess and uint256 max without overflow panics', async () => {
@@ -322,8 +360,9 @@ describe('DPLAMMPool — local EDR only', async () => {
     await send(tokens[1].write.transfer([pool.address, 2n * U]))
     assert.deepEqual(await pool.read.getReserves(), [0n, 0n])
     await fail(pool.read.quoteSwap([tokens[0].address, U]), pool, 'UninitializedPool')
-    await send(pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256], { account: student.account }))
-    assert.equal(await pool.read.balanceOf([holder]), 0n)
+    await send(pool.write.addLiquidity([U, 30n * U, 0n, 0n, 0n, maxUint256], { account: teacher.account }))
+    assert.equal(await pool.read.balanceOf([user]), 0n)
+    assert.equal(await pool.read.balanceOf([holder]), sqrt(U * 30n * U) - 1000n)
     assert.equal(await pool.read.totalSupply(), sqrt(U * 30n * U))
     assert.deepEqual(await pool.read.getReserves(), [2n * U, 32n * U])
   })
@@ -437,7 +476,7 @@ describe('DPLAMMPool — local EDR only', async () => {
   it('exposes only the intended operations, queries and standard ERC20, with no administrative withdrawal or mint', async () => {
     const { abi } = await artifacts.readArtifact('DPLAMMPool')
     assert.deepEqual(abi.filter((e) => e.type === 'function').map((e) => e.name).sort(), [
-      'dplt', 'assetA', 'MINIMUM_LIQUIDITY', 'LOCKED_LIQUIDITY_ADDRESS', 'MAX_RESERVE', 'FEE_BPS',
+      'dplt', 'assetA', 'initialProvider', 'MINIMUM_LIQUIDITY', 'LOCKED_LIQUIDITY_ADDRESS', 'MAX_RESERVE', 'FEE_BPS',
       'getReserves', 'quoteSwap', 'swap', 'addLiquidity', 'removeLiquidity',
       'allowance', 'approve', 'balanceOf', 'decimals', 'name', 'symbol', 'totalSupply', 'transfer', 'transferFrom',
     ].sort())
@@ -448,9 +487,10 @@ describe('DPLAMMPool — local EDR only', async () => {
   it('deploys the actual Ignition module with local parameters without approval, funding or initialization', async () => {
     const { tokens } = await fixture(false)
     const before = await Promise.all(tokens.map((t) => t.read.balanceOf([holder])))
-    const { pool } = await connection.ignition.deploy(PoolModule, { parameters: { DPLAMMPool: { dplt: tokens[0].address, assetA: tokens[1].address } } })
+    const { pool } = await connection.ignition.deploy(PoolModule, { parameters: { DPLAMMPool: { dplt: tokens[0].address, assetA: tokens[1].address, initialProvider: holder } } })
     assert.equal(await pool.read.dplt(), getAddress(tokens[0].address))
     assert.equal(await pool.read.assetA(), getAddress(tokens[1].address))
+    assert.equal(await pool.read.initialProvider(), getAddress(holder))
     assert.deepEqual(await pool.read.getReserves(), [0n, 0n])
     assert.equal(await pool.read.totalSupply(), 0n)
     assert.deepEqual(await Promise.all(tokens.map((t) => t.read.balanceOf([holder]))), before)

@@ -46,15 +46,18 @@ LP 對應兩資產權益為 `floor(liquidity * reserve / totalSupply)`，含費�
 | --- | --- |
 | DPLT／constructor dplt | `0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e` |
 | DPLT-A／constructor assetA | `0x53Ac929866423479c7C5746F76F398e8b3907d6E` |
+| initialProvider／constructor 第三參數 | `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`（教師公開錢包） |
 | Pool 正式地址 | `null`（尚未部署） |
 | 教師預計初始注資 | 100 DPLT + 3,000 DPLT-A |
 | 預計初始即時價格 | 1 DPLT = 30 DPLT-A（無額外捐贈的前提） |
 
-首次提供者能設定初始價格，**合約不自動保證 1:30，也未限制教師才能初始化**。公開部署到首次注資之間有搶先初始化風險；MINIMUM_LIQUIDITY 降低微量初始份額操縱，不能防止搶先或保證價格。
+Constructor `(dplt, assetA, initialProvider)` 拒絕零 initialProvider，並以 immutable 儲存；Ignition 的 initialProvider 預設為上表教師公開地址，本機測試可明確覆寫成本機教師。此地址不是 owner，沒有修改、轉移角色、暫停、任意鑄幣或提領他人資產的權限。
 
-最小必要的後續保護方案：Task 08B 審查部署與首次 addLiquidity 在同一原子批次內完成的可行方式，明確將初始 LP 歸教師；不在本次加入 owner／特殊提領權或實作批次部署架構。既有單筆 MetaMask 部署工具不等於已提供原子保護。若 08B 無法原子完成，必須停止公開初始化流程，先取得明確的初始化保護決策（例如一次性、不可更改且只限制首次提供者的 initializer，成功後失效）。不可把分開的 deploy／approve／addLiquidity 宣稱可防搶先。
+`addLiquidity()` 在 `totalSupply() == 0` 時直接於鏈上檢查 `msg.sender == initialProvider`，不符回 UnauthorizedInitialProvider。部署者若不是指定教師也無法初始化，直接呼叫合約、繞過前端、預先 approve 或轉入代幣皆不能取得首次初始化權。首次注資成功後，永久鎖定份額確保 totalSupply 不會回到零，所有帳號皆可按原比例公式注資；正常 swap／移除不增加教師核准要求。
 
-教師之後須逐筆核對 chain ID、帳號、兩個經審查的代幣地址與 18 decimals、Pool getter、現有餘額／totalSupply、數量、minima、deadline 及 Gas。部署 constructor 只設定兩資產，不自動從教師扣款。若已遭初始化，不照原計畫盲目入池，先重新確認比例、份額與部署處置。這些人工操作均不在 Task 08A 執行。
+沒有另設可提前解鎖的初始化旗標：教師交易若失敗，LP mint、轉帳及供給全回滾，仍只有指定教師能重試。指定錯誤的非零地址無法從鏈上判斷是否真為教師，且 immutable 無法修正，因此部署前必須確認完整地址；零地址則由 constructor 拒絕。
+
+教師能設定初始價格，**合約仍不自動保證 1:30**；預先捐贈政策維持原設計，可能改變最終儲備比例。此保護阻止其他帳號搶先呼叫 addLiquidity 初始化，不阻止 ERC-20 直接捐贈或後續市場交易。教師之後須逐筆核對 chain ID、帳號、兩資產／18 decimals、Pool 的 initialProvider getter、既有 balanceOf／totalSupply、數量、minima、deadline 與 Gas。部署只設定三參數，不自動扣款；不需要依賴前端隱藏按鈕或原子批次部署來保證首次呼叫者。Task 08B／08C 仍未實作，本次不執行上述真實操作。
 
 ## LP 發行、提供與移除
 
@@ -88,7 +91,7 @@ liquidity = min(
 
 | 方法 | 輸入／回傳 |
 | --- | --- |
-| `dplt / assetA` | immutable 兩種資產地址 |
+| `dplt / assetA / initialProvider` | immutable 兩種資產與首次提供者地址 |
 | `getReserves()` | `(reserveDPLT, reserveDPLTA)`，已初始化時為實際餘額 |
 | `quoteSwap(tokenIn, amountIn)` | `(tokenOut, amountOut)`，兩方向、自動推導 tokenOut |
 | `swap(tokenIn, amountIn, minAmountOut, deadline)` | 回 amountOut，approve + swap |
@@ -100,7 +103,7 @@ liquidity = min(
 
 所有數值 uint256／最小單位，不用浮點。兩儲備與 desired 金額不超過 `MAX_RESERVE = 2^112 - 1`，swap 輸入也不超過該上限減輸入儲備。先檢查界限，再乘法；初次積小於 2^224，報價分子小於 2^234、分母小於 2^123。極大輸入回 ReserveLimitExceeded，非隱含算術 panic。這遠大於既有兩種教學代幣各 1,000,000 tokens 的總供給；若不按部署清單而使用可超量鑄幣的未知資產，超限捐贈可能令池無法操作，不提供救援權。
 
-具名錯誤含 InvalidToken、DuplicateToken、UnsupportedToken、InvalidAmount、UninitializedPool、InsufficientReserve、ZeroOutput、ReserveLimitExceeded、ExpiredDeadline、InsufficientMinimumAmount、InsufficientLiquidity、UnexpectedTokenBalance，另有 ERC20／SafeERC20／ReentrancyGuard 錯誤。constructor 的 code／18 decimals 檢查只防誤設，不認證任意 ERC-20 安全性。
+具名錯誤含 InvalidInitialProvider、UnauthorizedInitialProvider、InvalidToken、DuplicateToken、UnsupportedToken、InvalidAmount、UninitializedPool、InsufficientReserve、ZeroOutput、ReserveLimitExceeded、ExpiredDeadline、InsufficientMinimumAmount、InsufficientLiquidity、UnexpectedTokenBalance，另有 ERC20／SafeERC20／ReentrancyGuard 錯誤。constructor 的 code／18 decimals 檢查只防誤設，不認證任意 ERC-20 安全性。
 
 ## 價格影響、滑價與無常損失
 
@@ -116,7 +119,7 @@ Price Impact 是交易沿曲線對即時價格的影響；若顯示相對當前�
 
 測試 [DPLAMMPool.test.ts](../test/contracts/DPLAMMPool.test.ts) 使用 Hardhat EDR、兩個獨立本機 TeachingToken；[AMMTestToken.sol](../contracts/test/AMMTestToken.sol) 僅用於測試拒絕轉帳、少轉與輸入／輸出 callback 重入，不能用於部署參數。
 
-涵蓋 constructor、空池、首次任意定價、整數 sqrt 與永久鎖定、第二位 LP／超額 desired 不多扣、六組報價精度界限、後續 LP／移除捨入、LP 轉移與合法授權、非持有人拒絕、雙向交換與無費用參照、費用／k／即時價格、最低收到量／最小注資／LP、期限、餘額／allowance、極大 uint256／儲備上限、輸入／輸出失敗完整回滾、三操作交叉重入、直接捐贈前後政策、多 LP 混合交換、ABI 入口白名單及真正 Ignition 本機空池部署。
+涵蓋 constructor、空池、指定教師首次定價、非教師／部署者初始化拒絕、零 initialProvider、失敗後權限維持、整數 sqrt 與永久鎖定、第二位 LP／超額 desired 不多扣、六組報價精度界限、後續 LP／移除捨入、LP 轉移與合法授權、非持有人拒絕、雙向交換與無費用參照、費用／k／即時價格、最低收到量／最小注資／LP、期限、餘額／allowance、極大 uint256／儲備上限、輸入／輸出失敗完整回滾、三操作交叉重入、直接捐贈前後政策、多 LP 混合交換、ABI 入口白名單及真正 Ignition 本機空池部署。
 
 2026-11-12（Asia/Taipei）本機結果：
 
@@ -125,7 +128,7 @@ Price Impact 是交易沿曲線對即時價格的影響；若顯示相對當前�
 | `npm ci --cache /tmp/dpl-npm-cache` | 通過；原 lockfile／依賴版本未修改 |
 | `npm run contracts:compile` | 通過，Solidity 0.8.38／Cancun |
 | `npm run contracts:typecheck` | 通過 |
-| `npm run contracts:test` | **115 passing、0 failing**，其中 AMM 35 項、既有 80 項 |
+| `npm run contracts`（連續三次） | 三次 compile／typecheck／test 全通過，每次 **118 passing、0 failing**，其中 AMM 38 項、既有 80 項 |
 | `npm run lint` | 通過，0 warnings |
 | `npm run typecheck` | 通過 |
 | `npm run build` | 通過，含正式產物隔離檢查 |
@@ -134,6 +137,6 @@ Price Impact 是交易沿曲線對即時價格的影響；若顯示相對當前�
 
 Hardhat 使用 `XDG_CONFIG_HOME=/tmp/dpl-config XDG_CACHE_HOME=/tmp/dpl-cache XDG_DATA_HOME=/tmp/dpl-data`，避免不可寫的預設家目錄。build 保留既有前端 chunk 大於 500 kB 及依賴 node:worker_threads 外部化提示；建置成功。未新增歷史 bytecode／metadata 或 Archive RPC 驗證工作；既有 contracts:test 的 80 項回歸照既定命令執行。測試不是正式審計或 Sepolia 人工驗收。
 
-Task 08B 待辦：審查初始化保護方案、沿用 localhost + MetaMask 工具、核對 Sepolia 與資產參數、教師初始數量／既有捐贈、最小收到量／LP／deadline、逐筆授權與簽署、保存合約地址／來源 commit／constructor／交易與 receipt。部署模組 [DPLAMMPool.ts](../ignition/modules/DPLAMMPool.ts) 需要顯式兩地址，不內建遠端 signer、approve 或注資。
+Task 08B 待辦：核對 immutable initialProvider 為上表教師地址、沿用 localhost + MetaMask 工具、核對 Sepolia 與資產參數、教師初始數量／既有捐贈、最小收到量／LP／deadline、逐筆授權與簽署、保存合約地址／來源 commit／constructor／交易與 receipt。部署模組 [DPLAMMPool.ts](../ignition/modules/DPLAMMPool.ts) 需要顯式兩資產地址，第三參數 initialProvider 預設為指定教師，部署前須核對，不內建遠端 signer、approve 或注資。
 
 Task 08C 待辦：池狀態與兩方向 quote／swap、精確 approve、加減流動性與 LP 餘額／份額、費用與價格影響教材、Slippage 設定與交易摘要、模擬／Receipt／未知結果、帳號／網路切換及真實兩帳號人工測試。未初始化、查詢失敗與零餘額需分開呈現，不新增假資料。Task 08A 不開始上述兩任務。

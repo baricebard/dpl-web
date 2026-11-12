@@ -151,4 +151,4 @@ npm run contracts:test
 
 已建立單一 DPLT／DPLT-A 常數乘積池，0.3% 輸入費留池，Pool 發行 ERC-20 DPL-LP（18 decimals），首次鎖定 1000 最小 LP 單位；後續按比例注資、LP 持有人自行移除。無 owner 或管理員提領入口。實際餘額為初始化後儲備，直接轉帳是沒有 LP 的不可退回捐贈。既有 TeachingToken 與固定匯率 Exchange 合約未修改。
 
-預計教師首次注入 100 DPLT + 3,000 DPLT-A；首次提供者設定價格，合約不保證 1:30，公開初始化有搶先風險。Pool 正式地址為 **null**，沒有 Sepolia 部署、真實 approve／swap／流動性操作或新 UI。Task 08B 先審查初始化保護並完成 localhost 部署工具，08C 才整合學生介面；兩者均尚未開始。本機合約測試 **115 passing、0 failing**（AMM 35 項），指定編譯／型別／lint／build 檢查通過。完整公式、ABI、LP／捐贈帳務、測試結果、無常損失及人工待辦見 [DPL AMM 規格](docs/15-amm-pool.md)。教學代幣無真實金融價值，沒有收益保證。
+預計教師首次注入 100 DPLT + 3,000 DPLT-A；首次初始化由鏈上 immutable initialProvider 限定為教師 `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`，成功後所有帳號皆可注資，失敗不解鎖；教師設定價格，合約不保證 1:30。Pool 正式地址為 **null**，沒有 Sepolia 部署、真實 approve／swap／流動性操作或新 UI。Task 08B 核對指定教師參數並完成 localhost 部署工具，08C 才整合學生介面；兩者均尚未開始。本機合約測試 **118 passing、0 failing**（AMM 38 項），指定編譯／型別／lint／build 檢查通過。完整公式、ABI、LP／捐贈帳務、測試結果、無常損失及人工待辦見 [DPL AMM 規格](docs/15-amm-pool.md)。教學代幣無真實金融價值，沒有收益保證。
