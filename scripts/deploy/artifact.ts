@@ -10,7 +10,7 @@ const read = (path: string) => readFileSync(resolve(root, path), 'utf8')
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
 
 /** Read only Hardhat's existing output. Never compile in a browser or substitute bytecode. */
-export function loadDeploymentArtifact(contract: 'TeachingToken' | 'DPLFixedExchange' = 'TeachingToken') {
+export function loadDeploymentArtifact(contract: 'TeachingToken' | 'DPLFixedExchange' | 'DPLAMMPool' = 'TeachingToken') {
   const path = `artifacts/contracts/${contract}.sol/${contract}.json`
   if (!existsSync(resolve(root, path))) throw new Error('Run npm run contracts:compile first')
   const artifact = JSON.parse(read(path))

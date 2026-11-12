@@ -6,9 +6,10 @@ import { sepolia } from 'viem/chains'
 import type { WalletProvider } from '../../src/lib/web3/provider.ts'
 import { constructorArgs, DEPLOYER, INITIAL_SUPPLY, SEPOLIA_CHAIN_ID, TOKENS, type TokenId } from './config.ts'
 
+import { AMM_ARGS } from './amm-config.ts'
 import { EXCHANGE_ARGS } from './exchange-config.ts'
 
-export type DeploymentId = TokenId | 'exchange'
+export type DeploymentId = TokenId | 'exchange' | 'amm'
 export interface DeploymentArtifact {
   abi: Abi; bytecode: Hex; deployedBytecode: Hex
   provenance: { commit: string; compiler: string; openZeppelin: string; [key: string]: unknown }
@@ -27,7 +28,7 @@ export interface RecordEntry {
 interface Prepared { data: Hex; gas: bigint; gasPrice: bigint; balance: bigint; revision: number; at: number }
 export const JOURNAL_KEY = `dpl-sepolia-deployment-v1:${DEPLOYER}`
 export interface Journal { read(): string | null; write(value: string): void }
-const empty = (): Record<DeploymentId, RecordEntry> => Object.fromEntries([...TOKENS, { id: 'exchange' }].map(t => [t.id, { status: '尚未部署' }])) as Record<DeploymentId, RecordEntry>
+const empty = (): Record<DeploymentId, RecordEntry> => Object.fromEntries([...TOKENS, { id: 'exchange' }, { id: 'amm' }].map(t => [t.id, { status: '尚未部署' }])) as Record<DeploymentId, RecordEntry>
 const json = (value: unknown) => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)
 const statuses: Status[] = ['尚未部署', '等待使用者確認', '等待 MetaMask 簽署', '已送出交易', '等待 Receipt', '成功', '失敗', '結果未知']
 export function rejected(error: unknown): boolean {
@@ -42,13 +43,13 @@ export function deadline<T>(operation: Promise<T>, milliseconds = 12000): Promis
   })
 }
 
-export function createDeploymentTool(provider: WalletProvider, artifact: DeploymentArtifact, journal: Journal, receiptTimeout = 60000, mode: 'tokens' | 'exchange' = 'tokens') {
+export function createDeploymentTool(provider: WalletProvider, artifact: DeploymentArtifact, journal: Journal, receiptTimeout = 60000, mode: 'tokens' | 'exchange' | 'amm' = 'tokens') {
   // This transport has no HTTP endpoint, signer, automatic send retry or fallback wallet.
   const client = createPublicClient({ chain: sepolia, transport: custom({ request: args => deadline(provider.request(args)) }, { retryCount: 0 }) })
-  const items = mode === 'exchange' ? [{ id: 'exchange' as const }] : TOKENS
+  const items = mode === 'tokens' ? TOKENS : [{ id: mode }]
   const argsFor = (id: DeploymentId) => {
     if (!items.some(t => t.id === id)) throw new DeploymentCheckError('部署種類不符')
-    return id === 'exchange' ? EXCHANGE_ARGS : constructorArgs(id)
+    return id === 'amm' ? AMM_ARGS : id === 'exchange' ? EXCHANGE_ARGS : constructorArgs(id)
   }
   let records = empty()
   let prepared: Partial<Record<DeploymentId, Prepared>> = {}
@@ -73,7 +74,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
       if (!r || !statuses.includes(r.status) || (r.hash && !isHash(r.hash)) || (r.contractAddress && !isAddress(r.contractAddress))) throw new DeploymentCheckError('部署紀錄損壞，停止部署')
       if ((r.attempted !== undefined && typeof r.attempted !== 'boolean') || (r.hash && !r.attempted) || (['等待 MetaMask 簽署', '已送出交易', '等待 Receipt', '成功', '結果未知'].includes(r.status) && !r.attempted)) throw new DeploymentCheckError('部署紀錄狀態不一致，停止部署')
       result[id] = { ...r }
-      if (r.attempted && ((restoring && mode === 'exchange' && r.status === '成功') || !['成功', '失敗'].includes(r.status))) result[id].status = '結果未知'
+      if (r.attempted && ((restoring && mode !== 'tokens' && r.status === '成功') || !['成功', '失敗'].includes(r.status))) result[id].status = '結果未知'
       if (!r.attempted) result[id].status = '尚未部署'
     }
     return result
@@ -144,6 +145,22 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
     if (receipt.status === 'reverted') { set(id, { ...details, status: '失敗', message: 'Receipt revert；不自動重送' }); return }
     if (!receipt.contractAddress || !isAddress(receipt.contractAddress)) throw new DeploymentCheckError('缺少 contractAddress')
     const address = getAddress(receipt.contractAddress)
+    if (id === 'amm') {
+      const code = await client.getCode({ address })
+      if (!code || code === '0x') throw new DeploymentCheckError('Pool 地址沒有合約')
+      const read = (functionName: string, args?: readonly unknown[]) => client.readContract({ address, abi: artifact.abi, functionName, args })
+      const values = await Promise.all(['dplt', 'assetA', 'initialProvider'].map(name => read(name)))
+      if (values.some((v, i) => typeof v !== 'string' || getAddress(v) !== AMM_ARGS[i])) throw new DeploymentCheckError('Pool Constructor 未驗證')
+      const supply = await read('totalSupply')
+      const reserves = await read('getReserves') as readonly bigint[]
+      const { erc20Abi } = await import('viem')
+      const balances = await Promise.all(AMM_ARGS.slice(0, 2).map(token => client.readContract({ address: token, abi: erc20Abi, functionName: 'balanceOf', args: [address] })))
+      const pristine = supply === 0n && reserves.every(v => v === 0n) && balances.every(v => v === 0n)
+      const block = await client.getBlock({ blockNumber: receipt.blockNumber })
+      await identity()
+      set(id, { ...details, status: '成功', contractAddress: address, deployedAt: new Date(Number(block.timestamp) * 1000).toISOString(), message: pristine ? '空池與實際 Token 餘額均為零' : 'Pool 已初始化或收到捐贈；停止首次注資並人工核對' })
+      return
+    }
     if (id === 'exchange') {
       // Latest-state checks only: no archive RPC, bytecode or metadata audit.
       const code = await client.getCode({ address })
@@ -232,7 +249,7 @@ export function createDeploymentTool(provider: WalletProvider, artifact: Deploym
   return {
     connect, prepare, confirm, reconcile, getSnapshot: () => snapshot,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
-    exportRecord: () => json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, initialHolder: DEPLOYER, mode, exchange: mode === 'exchange' ? { contract: 'DPLFixedExchange', constructorArgs: EXCHANGE_ARGS } : undefined, tokens: mode === 'tokens' ? TOKENS.map(t => ({ ...t, constructorArgs: constructorArgs(t.id), deploymentDataHash: keccak256(dataFor(t.id)) })) : undefined, provenance: artifact.provenance, records }),
+    exportRecord: () => json({ version: 1, chainId: SEPOLIA_CHAIN_ID, deployer: DEPLOYER, initialHolder: DEPLOYER, mode, exchange: mode === 'exchange' ? { contract: 'DPLFixedExchange', constructorArgs: EXCHANGE_ARGS } : undefined, tokens: mode === 'tokens' ? TOKENS.map(t => ({ ...t, constructorArgs: constructorArgs(t.id), deploymentDataHash: keccak256(dataFor(t.id)) })) : undefined, amm: mode === 'amm' ? { contract: 'DPLAMMPool', constructorArgs: AMM_ARGS } : undefined, provenance: artifact.provenance, records }),
     destroy() { provider.removeListener('accountsChanged', invalidate); provider.removeListener('chainChanged', invalidate); provider.removeListener('disconnect', invalidate); listeners.clear() },
   }
 }

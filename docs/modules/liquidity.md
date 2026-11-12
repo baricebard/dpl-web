@@ -2,7 +2,7 @@
 
 ## 責任與階段
 
-Task 08A 已建立 DPLAMMPool Solidity 合約、EDR 本機測試與 Ignition 模組。未部署 Sepolia，正式 Pool 地址為 `null`；Task 08B 部署工具與 Task 08C UI 尚未實作，Liquidity 入口保持未開放。本模組不屬於原 MVP，既有 DPL Exchange 固定匯率功能保持獨立。
+Task 08A 已建立 DPLAMMPool Solidity 合約、EDR 本機測試與 Ignition 模組。未部署 Sepolia，正式 Pool 地址為 `null`；Task 08B 已提供 [localhost 教師部署與首次流動性工具](../16-amm-deployment.md)，Task 08C 學生 UI 尚未實作，Liquidity 入口保持未開放。本模組不屬於原 MVP，既有 DPL Exchange 固定匯率功能保持獨立。
 
 ## A-07 已決定機制
 

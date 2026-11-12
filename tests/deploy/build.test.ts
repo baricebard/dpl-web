@@ -20,7 +20,8 @@ test('Pages content scan allows student transfer identifiers but rejects local t
     assert.doesNotThrow(() => checkProduction(directory))
     const artifact = JSON.parse(readFileSync('artifacts/contracts/TeachingToken.sol/TeachingToken.json', 'utf8'))
     const exchange = JSON.parse(readFileSync('artifacts/contracts/DPLFixedExchange.sol/DPLFixedExchange.json', 'utf8'))
-    for (const content of ['DPL 本機 Sepolia 部署工具', 'DPL 本機唯讀部署驗證', 'teaching-artifact', 'verification-artifact', 'exchange-artifact', 'dpl-exchange-funding-v1', exchange.bytecode, exchange.deployedBytecode, artifact.bytecode, artifact.deployedBytecode]) {
+    const amm = JSON.parse(readFileSync('artifacts/contracts/DPLAMMPool.sol/DPLAMMPool.json', 'utf8'))
+    for (const content of ['amm-artifact', 'dpl-amm-initial-v1', amm.bytecode, amm.deployedBytecode, 'DPL 本機 Sepolia 部署工具', 'DPL 本機唯讀部署驗證', 'teaching-artifact', 'verification-artifact', 'exchange-artifact', 'dpl-exchange-funding-v1', exchange.bytecode, exchange.deployedBytecode, artifact.bytecode, artifact.deployedBytecode]) {
       writeFileSync(file, content)
       assert.throws(() => checkProduction(directory), /leaked into production/)
     }
@@ -35,7 +36,7 @@ test('Pages module graph rejects imports of either local tool or a Hardhat artif
   const directory = mkdtempSync(join(tmpdir(), 'dpl-graph-guard-'))
   try {
     const file = join(directory, 'entry.js')
-    for (const module of ['tools/deploy/config.ts', 'tools/deploy/funding.ts', 'artifacts/contracts/DPLFixedExchange.sol/DPLFixedExchange.json', 'tools/verify/record.ts', 'artifacts/contracts/TeachingToken.sol/TeachingToken.json']) {
+    for (const module of ['tools/deploy/amm-liquidity.ts', 'artifacts/contracts/DPLAMMPool.sol/DPLAMMPool.json', 'tools/deploy/config.ts', 'tools/deploy/funding.ts', 'artifacts/contracts/DPLFixedExchange.sol/DPLFixedExchange.json', 'tools/verify/record.ts', 'artifacts/contracts/TeachingToken.sol/TeachingToken.json']) {
       writeFileSync(file, `import * as local from ${JSON.stringify(resolve(module))}; console.log(local);`)
       await assert.rejects(build({ configFile: resolve('vite.config.ts'), logLevel: 'silent', build: { write: false, rollupOptions: { input: file } } }), /Local deployment module cannot enter production/)
     }

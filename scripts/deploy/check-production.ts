@@ -4,11 +4,11 @@ import { pathToFileURL } from 'node:url'
 import assert from 'node:assert/strict'
 
 // 學生 Token 的 transfer/RPC 方法與公開地址是正式功能；禁止的是本機工具與其產物。
-const forbidden = ['exchange-artifact', 'dpl-exchange-funding-v1', 'dpl-sepolia-deployment-v1', 'DPL 本機 Sepolia 部署工具', 'teaching-artifact', 'tools/deploy',
+const forbidden = ['amm-artifact', 'dpl-amm-initial-v1', 'exchange-artifact', 'dpl-exchange-funding-v1', 'dpl-sepolia-deployment-v1', 'DPL 本機 Sepolia 部署工具', 'teaching-artifact', 'tools/deploy',
   'DPL 本機唯讀部署驗證', 'verification-artifact', 'tools/verify', 'localhost-readonly-deployment-check',
   'hh3-artifact-1', 'pragma solidity 0.8.38']
 export function checkProduction(directory = 'dist') {
-  const artifacts = ['TeachingToken', 'DPLFixedExchange'].map(name => JSON.parse(readFileSync(`artifacts/contracts/${name}.sol/${name}.json`, 'utf8')))
+  const artifacts = ['TeachingToken', 'DPLFixedExchange', 'DPLAMMPool'].map(name => JSON.parse(readFileSync(`artifacts/contracts/${name}.sol/${name}.json`, 'utf8')))
   const bytecodes = artifacts.flatMap(artifact => [artifact.bytecode, artifact.deployedBytecode]).map((code: string) => {
     assert.match(code, /^0x(?:[\da-f]{2})+$/i)
     return code.slice(2).toLowerCase()

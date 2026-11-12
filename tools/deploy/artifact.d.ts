@@ -7,3 +7,8 @@ declare module 'virtual:exchange-artifact' {
   const artifact: import('./engine').DeploymentArtifact
   export default artifact
 }
+
+declare module 'virtual:amm-artifact' {
+  const artifact: import('./engine').DeploymentArtifact
+  export default artifact
+}

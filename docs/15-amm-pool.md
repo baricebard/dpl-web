@@ -140,3 +140,7 @@ Hardhat 使用 `XDG_CONFIG_HOME=/tmp/dpl-config XDG_CACHE_HOME=/tmp/dpl-cache XD
 Task 08B 待辦：核對 immutable initialProvider 為上表教師地址、沿用 localhost + MetaMask 工具、核對 Sepolia 與資產參數、教師初始數量／既有捐贈、最小收到量／LP／deadline、逐筆授權與簽署、保存合約地址／來源 commit／constructor／交易與 receipt。部署模組 [DPLAMMPool.ts](../ignition/modules/DPLAMMPool.ts) 需要顯式兩資產地址，第三參數 initialProvider 預設為指定教師，部署前須核對，不內建遠端 signer、approve 或注資。
 
 Task 08C 待辦：池狀態與兩方向 quote／swap、精確 approve、加減流動性與 LP 餘額／份額、費用與價格影響教材、Slippage 設定與交易摘要、模擬／Receipt／未知結果、帳號／網路切換及真實兩帳號人工測試。未初始化、查詢失敗與零餘額需分開呈現，不新增假資料。Task 08A 不開始上述兩任務。
+
+## Task 08B 本機教師工具
+
+已沿用 localhost + MetaMask 工具提供部署、兩筆精確 approve 與首次 addLiquidity，包含實際 balanceOf 捐贈阻擋、bigint LP 計算、未知交易 Reconcile 與公開 JSON。Windows 操作及人工驗收見 [AMM 部署指南](16-amm-deployment.md)。沒有真實 Sepolia 交易；正式 Pool 地址仍為 null，Task 08C 未實作。
