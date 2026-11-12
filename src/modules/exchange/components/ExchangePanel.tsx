@@ -1,3 +1,5 @@
+import { transactionLabels } from '../../../config/transactionLabels'
+import { LearningIntro, LearningOutro } from '../../../shared/components/LearningJourney'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { formatEther, formatUnits } from 'viem'
 import { exchange, exchangeInputCaps, exchangeRates, exchangeSummaryTtl } from '../../../config/exchange'
@@ -56,11 +58,12 @@ export function ExchangePanel() {
   return <section id="exchange" className="wallet-panel exchange-panel" aria-labelledby="exchange-heading">
     <p className="eyebrow">EXCHANGE / FIXED RATE</p>
     <h2 id="exchange-heading">DPL Exchange</h2>
+    <LearningIntro moduleId="exchange" />
     <p>以教學固定匯率交換 DPLT（USD）、DPLT-A（TWD）與 DPLT-B（CNY）。僅限 Ethereum Sepolia / 11155111，不是真實外匯行情。</p>
     {!address ? <p>請先至 <a href="#wallet">Wallet 連接 MetaMask</a>。</p> : <><p className="wallet-address">目前帳號：{address}</p><p>{ready ? 'Ethereum Sepolia / 11155111' : '目前非 Sepolia，已停用交換並清除舊餘額。'}</p></>}
     <div className="exchange-grid token-form">
       <div className="exchange-side">
-        <h3>You Pay</h3>
+        <h3>支付 / You Pay</h3>
         <label htmlFor="exchange-in">支付代幣</label>
         <select id="exchange-in" value={tokenIn} disabled={locked} onChange={event => { const next = event.target.value; setTokenIn(next); if (next === tokenOut) setTokenOut(tokenIn); change() }}>{tokens.map(token => <option key={token.id} value={token.id}>{token.symbol}</option>)}</select>
         <label htmlFor="exchange-amount">支付數量</label>
@@ -70,7 +73,7 @@ export function ExchangePanel() {
         <p className="wallet-note">單筆上限 {formatUnits(exchangeInputCaps[inIndex], 18)} {tokens[inIndex].symbol}（10 DPLT 等值）。</p>
       </div>
       <div className="exchange-side">
-        <h3>You Receive</h3>
+        <h3>取得 / You Receive</h3>
         <label htmlFor="exchange-out">取得代幣</label>
         <select id="exchange-out" value={tokenOut} disabled={locked} onChange={event => { setTokenOut(event.target.value); change() }}>{tokens.map(token => <option key={token.id} value={token.id} disabled={token.id === tokenIn}>{token.symbol}</option>)}</select>
         <p className="exchange-output" data-testid="exchange-quote">{quote ? `${formatUnits(quote.amountOut, 18)} ${quote.tokenOut.symbol}` : '等待合約報價'}</p>
@@ -91,7 +94,7 @@ export function ExchangePanel() {
       <div className="exchange-balances">{tokens.map((token, index) => <p key={token.id} data-testid={`exchange-balance-${token.symbol}`}>{token.symbol} 餘額：{formatUnits(data.balances[index], 18)}；庫存：{formatUnits(data.reserves[index], 18)}</p>)}</div>
       <p className="wallet-note">最後查詢：<time dateTime={new Date(data.updatedAt).toISOString()}>{new Date(data.updatedAt).toLocaleString('zh-TW')}</time></p>
       <p>Sepolia ETH：{formatEther(data.ethBalance)} ETH；Exchange：{data.paused ? '已暫停' : '未暫停'}。</p>
-      <p>目前 allowance：{formatUnits(data.allowances[inIndex], 18)} {tokens[inIndex].symbol}。{allowanceEnough ? '授權已足夠，可跳過 approve。' : '不足時需先完成 approve。'}</p>
+      <details><summary>查看精確授權額度（allowance）</summary><p>目前 allowance：{formatUnits(data.allowances[inIndex], 18)} {tokens[inIndex].symbol}。{allowanceEnough ? '授權已足夠，可跳過 approve。' : '不足時需先完成 approve。'}</p></details>
     </>}
     <dl className="exchange-info">
       <dt>教學固定匯率</dt><dd>1 {tokens[inIndex].symbol} = {exchangeRates[inIndex][outIndex]} {tokens[outIndex].symbol}</dd>
@@ -122,8 +125,8 @@ export function ExchangePanel() {
     {(['approve', 'swap'] as const).map(kind => {
       const step = state[kind], tx = step.transaction
       return <div key={kind} className="token-transaction" data-testid={`exchange-${kind}-status`} aria-live="polite">
-        <h3>{kind === 'approve' ? 'Approve 授權狀態' : step.status === 'success' ? 'Swap Success' : 'Swap 交換狀態'}</h3>
-        <p>狀態：<strong>{step.status}</strong></p><p role={step.status === 'failed' || step.status === 'unknown' ? 'alert' : 'status'}>{step.message}</p>
+        <h3>{kind === 'approve' ? 'Approve 授權狀態' : step.status === 'success' ? '交換成功 / Swap Success' : 'Swap 交換狀態'}</h3>
+        <p>狀態：<strong>{step.status === 'success' ? kind === 'approve' ? '授權已確認（此筆僅授權）' : '交換已確認成功' : transactionLabels[step.status]}</strong></p><p role={step.status === 'failed' || step.status === 'unknown' ? 'alert' : 'status'}>{step.message}</p>
         {tx && <><p>支付／授權：{formatUnits(tx.amountIn, 18)} {tx.tokenIn.symbol}</p>{kind === 'swap' && <p>取得：{tx.received === undefined ? '尚未確認' : `${formatUnits(tx.received, 18)} ${tx.tokenOut.symbol}`}</p>}
           <p className="wallet-address">原始帳號：{tx.account}</p><p>原始網路：Sepolia / {tx.chainId}</p>
           <p className="wallet-address">Exchange：{exchange.address}</p><p>實際 Receipt 狀態：{tx.receiptStatus ?? '尚未確認'}</p>
@@ -139,5 +142,6 @@ export function ExchangePanel() {
       <p>ERC-20 approve 允許指定 Exchange 在額度內使用支付代幣；swap 才扣除輸入並交付輸出。兩者是獨立交易，授權成功不等於交換成功，兩筆都需要 Sepolia ETH Gas。已有足夠授權時可略過 approve。</p>
       <p>Hash 不代表成功。Receipt success 且至少 1 個區塊確認仍可能重組。逾時或未知時保存原 Hash、查 MetaMask 活動並手動查詢，勿重送。切換帳號／網路後請拒絕尚開啟的錢包請求。重新整理會清除本頁交易紀錄，請先保存 Hash。</p>
     </aside>
+    <LearningOutro moduleId="exchange" />
   </section>
 }

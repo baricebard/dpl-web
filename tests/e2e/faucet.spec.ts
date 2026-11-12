@@ -37,6 +37,7 @@ for (const [wei, display, exact] of [
     await setup(page, wei)
     await page.goto('./#faucet')
     await expect(panel(page).locator('.balance-value')).toHaveText(`${display} Sepolia ETH`)
+    await panel(page).getByText('查看精確 ETH 餘額', { exact: true }).click()
     await expect(panel(page).getByText(`完整金額：${exact} ETH`, { exact: true })).toBeVisible()
     await expect(panel(page).locator('time')).toHaveAttribute('datetime', /T/)
     await expect(panel(page).getByRole('link', { name: '在 Sepolia Etherscan 查看地址' })).toHaveAttribute('href', `https://sepolia.etherscan.io/address/${address}`)

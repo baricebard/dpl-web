@@ -1,3 +1,4 @@
+import { LearningIntro, LearningOutro } from '../../../shared/components/LearningJourney'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { formatEther, formatUnits } from 'viem'
 import { amm, ammTokens } from '../../../config/amm'
@@ -90,8 +91,9 @@ export function LiquidityPanel() {
   return <section id="liquidity" className="wallet-panel exchange-panel amm-panel" aria-labelledby="amm-heading">
     <p className="eyebrow">LIQUIDITY / CONSTANT PRODUCT AMM</p>
     <h2 id="amm-heading">DPL AMM 流動性實驗室</h2>
+    <LearningIntro moduleId="liquidity" />
     <p>觀察 DPLT／DPLT-A 池的即時比例、交換與 LP 權益。僅限 Ethereum Sepolia / 11155111，教學代幣不具真實金融價值。</p>
-    <p className="wallet-address">Pool：{amm.address}</p>
+    <details><summary>查看 Pool 合約地址</summary><p className="wallet-address">Pool：{amm.address}</p></details>
     {!address ? <p>請先至 <a href="#wallet">Wallet 連接 MetaMask</a>。</p> : <p className="wallet-address">目前帳號：{address}；{ready ? 'Ethereum Sepolia' : '目前非 Sepolia，已停用交易。'}</p>}
     <div className="amm-tabs" role="group" aria-label="AMM 操作">{(['swap', 'add', 'remove'] as const).map(op => <button key={op} className={`wallet-button ${operation !== op ? 'secondary' : ''}`} disabled={locked} aria-pressed={operation === op} onClick={() => { setOperation(op); setPendingKind(op); setAmount(''); change() }}>{labels[op]}</button>)}</div>
     <div className="amm-workflow">
@@ -190,5 +192,6 @@ export function LiquidityPanel() {
       <p>approve、swap、addLiquidity 各需獨立確認與 Gas；若兩資產皆未授權，注資可能需要三筆交易。授權可能在操作失敗後仍存在，可至 Sepolia 代幣合約核對 spender 後手動 approve(spender, 0) 撤銷，亦需 Gas。</p>
       <p>交易未知時保存原 Hash，手動查詢，不自動重送或追蹤替換交易。帳號／網路切換使未送出摘要失效；請拒絕仍開啟的錢包請求。紀錄僅保存於本頁記憶體，重新整理前請先保存 Hash。</p>
     </aside>
+    <LearningOutro moduleId="liquidity" />
   </section>
 }

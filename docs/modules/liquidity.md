@@ -1,5 +1,7 @@
 # Liquidity：流動性池與 AMM
 
+> Task 10 已整合學習目標、操作步驟／預期結果、概念整理、六階段自由導覽與下一單元。教學使用以 [學習體驗指南](../19-learning-journey.md)為入口；下列各 Task 的驗證紀錄保留其歷史時點，不能視為本次新增鏈上驗收。
+
 Task 08A／08B 已合併；Task 08C 提供學生 AMM Swap、Add Liquidity、Remove Liquidity 與 LP 權益介面。此為 MVP 之外的後續教學模組；真實 Sepolia 兩帳號人工驗收與網站發布仍待完成。
 
 A-07 已決定單一 DPLT／DPLT-A 常數乘積池、18 decimals ERC-20 DPL-LP、0.3% 輸入費用全部留池、永久鎖定 1000 LP 最小單位。無管理者任意提領、獎勵挖礦或收益保證；合約規則見 [Task 08A](../15-amm-pool.md)。

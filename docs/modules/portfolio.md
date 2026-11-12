@@ -1,5 +1,7 @@
 # Portfolio：投資組合檢視
 
+> Task 10 已整合學習目標、操作步驟／預期結果、概念整理、六階段自由導覽與下一單元。教學使用以 [學習體驗指南](../19-learning-journey.md)為入口；下列各 Task 的驗證紀錄保留其歷史時點，不能視為本次新增鏈上驗收。
+
 Task 09 已實作唯讀 Dashboard，首頁 `#portfolio` 開放；A-08 由本次任務決定。沿用 React、TypeScript、Vite、viem 與唯一 Sepolia Public Client，沒有新合約、後端或資料庫。學生操作與人工驗收見 [Task 09 指南](../18-portfolio-dashboard.md)。
 
 ## A-08 教學估值

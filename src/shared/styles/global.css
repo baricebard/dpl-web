@@ -192,3 +192,22 @@ h1 > span { display: block; }
 .portfolio-allocation { margin-block: .8rem; }
 .portfolio-track { height: .6rem; background: #e8ede9; border-radius: 1rem; overflow: hidden; margin-top: .3rem; }
 .portfolio-track > div { height: 100%; background: #39775b; }
+
+.course-name { margin-top: 18px; font-size: 14px; font-weight: 600; }
+.course-name span { font-size: 12px; font-weight: 400; }
+.learning-intro, .learning-outro { margin-block: 24px; padding: clamp(12px, 2vw, 22px); background: #f0f4f0; border: 1px solid #dce4df; border-radius: 8px; overflow-wrap: anywhere; }
+.learning-intro h3, .learning-outro h3 { margin: 16px 0 8px; font-size: 18px; }
+.learning-intro p, .learning-outro p { margin: 12px 0; font-size: 13px; }
+.learning-intro li, .learning-outro li { margin-block: 10px; font-size: 14px; }
+.learning-intro ol, .learning-outro ul { padding-left: 22px; }
+.learning-nav ol { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0 0 16px; }
+.learning-nav li { margin: 0; flex: 1 1 90px; min-width: 0; }
+.learning-nav a { display: block; padding: 10px; border: 1px solid #b8ccc0; border-radius: 6px; text-align: center; text-decoration: none; }
+.learning-nav a[aria-current="step"] { background: #214e43; color: #fff; font-weight: 700; }
+.learning-outro .primary-link { margin-top: 10px; gap: 12px; }
+summary { cursor: pointer; padding-block: 10px; font-size: 14px; font-weight: 600; }
+summary:focus-visible { outline: 3px solid #3a7865; outline-offset: 2px; }
+.classroom-help dt { font-weight: 700; color: #183c35; font-size: 14px; }
+.classroom-help dd { padding-bottom: 12px; }
+.wallet-panel, .wallet-panel button, .course-name { overflow-wrap: anywhere; }
+.wallet-button { max-width: 100%; }
