@@ -1,3 +1,4 @@
+import { LearningIntro, LearningOutro } from '../../../shared/components/LearningJourney'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { formatUnits } from 'viem'
 import { tokens } from '../../../config/tokens'
@@ -26,12 +27,13 @@ export function PortfolioPanel() {
   return <section id="portfolio" className="portfolio-panel" aria-labelledby="portfolio-heading">
     <p className="eyebrow">PORTFOLIO / READ ONLY</p>
     <h2 id="portfolio-heading">我的教學總資產</h2>
+    <LearningIntro moduleId="portfolio" />
     <p>僅讀取目前資產，不要求簽署或管理資產。DPLT 教學參考價值，不代表真實貨幣價值。</p>
     <p className="portfolio-total" data-testid="portfolio-total">{amount(v?.total, (v?.amounts.some(a => a !== undefined && a > 0n) || (s?.lp.value ?? 0n) > 0n))} DPLT</p>
     <p className="portfolio-address">目前帳號：{wallet.address ?? '尚未連接'} · 目標網路：Ethereum Sepolia（11155111）</p>
-    {!wallet.address ? <p>請先至 Wallet 連接錢包。</p> : !wallet.isSepolia ? <p role="alert">請切換至 Ethereum Sepolia，舊網路資料已清除。</p> : null}
+    {!wallet.address ? <p>請先至 <a href="#wallet">Wallet 連接錢包</a>。</p> : !wallet.isSepolia ? <p role="alert">請切換至 Ethereum Sepolia，舊網路資料已清除。</p> : null}
     <p>最後更新時間：{s ? new Date(s.updatedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }) + '（台北時間）' : '尚無成功快照'}。數值僅代表查詢時點，無背景自動更新。</p>
-    {s && <p>資料區塊 #{s.blockNumber.toString()}。</p>}
+    {s && <details><summary>查看快照區塊</summary><p>資料區塊 #{s.blockNumber.toString()}。</p></details>}
     <button type="button" onClick={() => void store.refresh()} disabled={!address || state.loading || state.retryAt > 0}>手動重新整理</button>
     <p>更新後冷卻 30 秒，期間重按不發出 RPC 請求。{state.loading ? '查詢中，已清除前次資料。' : '請核對最後更新時間。'}</p>
     {failed && <p role="alert">{state.error ?? '部分資料查詢失敗；相關估值與配置不可計算，失敗不代表資產歸零。'}</p>}
@@ -68,5 +70,6 @@ export function PortfolioPanel() {
       <pre>{JSON.stringify(s, (_, value: unknown) => typeof value === 'bigint' ? value.toString() : value, 2)}</pre>
       <p>精確 DPLT 等值：{v?.values.map(value => value === undefined ? '不可計算' : formatUnits(value, 18)).join(' / ')}；總額：{v?.total === undefined ? '不可計算' : formatUnits(v.total, 18)}</p>
     </details>}
+    <LearningOutro moduleId="portfolio" />
   </section>
 }

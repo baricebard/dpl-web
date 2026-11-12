@@ -5,7 +5,13 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。Task 08A 新增 AMM 合約與本機測試，尚未部署；Task 08C 現已加入 Liquidity 的 AMM Swap／Add／Remove 與 LP 權益；Task 09 已開放唯讀 Portfolio 投資組合。
+六個模組均已有學生介面：Wallet 連線、Faucet 外部指引、Token 查詢／轉帳、Exchange 固定匯率交換、Liquidity AMM／LP 操作及 Portfolio 唯讀估值。Task 10 串連六階段學習體驗；本次以 Mock Provider／RPC 驗證受影響 UI，不新增 Sepolia 交易。各 Task 的歷史測試與待辦保留於下方及所屬文件，課堂資源與教學易用性仍需人工驗收。
+
+## 教學動線（Task 10）
+
+課程「區塊鏈交易與去中心化金融應用實務」（Practical Applications of Blockchain Transactions and Decentralized Finance）採 Wallet → Faucet → Token → Exchange → Liquidity → Portfolio 六階段，可自由跳轉。各單元提供目標、步驟、成果判讀、概念整理與下一步；沒有錢包仍可閱讀與觀察教師展示，不以瀏覽紀錄判定完成。
+
+課程定位、六單元操作／MetaMask 確認、常見問題、150 分鐘試教與學期使用方式見 [教學體驗指南](docs/19-learning-journey.md)。Task 10 不修改合約或交易服務、不部署、不發送真實交易；詳細課程流程及 PPT 大綱另行規劃。
 
 ## 本機開發與驗證
 

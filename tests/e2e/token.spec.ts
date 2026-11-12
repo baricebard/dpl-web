@@ -48,9 +48,13 @@ for (const balance of ['0', '1', '999999999999999999999999']) {
     await page.goto('./#token')
     for (const token of tokens) {
       await expect(panel(page).getByText(token.name, { exact: true })).toBeVisible()
-      const display = balance === '0' ? '0' : balance === '1' ? '0.000000000000000001' : '999999.999999999999999999'
+      const display = balance === '0' ? '0' : balance === '1' ? '< 0.000001' : '999999.999999'
       await expect(panel(page).getByTestId(`balance-${token.symbol}`)).toHaveText(`${display} ${token.symbol}`)
       await expect(panel(page).getByRole('link', { name: `${token.symbol} Sepolia Etherscan ↗`, exact: true })).toHaveAttribute('href', token.explorerUrl)
+      const asset = panel(page).locator('.token-asset').filter({ has: page.getByRole('heading', { name: token.symbol, exact: true }) })
+      await asset.getByText('精確餘額與代幣合約', { exact: true }).click()
+      const exact = balance === '0' ? '0' : balance === '1' ? '0.000000000000000001' : '999999.999999999999999999'
+      await expect(asset).toContainText(`完整餘額：${exact} ${token.symbol}`)
     }
     await expect(panel(page).locator('time')).toHaveCount(3)
     await expect(panel(page).locator('time').first()).toHaveAttribute('datetime', /T/)
@@ -139,7 +143,7 @@ test('取得 Hash 後結果未知仍保留原帳號、鏈與 Etherscan 連結，
   await page.goto('./#token')
   await form(page)
   await panel(page).getByRole('button', { name: '確認並開啟 MetaMask' }).click()
-  await expect(panel(page).getByText('unknown', { exact: true })).toBeVisible()
+  await expect(panel(page).getByText('交易狀態未知，請查詢原交易', { exact: true })).toBeVisible()
   await expect(panel(page).getByRole('link', { name: hash })).toHaveAttribute('href', `https://sepolia.etherscan.io/tx/${hash}`)
   await emit(page, 'accountsChanged', [secondAddress])
   await emit(page, 'chainChanged', '0x1')
@@ -153,7 +157,7 @@ test('MetaMask 拒簽顯示 failed，沒有交易 Hash', async ({ page }) => {
   await form(page)
   await panel(page).getByRole('button', { name: '確認並開啟 MetaMask' }).click()
   await expect(panel(page).getByRole('alert')).toContainText('使用者拒絕')
-  await expect(panel(page).getByText('failed', { exact: true })).toBeVisible()
+  await expect(panel(page).getByText('操作失敗', { exact: true })).toBeVisible()
   await expect(panel(page).getByRole('button', { name: '重新查詢原交易狀態' })).toHaveCount(0)
 })
 
@@ -174,7 +178,7 @@ test('Mock Receipt 成功後更新相關代幣餘額，保留交易連結', asyn
   await page.goto('./#token')
   await form(page)
   await panel(page).getByRole('button', { name: '確認並開啟 MetaMask' }).click()
-  await expect(panel(page).getByText('success', { exact: true })).toBeVisible()
+  await expect(panel(page).getByText('已確認成功', { exact: true })).toBeVisible()
   await expect(panel(page).getByTestId('balance-DPLT')).toHaveText('999999 DPLT')
   await expect(panel(page).getByTestId('balance-DPLT-A')).toHaveText('1000000 DPLT-A')
   await expect(panel(page).getByRole('link', { name: hash })).toHaveAttribute('href', `https://sepolia.etherscan.io/tx/${hash}`)

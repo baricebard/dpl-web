@@ -1,5 +1,7 @@
 # Exchange：DPL Exchange
 
+> Task 10 已整合學習目標、操作步驟／預期結果、概念整理、六階段自由導覽與下一單元。教學使用以 [學習體驗指南](../19-learning-journey.md)為入口；下列各 Task 的驗證紀錄保留其歷史時點，不能視為本次新增鏈上驗收。
+
 ## 責任與目前狀態
 
 Task 07A PR #10 與 Task 07B PR #11 已合併。Task 07C 從最新 main `55549d43bcc9b8c89ec27a95a9e8e77dd5467e48` 實作學生前端，首頁 `#exchange` 開放固定匯率交換。部署地址由使用者在 Task 07C 提供：Ethereum Sepolia（11155111）`0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`。這是使用者提供的部署／注入紀錄，本次沒有獨立聲稱完成真實 RPC、MetaMask 或鏈上人工驗收。

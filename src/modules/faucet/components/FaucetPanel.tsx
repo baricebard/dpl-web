@@ -1,3 +1,4 @@
+import { LearningIntro, LearningOutro } from '../../../shared/components/LearningJourney'
 import { useEffect, useState } from 'react'
 import { formatEther } from 'viem'
 import { faucets } from '../../../config/faucets'
@@ -30,6 +31,7 @@ export function FaucetPanel() {
   return <section id="faucet" className="wallet-panel faucet-panel" aria-labelledby="faucet-panel-title">
     <p className="eyebrow">FAUCET / TEST ETH</p>
     <h2 id="faucet-panel-title">準備你的 Sepolia ETH</h2>
+    <LearningIntro moduleId="faucet" />
     <p>連接錢包 → 查詢餘額 → 前往外部 Faucet → 返回更新餘額。只使用測試網資產，網站不要求私鑰、助記詞或簽名。</p>
     <div className="faucet-grid">
       <div className="faucet-step">
@@ -45,7 +47,7 @@ export function FaucetPanel() {
         <p className="balance-label">Ethereum Sepolia Test ETH 餘額</p>
         <div aria-live="polite" aria-busy={balance.status === 'loading'}>
           {ready && balance.status === 'loading' && <p>餘額查詢中…</p>}
-          {ready && balance.data && <><p className="balance-value">{displayEther(balance.data.wei)} <span>Sepolia ETH</span></p><p>完整金額：{formatEther(balance.data.wei)} ETH</p><p>最後更新：<time dateTime={new Date(balance.data.updatedAt).toISOString()}>{new Date(balance.data.updatedAt).toLocaleString('zh-TW')}</time></p></>}
+          {ready && balance.data && <><p className="balance-value">{displayEther(balance.data.wei)} <span>Sepolia ETH</span></p><details><summary>查看精確 ETH 餘額</summary><p>完整金額：{formatEther(balance.data.wei)} ETH</p></details><p>最後更新：<time dateTime={new Date(balance.data.updatedAt).toISOString()}>{new Date(balance.data.updatedAt).toLocaleString('zh-TW')}</time></p></>}
           {ready && balance.error && <p role="alert" className="wallet-warning">{balance.error}</p>}
           {!ready && <p>尚無可顯示的 Sepolia 餘額。</p>}
         </div>
@@ -68,5 +70,6 @@ export function FaucetPanel() {
       <p>DPLT 等 ERC-20 教學代幣是合約管理的資產，不是 Gas Token。即使只轉帳 DPLT，也需要 Sepolia ETH 支付 Gas；持有 DPLT 不能代替 Gas。</p>
       <p>本頁查詢餘額一般不需要支付鏈上 Gas，因為只是讀取資料，沒有送出交易。教學代幣由教師透過一般 transfer 分發，網站不提供公開 Mint 或自助領取。</p>
     </aside>
+    <LearningOutro moduleId="faucet" />
   </section>
 }

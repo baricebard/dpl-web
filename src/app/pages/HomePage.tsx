@@ -1,3 +1,4 @@
+import { ClassroomHelp } from '../../shared/components/LearningJourney'
 import { PortfolioPanel } from '../../modules/portfolio'
 import { LiquidityPanel } from '../../modules/liquidity'
 import { ExchangePanel } from '../../modules/exchange'
@@ -17,6 +18,7 @@ export function HomePage() {
           <p className="eyebrow"><span className="small-square" /> A SPACE TO LEARN DEFI</p>
           <h1 id="hero-title">DeFi Portfolio <span>Lab<span className="title-period">.</span></span></h1>
           <p className="hero-subtitle">去中心化金融投資組合實驗室</p>
+          <p className="course-name">區塊鏈交易與去中心化金融應用實務<br /><span lang="en">Practical Applications of Blockchain Transactions and Decentralized Finance</span></p>
           <p className="hero-description">在測試網探索 DeFi 的運作原理。<br />從錢包、代幣到投資組合，讓金融概念成為可理解的學習路徑。</p>
           <a className="primary-link" href="#modules">探索學習模組 <span aria-hidden="true">↓</span></a>
         </div>
@@ -40,6 +42,7 @@ export function HomePage() {
         </div>
         <div className="module-grid">{modules.map((module, index) => <ModuleCard key={module.id} module={module} index={index} />)}</div>
       </section>
+      <ClassroomHelp />
       <WalletPanel />
       <FaucetPanel />
       <TokenPanel />
@@ -48,7 +51,7 @@ export function HomePage() {
       <PortfolioPanel />
       <section className="about-section" id="about" aria-labelledby="about-title">
         <div><p className="eyebrow">BUILT FOR THE CLASSROOM</p><h2 id="about-title">從理解開始，循序實踐。</h2></div>
-        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。本階段先建立學習入口，後續依序加入經驗證的測試網功能。</p><p className="about-note">目前提供錢包、Faucet 指引與經合約核對後的 Sepolia 教學代幣轉帳。</p></div>
+        <div><p>為大學區塊鏈與去中心化金融課程打造，支援課堂示範與自主學習。六個單元串連帳號、Gas、轉帳、交換、流動性與資產配置。</p><p className="about-note">適合零基礎學生，以 30 人混合教學、150 分鐘試教為起點，可延伸至一學期練習。無錢包也可閱讀教材與觀看教師展示。</p></div>
       </section>
     </main>
   )

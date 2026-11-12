@@ -1,5 +1,7 @@
 # Token：ERC-20 餘額與轉帳
 
+> Task 10 已整合學習目標、操作步驟／預期結果、概念整理、六階段自由導覽與下一單元。教學使用以 [學習體驗指南](../19-learning-journey.md)為入口；下列各 Task 的驗證紀錄保留其歷史時點，不能視為本次新增鏈上驗收。
+
 ## Task 06 狀態與公開設定
 
 Task 06 已合併至 main。本次 `fix/token-balance-validation` 修正學生流程：三種已部署地址的 runtime 指紋與開發環境預期值不同，原先在 balanceOf 前強制比對完整 runtime／Solidity metadata，造成實際餘額被擋。現在使用既有固定允許清單與 Ethereum Sepolia 檢查後直接讀取 balanceOf；Runtime Manifest 不再是一般餘額查詢或 transfer 的前置條件。本修正不重新部署或更改地址，尚未執行真實 Sepolia 轉帳。
@@ -18,8 +20,8 @@ Task 06 已合併至 main。本次 `fix/token-balance-validation` 修正學生�
 
 首頁 Token 卡片開啟 `#token` 才載入 ERC-20 查詢；離開入口仍保留本頁交易資料。模組依賴公開 `useWallet()`、`captureTransactionSession()`、Sepolia Public Client 及共用 `useSepoliaBalance()`／RPC 錯誤分類。Wallet 原有連接與 Faucet 流程保持可用。
 
-- 顯示連接帳號、目前網路、Sepolia ETH、三種完整精度餘額、最後查詢時間與安全 Etherscan 連結。未連接／錯鏈清除帳號資料；RPC 失敗不顯示零。各代幣查詢錯誤獨立顯示，其他成功讀取的代幣仍可操作。
-- 查詢只做固定地址與 RPC Chain ID 檢查，再以標準 ERC-20 ABI 在 latest 讀取三個 balanceOf；不查 getCode、runtime hash、name／symbol／decimals／totalSupply，不指定歷史狀態區塊或要求 Archive RPC。名稱、symbol、18 decimals 使用已確認的公開設定，每張卡片顯示完整精度餘額、地址、Etherscan 及本批最後查詢時間。同地址進行中查詢去重，同批鏈別核對去重；代幣手動更新最少 30 秒、無自動重試或餘額輪詢。ETH 沿用 Faucet：8 秒逾時、最多重試一次及限流退避。RPC 限流／故障時請稍候手動更新，課堂改用教材與教師示範，不展示假資料。
+- 顯示連接帳號、目前網路、Sepolia ETH、三種易讀餘額（可展開完整精度）、最後查詢時間與安全 Etherscan 連結。未連接／錯鏈清除帳號資料；RPC 失敗不顯示零。各代幣查詢錯誤獨立顯示，其他成功讀取的代幣仍可操作。
+- 查詢只做固定地址與 RPC Chain ID 檢查，再以標準 ERC-20 ABI 在 latest 讀取三個 balanceOf；不查 getCode、runtime hash、name／symbol／decimals／totalSupply，不指定歷史狀態區塊或要求 Archive RPC。名稱、symbol、18 decimals 使用已確認的公開設定，每張卡片顯示最多六位小數餘額、Etherscan 及本批最後查詢時間，完整精度與地址可展開。同地址進行中查詢去重，同批鏈別核對去重；代幣手動更新最少 30 秒、無自動重試或餘額輪詢。ETH 沿用 Faucet：8 秒逾時、最多重試一次及限流退避。RPC 限流／故障時請稍候手動更新，課堂改用教材與教師示範，不展示假資料。
 - 選擇固定代幣，輸入有效非零 Ethereum 地址與正十進位字串，拒絕負數、NaN、科學記號、超過 18 位小數、零及超額。所有金額使用 bigint、`parseUnits`／`formatUnits`。收款為自己時提示 Gas 消耗。
 - 「檢查轉帳摘要」重新核對 MetaMask 帳號／鏈、固定合約允許清單、最新 balanceOf 與 Sepolia ETH 餘額，使用 `simulateContract`（必須回傳 true）、`estimateContractGas`、`getGasPrice`。Gas limit 與 legacy gas price 各加 20% 整數緩衝，檢查 ETH 足夠支付所顯示上限。預估與實際費用、確認時間有不確定性。
 - 摘要列出完整帳號、網路、合約、收款地址、數量、代幣及 ETH 餘額、Gas limit、gas price 與費用上限。2 分鐘後過期；表單變更、帳號／網路／Provider／工作階段切換均使原摘要失效，切走再切回也不可沿用。
