@@ -5,7 +5,7 @@ DeFi Portfolio Lab（去中心化金融投資組合實驗室）是供大學區�
 
 Repository：[baricebard/dpl-web](https://github.com/baricebard/dpl-web)。交易介面名稱為 **DPL Exchange**。
 
-Task 02～04 已建立前端、Wallet 與 Faucet；Task 05 已完成 TeachingToken 本機合約與測試；Task 05C 提供部署準備指南。Task 06 已整合三種任務提供的 Sepolia 代幣地址、餘額、單筆 transfer、摘要、MetaMask 確認及 Receipt 追蹤，本次未執行真實轉帳。本次修正將學生餘額查詢與 runtime 診斷解耦：確認固定地址及 Sepolia 後直接讀 balanceOf；轉帳保留帳號／鏈、最新餘額、Gas、模擬與明確確認，完整 runtime／metadata 比對只供開發診斷。此修正已透過 PR #9 合併 main，真實轉帳仍待人工驗收。Exchange、Liquidity、Portfolio 仍未開放。
+Task 02～06 已完成 Wallet、Faucet、三種教學 Token 餘額與單筆轉帳。Task 07A PR #10、Task 07B PR #11 已合併；Task 07C 現已整合 **DPL Exchange 固定匯率前端**，提供合約報價、精確本次 approve、swap、庫存／Gas 檢查與獨立 Receipt 追蹤。地址由使用者提供，測試採 Mock Provider／RPC；真實 MetaMask、Sepolia 及兩帳號人工驗收仍待完成。本次不修改或部署合約、不發送真實交易、不合併或發布網站；Liquidity、Portfolio 仍未開放。
 
 ## 本機開發與驗證
 
@@ -75,6 +75,16 @@ Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,0
 
 已安裝既有依賴後可執行唯讀工具 `node scripts/contracts/read-deployed.ts`，核對 RPC chain ID、三份 code 與 metadata；不含部署或簽署。本次工具因 RPC 存取受阻失敗。此工具現在以完整 runtime 指紋（含 Solidity metadata）核對 Code，同時核對 ERC-20 欄位；此工具與 Runtime Manifest 保留為開發診斷；學生 balanceOf／transfer 不依賴完整 runtime 或 Solidity metadata 相符，也不打包完整 artifact。來源 commit／compiler、離線重現與 CI 檢查見 [完整性審查修正](docs/09-task-06-runtime-integrity.md)。開發階段的本機重現與診斷比對不等於已完成三地址鏈上匹配、歷史產物封存、Etherscan 原始碼驗證或人工兩帳號測試。
 
+## DPL Exchange（Task 07C）
+
+首頁 Exchange → 選擇支付與取得代幣 → 輸入數量／Max → 查詢合約 quote → allowance 不足時先明確確認 approve → Receipt 成功並重讀 allowance → 另行檢查、確認 swap → 查看 Receipt／Swap 事件及更新後餘額與庫存。足夠 allowance 可跳過 approve；兩筆交易各需 Sepolia ETH Gas，授權成功不等於交換成功。
+
+Exchange：Ethereum Sepolia（11155111）`0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`。六方向為 DPLT→A 30/1、A→DPLT 1/30、B→A 9/2、A→B 2/9、DPLT→B 20/3、B→DPLT 3/20；僅教學模擬 USD／TWD／CNY。正式報價只讀合約，18 decimals／bigint 向下取整，交換費 0%。每筆限 10 DPLT 等值，Max 不超過限制。固定 spender、精確本次授權，不預設無限額。
+
+報價／摘要 2 分鐘過期，輸入／帳號／網路變更使摘要失效；送出前重查餘額、allowance、reserveOf、paused、quote、模擬與 Gas。Hash 不等於成功，未知結果保留 Hash、允許手動查原交易並阻止重送。查詢失敗不補零。完整操作、授權撤銷教學、測試與真實 Sepolia 人工驗收見 [Task 07C 指南](docs/14-exchange-frontend.md)及 [Exchange 規格](docs/modules/exchange.md)。
+
+本機驗證：lint、typecheck、build（含正式產物隔離）通過；Exchange、Wallet、Token、Faucet、首頁桌面／手機 Mock 測試 **292 passing、0 failing**，其中 Exchange 132 項（58 個服務案例及 8 個 UI 案例，各跑桌面／手機兩設定）。沒有真實 Sepolia approve／swap；人工驗收仍待執行。
+
 ## GitHub Pages
 
 預計網址：<https://baricebard.github.io/dpl-web/>。Vite `base` 固定為 `/dpl-web/`，單頁使用錨點導覽，無須 history rewrite。
@@ -85,7 +95,7 @@ Ethereum Sepolia，Chain ID **11155111**；每種 18 decimals、固定供給 1,0
 
 ## 文件入口
 
-Task 05C-3 的[Sepolia 唯讀部署驗證報告](docs/09-sepolia-deployment-verification.md)保留雲端代理 403 與未完成驗證的證據。現提供[Windows／Chrome 本機唯讀驗證工具](docs/10-local-readonly-verifier.md)：`npm run verify:local`，開啟 `http://127.0.0.1:5175/`，匯入公開部署 JSON 後手動查詢／匯出，不需 MetaMask。原始或鎖定版本重建產物的準備方法見指南；本機工具測試不代表三筆真實部署通過。Token 保持未開放，未開始 Task 06。
+Task 05C-3 的[Sepolia 唯讀部署驗證報告](docs/09-sepolia-deployment-verification.md)保留雲端代理 403 與未完成驗證的證據。現提供[Windows／Chrome 本機唯讀驗證工具](docs/10-local-readonly-verifier.md)：`npm run verify:local`，開啟 `http://127.0.0.1:5175/`，匯入公開部署 JSON 後手動查詢／匯出，不需 MetaMask。原始或鎖定版本重建產物的準備方法見指南；本機工具測試不代表三筆真實部署通過。該工具的歷史任務不包含 Token 整合；目前 Task 06／07C 狀態見上方學生功能章節。
 
 | 文件 | 責任 |
 | --- | --- |
@@ -98,7 +108,7 @@ Task 05C-3 的[Sepolia 唯讀部署驗證報告](docs/09-sepolia-deployment-veri
 
 模組規格：[Wallet](docs/modules/wallet.md) · [Faucet](docs/modules/faucet.md) · [Token](docs/modules/token.md) · [Exchange](docs/modules/exchange.md) · [Liquidity](docs/modules/liquidity.md) · [Portfolio](docs/modules/portfolio.md) · [Layer 2](docs/modules/layer2.md)。
 
-前端採 React、TypeScript、Vite、viem 2.57.17；Task 06 已完成 Sepolia ETH／三種 ERC-20 讀寫整合與 Mock 驗證，真實鏈上核對及人工驗收限制見上方 Token 章節。
+前端採 React、TypeScript、Vite、viem 2.57.17；Task 06／07C 已完成 Sepolia ETH／三種 ERC-20 及固定匯率 Exchange 前端與 Mock 驗證，真實鏈上核對及人工驗收限制見上方 Token 章節。
 
 ## Task 05 合約與 Task 05C 歷史準備成果
 

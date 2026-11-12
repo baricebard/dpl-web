@@ -156,3 +156,13 @@ h1 > span { display: block; }
 .token-summary dd, .token-transaction { overflow-wrap: anywhere; }
 .token-transaction { margin-top: 24px; padding-top: 20px; border-top: 1px solid #dce4df; }
 @media (max-width: 700px) { .token-balances { grid-template-columns: 1fr; } }
+
+.exchange-panel { overflow-wrap: anywhere; }
+.exchange-grid.token-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: none; }
+.exchange-side { min-width: 0; padding: 22px; border: 1px solid #dce4df; background: #f6f8f7; border-radius: 10px; }
+.exchange-side h3 { margin-bottom: 16px; }
+.exchange-side label { display: block; margin: 12px 0 6px; }
+.exchange-panel .exchange-output { padding: 16px 0; font-size: 24px; font-weight: 600; }
+.exchange-balances { border-top: 1px solid #dce4df; margin-top: 20px; padding-top: 12px; }
+.exchange-info { padding: 18px; background: #f0f4f0; border-radius: 8px; }
+@media (max-width: 700px) { .exchange-grid.token-form { grid-template-columns: 1fr; } .exchange-side { padding: 16px; } }

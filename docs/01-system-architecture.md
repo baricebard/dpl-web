@@ -21,7 +21,7 @@ GitHub Pages 僅供應靜態內容，無法保密前端設定、執行伺服器�
 | Wallet | 連接狀態、帳號與網路事件；供其他模組讀取可交易狀態 |
 | Faucet | Sepolia ETH 餘額、外部 Gas 領取與 Gas 教材；不代管資金 |
 | Token | 三種代幣資料、餘額與 ERC-20 轉帳 |
-| Exchange | 未來報價、授權與交換流程；依賴 Wallet、Token |
+| Exchange | Task 07C：固定匯率 quote、精確 approve、swap、庫存與 Receipt；依賴 Wallet、Token 公開介面 |
 | Liquidity | 未來池狀態、提供／移除流動性與 AMM 教學 |
 | Portfolio | 未來資產彙整與教學估值；不負責簽署交易 |
 | Layer 2 | 未來概念教材；獨立於 Sepolia MVP 交易流程 |
@@ -63,7 +63,7 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 | A-03 | 已確定：三種各 18 decimals、1,000,000 tokens；constructor 一次分配全部供給至明確教師地址；無額外鑄造、銷毀、管理權限、稅費或升級 | Task 05；[合約規格](06-token-contracts.md) |
 | A-04 | 已確定：教師錢包在 Sepolia 以一般 transfer 分發；不實作自動 ERC-20 Faucet、批次合約或教師 UI；30 人需保留後續練習資產 | Task 05；[合約規格](06-token-contracts.md) |
 | A-05 | Task 06 已定：idle／validating／awaiting-wallet／submitted／confirming／success／failed／unknown；receipt success、至少 1 個區塊及 canonical block／實際 calldata 核對；替換／取消需核對實際交易；重組／逾時結果未知不重送；原鏈／帳號／Hash 記憶體保留，無持久保存 | [Token 詳細策略](modules/token.md) |
-| A-06 | Task 07A 已定：三資產六方向不可變固定有理數匯率、無費用、教師庫存、10 DPLT 等值單筆限制、minAmountOut、最小必要 approve；owner 暫停／提領；非 AMM | [Exchange](modules/exchange.md)；合約與本機測試已完成，部署及 UI 待 07B／07C |
+| A-06 | Task 07A 已定：三資產六方向不可變固定有理數匯率、無費用、教師庫存、10 DPLT 等值單筆限制、minAmountOut、最小必要 approve；owner 暫停／提領；非 AMM | [Exchange](modules/exchange.md)；合約／本機工具已合併，07C 前端與 Mock 已完成；真實人工驗收待辦 |
 | A-07 | 池模型、初始流動性、LP 權益表示及資金管理 | Liquidity 階段前；Liquidity |
 | A-08 | Portfolio 計價單位、價格來源、歷史資料與績效方法 | Portfolio 階段前；Portfolio |
 | A-09 | Layer 2 教材深度、是否實作及對應測試網 | Layer 2 階段前；Layer 2 |
@@ -83,3 +83,10 @@ Task 05 採 Hardhat 3／viem Toolbox／Node Test Runner 與 OpenZeppelin 5.x。�
 `src/config/tokens.ts` 是唯一前端地址與 ABI 來源，使用 viem `erc20Abi` 對應 TeachingToken 繼承的標準 OpenZeppelin ERC20。Wallet 公開 `captureTransactionSession()` 綁定 Provider、帳號、chain ID 與事件版本，前置讀取及送出前均重新核對；事件版本可阻止 A → B → A 後沿用摘要。Token services 不存私鑰，Public Client 無 signer；錢包 transport 不重試發送。PR #8 當時新增完整 runtime（含 Solidity metadata）核對；後續因 metadata 差異阻止學生使用，已自學生查詢與轉帳移除，僅保留為開發者獨立診斷。固定來源 manifest、Hardhat 產物與歷史證據方法見 [完整性驗證](09-task-06-runtime-integrity.md)。
 
 首次開啟 `#token` 才查詢 ERC-20，手動更新至少 30 秒、同址進行中去重及同批 chain ID 去重，無餘額輪詢；Token 與 Faucet 共用 ETH 讀取與 RPC 錯誤分類。只有已廣播交易在最多 60 秒內每 8 秒追蹤 receipt，逾時後改為手動查詢。詳見 [Task 06 驗收紀錄](08-task-06-validation.md)。
+
+
+## Task 07C Exchange 整合
+
+Task 07A／07B 已合併；使用者提供 Exchange 地址 `0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`（Sepolia 11155111），唯一學生設定為 `src/config/exchange.ts`。此地址依使用者部署／注入紀錄採用，本次不聲稱獨立完成真實鏈上驗證。
+
+`src/modules/exchange/` 重用既有 Public Client、Token 設定／ERC-20 ABI 與 Wallet Transaction Session。單一簡單 store 分開保存 approve／swap 狀態及原始 Hash；同帳號快照查詢去重、成功快取 30 秒，無背景輪詢，必要送出前讀取繞過快取。輸入或 Session 改變使報價／摘要失效，已送交易保持原身份追蹤；未知交易禁止新送出。成功以 Receipt、canonical block、實際 calldata 與 Swap 事件核對，重讀餘額／allowance／reserveOf。ABI 僅選必要介面，正式 bundle 不包含 artifact／bytecode／部署工具。細節與人工待驗收見 [Task 07C](14-exchange-frontend.md)。

@@ -7,7 +7,7 @@
 | 0：文件基線 | 專案規格、MVP 邊界、模組文件與 Codex 規範 | 文件連結有效、責任分明、待決事項可追蹤；無應用程式或合約實作 |
 | 1：工具鏈與基礎介面 | 決定 A-01、A-02、A-10 的前端相關項目，再建立 React／TypeScript／Vite 及測試配置；Wallet、Faucet 指引 | 錢包狀態與錯誤流程通過測試，Pages 子路徑預覽可用 |
 | 2：教學代幣與 MVP | 先決定 A-03、A-04、A-05；Solidity／Hardhat 本機測試後，另行執行 Sepolia 部署工作；整合 Token | 三種地址與 ABI 有紀錄，兩帳號轉帳與全部 [MVP 驗收](02-mvp-scope.md)通過，完成 30 人演練後再發布 |
-| 3：DPL Exchange | Task 07A 已決定 A-06：六方向不可變固定匯率、教師庫存、10 DPLT 等值單筆額度；完成合約及本機測試 | Task 07B 部署與庫存、Task 07C 前端及人工驗收仍待另行授權；首頁尚未開放 |
+| 3：DPL Exchange | Task 07A 已決定 A-06：六方向不可變固定匯率、教師庫存、10 DPLT 等值單筆額度；完成合約及本機測試 | 07A／07B 已合併；使用者提供部署地址，07C 前端與 Mock 測試完成、首頁入口開放；真實人工驗收與發布仍待辦 |
 | 4：Liquidity／AMM | 決定 A-07；若階段 3 選 AMM，兩階段須協同設計並分開驗收 | 池狀態、LP 權益與加減流動性符合選定模型，有風險教學 |
 | 5：Portfolio | 決定 A-08；依估值範圍整合 Token、Exchange／Liquidity 資料 | 單位與價格來源可解釋，缺價或過期不產生誤導績效 |
 | 6：Layer 2 與課程擴充 | 決定 A-09；教材可獨立進行，鏈上實驗需另訂網路與資源規格 | 明確區分概念、模擬及實際交易；課程流程經試教 |
@@ -34,3 +34,8 @@
 ## Task 07A 完成範圍
 
 [固定匯率交換規格](12-fixed-rate-exchange.md)記錄不可變比例、單筆額度、原子交換、最小 approve、庫存與 owner 管理、測試及部署計畫。Task 06 與餘額修正已合併 main。Task 07A 僅完成本機合約與部署準備，不代表 Sepolia 或交換 UI 完成；未執行部署、教師資產移動、approve，也未開始 Task 07B／07C。
+
+
+## Task 07C 完成範圍
+
+Task 07A PR #10、Task 07B PR #11 已合併，07C 由最新 main 開發，依使用者提供的 Exchange 地址完成六方向固定報價、最小授權、交換、Receipt、庫存／Gas／單筆上限與繁中教學；Mock 驗證及 [人工驗收指南](14-exchange-frontend.md)已建立。此任務只含前端，沒有合約修改、部署、庫存注入、真實 approve／swap、合併或網站發布。後續需人工驗證 MetaMask／Sepolia、兩帳號與課堂資源；不開始階段 4／5。

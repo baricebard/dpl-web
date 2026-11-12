@@ -2,6 +2,8 @@
 
 本次只開發與本機測試工具，沒有發送任何 Sepolia 交易。PR #10 已合併，開發基底為 main 的 `59db139b12a7eb1b6d5d7dc9710c7ebf3a5b7a23`。既有三種 ERC-20 不需重新部署，合約、地址及固定匯率保持不變。學生 Exchange UI 留待 Task 07C。
 
+> 後續 Task 07C：使用者已提供部署／注入紀錄與 Exchange 地址 `0xd0bc9E38a7fA59C9ee306Ef28D1Fa5B001957e3B`（Sepolia）。本文件保留 07B 工具開發當時的紀錄，不要求再次部署或注入。學生前端與人工驗收見 [Task 07C](14-exchange-frontend.md)。
+
 ## Windows 安裝、更新與啟動
 
 使用 Git for Windows、Node.js 24.22.1、npm 11.9.0、最新版 Chrome／Edge 與官方 MetaMask。一般使用者 PowerShell：
