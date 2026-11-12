@@ -8,7 +8,7 @@
 | 1：工具鏈與基礎介面 | 決定 A-01、A-02、A-10 的前端相關項目，再建立 React／TypeScript／Vite 及測試配置；Wallet、Faucet 指引 | 錢包狀態與錯誤流程通過測試，Pages 子路徑預覽可用 |
 | 2：教學代幣與 MVP | 先決定 A-03、A-04、A-05；Solidity／Hardhat 本機測試後，另行執行 Sepolia 部署工作；整合 Token | 三種地址與 ABI 有紀錄，兩帳號轉帳與全部 [MVP 驗收](02-mvp-scope.md)通過，完成 30 人演練後再發布 |
 | 3：DPL Exchange | Task 07A 已決定 A-06：六方向不可變固定匯率、教師庫存、10 DPLT 等值單筆額度；完成合約及本機測試 | 07A／07B 已合併；使用者提供部署地址，07C 前端與 Mock 測試完成、首頁入口開放；真實人工驗收與發布仍待辦 |
-| 4：Liquidity／AMM | Task 08A 已決定 A-07：單池 DPLT／A 常數乘積、0.3% 留池、ERC-20 LP、無管理權限；完成合約與本機測試 | 首次初始化已受 immutable initialProvider 保護；08B 部署與 08C UI 尚待實作；池狀態、LP 權益、風險教學與人工驗收完成後才開放 |
+| 4：Liquidity／AMM | Task 08A 已決定 A-07：單池 DPLT／A 常數乘積、0.3% 留池、ERC-20 LP、無管理權限；完成合約與本機測試 | 08A／08B 已合併，08C 學生 AMM Swap／LP 操作與 Mock 已實作；使用者提供 Sepolia 地址，真實兩帳號人工驗收與發布待辦，見 [08C](17-amm-frontend.md) |
 | 5：Portfolio | 決定 A-08；依估值範圍整合 Token、Exchange／Liquidity 資料 | 單位與價格來源可解釋，缺價或過期不產生誤導績效 |
 | 6：Layer 2 與課程擴充 | 決定 A-09；教材可獨立進行，鏈上實驗需另訂網路與資源規格 | 明確區分概念、模擬及實際交易；課程流程經試教 |
 
@@ -45,3 +45,7 @@ Task 07A PR #10、Task 07B PR #11 已合併，07C 由最新 main 開發，依使
 [DPL AMM 規格](15-amm-pool.md)記錄 A-07 常數乘積、0.3% 留池費、DPL-LP／永久鎖定、比例注資與自行移除、實際餘額／捐贈政策、數學界限與本機驗證。無 owner 或任意提領入口，既有已部署合約不修改。Pool 地址為 null，沒有 Sepolia 部署或真實資產操作，Liquidity 未開放。
 
 08A 已加入非零 immutable initialProvider，只限制教師首次初始化，失敗不解鎖，成功後所有帳號皆可注資；不增加管理員提領權。08B 核對教師參數並沿用 localhost + MetaMask 工具處理部署／教師首次注資；08C 才實作學生 quote／swap／LP 及教材介面。兩任務均未開始，本機測試不代表人工驗收完成。
+
+## Task 08C 完成範圍
+
+由 main `753c7c4` 開發學生 AMM Swap／Add／Remove、精確授權、LP 權益、Fee／Price Impact／Slippage 與 Fixed quote 比較，附 Mock 與手機版面驗證。[人工驗收指南](17-amm-frontend.md)保留真實兩帳號／MetaMask／Sepolia 待辦；本次沒有合約修改、部署、真實交易、合併或發布，也不開始 Portfolio。

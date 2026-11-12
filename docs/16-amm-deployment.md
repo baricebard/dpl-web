@@ -1,5 +1,7 @@
 # Task 08B：AMM 本機部署與首次流動性
 
+> 後續狀態：本文件保留當次任務紀錄。Task 08C 已依使用者提供的 Sepolia Pool 地址整合學生前端；最新操作、驗證與人工待辦見 [AMM 前端指南](17-amm-frontend.md)。下文「未部署／未開放」為當時狀態。
+
 本工具僅供教師在自己的 Windows 電腦使用 localhost + MetaMask。PR #13 已合併，開發基底為最新 main `9c12a639d6eb6d63b1164d992ef8a3546990a3ab`。本次只開發與本機測試，沒有真實 Sepolia 部署、approve 或 addLiquidity。Pool 公開地址仍為 `null`；不修改既有合約、資產地址、公式或費率，不包含 Task 08C 學生操作。
 
 ## Windows 更新與啟動

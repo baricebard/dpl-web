@@ -166,3 +166,8 @@ h1 > span { display: block; }
 .exchange-balances { border-top: 1px solid #dce4df; margin-top: 20px; padding-top: 12px; }
 .exchange-info { padding: 18px; background: #f0f4f0; border-radius: 8px; }
 @media (max-width: 700px) { .exchange-grid.token-form { grid-template-columns: 1fr; } .exchange-side { padding: 16px; } }
+
+.amm-panel { min-width: 0; }
+.amm-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+.amm-panel .wallet-button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.amm-panel input, .amm-panel select { max-width: 100%; }
