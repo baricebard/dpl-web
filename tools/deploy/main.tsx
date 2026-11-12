@@ -2,12 +2,18 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createRoot } from 'react-dom/client'
 import { formatEther } from 'viem'
 import artifact from 'virtual:teaching-artifact'
+import ammArtifact from 'virtual:amm-artifact'
+import { AMMPanel } from './amm-panel'
+import { AMM_KEY } from './amm-config'
+import { createAMMLiquidityTool, type AMMLiquidityTool } from './amm-liquidity'
 import exchangeArtifact from 'virtual:exchange-artifact'
 import { ExchangePanel } from './exchange-panel'
 import { createFundingTool, FUNDING_KEY, type FundingTool } from './funding'
 import { discoverMetaMask } from '../../src/lib/web3/provider'
 import { assertLocal, constructorArgs, DEPLOYER, TOKENS, type TokenId } from './config'
 import { createDeploymentTool, JOURNAL_KEY, type DeploymentTool } from './engine'
+import { tokens as deployedTokens } from '../../src/config/tokens'
+import { exchange as deployedExchange } from '../../src/config/exchange'
 import './style.css'
 
 assertLocal()
@@ -72,11 +78,14 @@ function DeploymentPanel({ tool }: { tool: DeploymentTool }) {
   </>
 }
 function App() {
+  const [amm, setAMM] = useState<DeploymentTool>()
+  const [liquidity, setLiquidity] = useState<AMMLiquidityTool>()
   const [tool, setTool] = useState<DeploymentTool>()
   const [exchange, setExchange] = useState<DeploymentTool>()
   const [funding, setFunding] = useState<FundingTool>()
   const [error, setError] = useState('')
   useEffect(() => {
+    let ammTool: DeploymentTool | undefined, liquidityTool: AMMLiquidityTool | undefined
     let active: DeploymentTool | undefined
     let exchangeTool: DeploymentTool | undefined, fundingTool: FundingTool | undefined
     const stop = discoverMetaMask(provider => {
@@ -85,10 +94,14 @@ function App() {
         const key = `${JOURNAL_KEY}:exchange`
         exchangeTool = createDeploymentTool(provider, exchangeArtifact, { read: () => localStorage.getItem(key), write: value => localStorage.setItem(key, value) }, 60000, 'exchange')
         fundingTool = createFundingTool(provider, exchangeArtifact, exchangeTool, { read: () => localStorage.getItem(FUNDING_KEY), write: value => localStorage.setItem(FUNDING_KEY, value) })
+        const ammKey = `${JOURNAL_KEY}:amm`
+        ammTool = createDeploymentTool(provider, ammArtifact, { read: () => localStorage.getItem(ammKey), write: value => localStorage.setItem(ammKey, value) }, 60000, 'amm')
+        liquidityTool = createAMMLiquidityTool(provider, ammArtifact, ammTool, { read: () => localStorage.getItem(AMM_KEY), write: value => localStorage.setItem(AMM_KEY, value) })
+        setAMM(ammTool); setLiquidity(liquidityTool)
         setTool(active); setExchange(exchangeTool); setFunding(fundingTool)
       } catch { setError('無法安全讀取部署紀錄；請保留紀錄並人工核對，停止部署。') }
     })
-    return () => { stop(); active?.destroy(); exchangeTool?.destroy(); fundingTool?.destroy() }
+    return () => { stop(); ammTool?.destroy(); liquidityTool?.destroy(); active?.destroy(); exchangeTool?.destroy(); fundingTool?.destroy() }
   }, [])
   return <main>
     <h1>DPL 本機 Sepolia 部署工具</h1>
@@ -96,8 +109,18 @@ function App() {
     <p>部署者及 initialHolder：<strong>{DEPLOYER}</strong></p>
     <p>Ethereum Sepolia：11155111。絕不輸入私鑰、助記詞或秘密。</p>
     <details><summary>Hardhat 編譯產物來源</summary><pre>{JSON.stringify(artifact.provenance, null, 2)}</pre></details>
+    {error && <p role="alert">{error}</p>}
+    <details><summary>已部署的 ERC-20 與 Fixed Exchange 公開地址</summary>
+      {deployedTokens.map(t => <p key={t.symbol}>{t.symbol}：{t.address}</p>)}
+      <p>DPL Fixed Exchange：{deployedExchange.address}</p>
+    </details>
+    <nav><a href="#amm">AMM 部署與首次注資</a> · <a href="#legacy">既有部署工具（請勿重部署）</a></nav>
+    {!amm && !error && <p>等待辨識 MetaMask；請安裝並啟用官方擴充功能。本頁尚未要求連接。</p>}
+    {amm && liquidity && <AMMPanel tool={amm} liquidity={liquidity} artifact={ammArtifact} />}
+    <details id="legacy"><summary>既有 ERC-20 與 DPL Fixed Exchange 已部署；舊工具僅供歷史紀錄</summary>
     {error ? <p role="alert">{error}</p> : tool ? <DeploymentPanel tool={tool} /> : <p>等待辨識 MetaMask。請安裝並啟用官方擴充功能；本頁尚未要求連接。</p>}
     {exchange && funding && <ExchangePanel tool={exchange} funding={funding} artifact={exchangeArtifact} />}
+    </details>
   </main>
 }
 createRoot(document.getElementById('root')!).render(<App />)

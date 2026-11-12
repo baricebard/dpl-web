@@ -19,8 +19,9 @@ export default defineConfig(({ command, mode }) => {
           next()
         })
       },
-      resolveId(id) { if (id === 'virtual:teaching-artifact' || id === 'virtual:exchange-artifact') return '\0' + id.slice(8) },
+      resolveId(id) { if (id === 'virtual:teaching-artifact' || id === 'virtual:exchange-artifact' || id === 'virtual:amm-artifact') return '\0' + id.slice(8) },
       load(id) {
+        if (id === '\0amm-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact('DPLAMMPool'))}`
         if (id === '\0teaching-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact())}`
         if (id === '\0exchange-artifact') return `export default ${JSON.stringify(loadDeploymentArtifact('DPLFixedExchange'))}`
       },
