@@ -18,7 +18,7 @@ export interface AmmPreview {
 export interface AmmSummary extends AmmPreview { kind: AmmKind; deadline: bigint; gas: bigint; gasPrice: bigint; to: Address; data: Hex }
 export interface AmmTransaction {
   kind: AmmKind; account: Address; chainId: 11155111; originalHash?: Hash; to: Address; data: Hex
-  summary: AmmSummary; receiptStatus?: 'success' | 'reverted'; actual?: readonly bigint[]
+  summary: AmmSummary; before?: AmmSnapshot; after?: AmmSnapshot; receiptStatus?: 'success' | 'reverted'; actual?: readonly bigint[]
 }
 export interface AmmState {
   status: TransactionStatus; busy: boolean; loading: boolean; message?: string; error?: string

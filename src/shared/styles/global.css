@@ -171,3 +171,12 @@ h1 > span { display: block; }
 .amm-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
 .amm-panel .wallet-button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .amm-panel input, .amm-panel select { max-width: 100%; }
+
+.amm-workflow { margin-top: 20px; padding: clamp(12px, 3vw, 24px); border: 1px solid #b8ccc0; border-radius: 12px; }
+.amm-steps { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+.amm-steps li { padding: 8px 12px; background: #edf2ee; border-radius: 6px; }
+.amm-steps li[aria-current="step"] { background: #173f35; color: white; font-weight: 700; }
+.amm-authorization, .amm-confirmation, .amm-result { margin-top: 16px; padding: 12px; border: 1px solid #b8ccc0; border-radius: 8px; overflow-wrap: anywhere; }
+.amm-next, .amm-authorized { color: #18523c; font-weight: 700; }
+.amm-workflow h4 { margin-bottom: 12px; }
+.amm-result dd { margin-left: 0; margin-bottom: 12px; }

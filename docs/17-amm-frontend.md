@@ -2,19 +2,35 @@
 
 ## 範圍與部署資料
 
-Task 08A PR #13、08B PR #14 均已合併；08C 從最新 main `753c7c4` 建立 `task-08c-amm-frontend`。本次只有前端、Mock 測試與文件，沒有修改／部署智能合約、真實 Sepolia 交易或發布網站。Portfolio 不在本次範圍。
+Task 08A PR #13、08B PR #14、08C PR #15 均已合併。Task 08C-UX 從最新 main 建立 `fix/amm-ux-workflow`，只改善 Liquidity 學生操作流程與結果呈現，沿用既有交易服務及安全檢查。沒有修改／部署智能合約、真實 Sepolia 交易或發布網站；Portfolio 不在本次範圍。
 
 使用者提供 Ethereum Sepolia（11155111）Pool：`0x58841DBfDBa420B52fedbEe07AC9414E74E382F2`。DPLT `0x1e802B4E03EdC58B2789819fdF8bc0Ed77b58F3e`、DPLT-A `0x53Ac929866423479c7C5746F76F398e8b3907d6E`；initialProvider `0xC6EdF1cBb0aC65d7DefF5CDadA1721C90951ea02`。本次地址採任務提供紀錄，不宣稱獨立完成真實鏈上核對。
 
 初始化紀錄為 100 DPLT／3000 DPLT-A，LP 總供給 `547722557505166113456`、教師持有 `547722557505166112456`、永久鎖定 1000 個最小單位。**這些歷史值不作為畫面預設儲備或報價**。畫面只呈現當前 RPC 查詢；空池與查詢失敗分開，不提供學生初始化入口。
 
+## 學生操作速查（08C-UX）
+
+先在 Wallet 連接 MetaMask，確認 Ethereum Sepolia 與足夠 Gas，再進入 Liquidity。三種操作分頁各有步驟、輸入、估算、授權、摘要、最終確認及結果；目前步驟以文字及色彩突出，摘要與結果會取得焦點，方便投影及手機操作。
+
+- **Swap**：選「交換代幣（AMM Swap）」→ 設定支付代幣與數量 →「查詢交換報價」並查看匯率、0.3% 費用、Price Impact、最低收到量 → 必要時按「授權 X 代幣」，查看摘要並確認授權 →「查看交換摘要」→ 核對後按「確認交換」→ 在 MetaMask 確認 → 等待「交換成功」。
+- **Add Liquidity**：選「提供流動性（Add Liquidity）」→ 輸入一種代幣數量 →「計算提供流動性」查看另一種數量及預估 LP → 分別完成不足的 DPLT／DPLT-A 授權 →「查看注資摘要」→「確認提供流動性」→ 在 MetaMask 確認 → 等待「提供流動性成功」。
+- **Remove Liquidity**：選「移除流動性（Remove Liquidity）」→ 查看目前 LP 與份額 → 選 25%、50%、75%、100% 或自行輸入 LP →「計算移除流動性」查看兩種預計取回量 →「查看移除摘要」→「確認移除流動性」→ 在 MetaMask 確認 → 等待「移除流動性成功」。不需要授權 LP。
+
+**授權完成 ≠ 交易完成。** 授權只允許 Pool 使用指定代幣；畫面會顯示「授權完成，但尚未交換／提供流動性」，重讀 allowance 後標示各代幣是否已授權。額度足夠就不再要求 approve，突出查看交易摘要的下一步；仍須明確確認真正的 Swap／Add，網站不會自動送出。兩種代幣皆未授權時，Add 最多需要三筆獨立交易。
+
+真正完成須核對對應 Receipt、交易身分及 Swap／AddLiquidity／RemoveLiquidity 事件。結果在同一操作區顯示實際支付／投入／取回量、鑄造／銷毀 LP、錢包餘額、LP 持有量、池中份額、Pool 儲備前後變化及 Hash（可開啟 Sepolia Etherscan）。LP Token 名稱為 DPL-LP；持有量及份額也可在操作區下方的池資訊查看。
+
+前後比較使用確認送出前重新檢查的單區塊快照，以及 Receipt 確認後重查且區塊不早於 Receipt 的快照，隨該筆交易保存，不拿之後的全域餘額代替。快照間其他交易也可能影響餘額／儲備；本筆實際數量以事件為準。缺可靠快照、帳號已切換或 RPC 更新失敗時顯示「尚無法確認前後餘額」，不以估算補值。可按「查詢原交易」重查；未知結果保存 Hash 並停止送出，不要重複交易。
+
+切換操作或修改輸入後，已完成結果移到「本頁較早交易」，不沿用至新操作；帳號／網路切換使未送出摘要失效。紀錄僅存本頁記憶體，重新整理前請保存 Hash。
+
 ## AMM Swap
 
 1. Wallet 連接 MetaMask 並切換 Sepolia，開啟首頁 Liquidity。
 2. 選擇 AMM Swap、支付代幣與數量。支援 DPLT ↔ DPLT-A，Max 使用已讀取錢包餘額；不套用固定匯率 Exchange 的額度。
-3. 按「查詢 AMM 合約報價」。正式輸出只取自 `quoteSwap(tokenIn, amountIn)`，同時顯示輸出資產儲備、價格、Fee、Price Impact、Minimum Received。
+3. 按「查詢交換報價」。正式輸出只取自 `quoteSwap(tokenIn, amountIn)`，同時顯示輸出資產儲備、價格、Fee、Price Impact、Minimum Received。
 4. allowance 不足時檢查對應代幣授權摘要，核對 Pool spender、精確本次數量、原帳號、Sepolia 與 Gas，明確確認，再親自核准 MetaMask。
-5. Receipt 成功後重新查詢 allowance，再重新查報價，另行檢查與確認 AMM Swap 摘要。已有足夠 allowance 時略過 approve。
+5. Receipt 成功後重新查詢 allowance，保留報價流程，另行查看交換摘要並按「確認交換」。已有足夠 allowance 時略過 approve。
 6. swap 成功需 Receipt success、至少一個區塊、canonical block、原帳號／目標／calldata／value 與 Swap 事件核對；畫面將事件結果標示為實際成交量。
 
 `swap(tokenIn, amountIn, minAmountOut, deadline)` 的 ETH value 為零。報價／摘要有效 2 分鐘；deadline 準備時計算約 10 分鐘 Unix 秒，確認前再次檢查且至少保留 15 秒。輸入、操作、帳號或網路變更使未送出摘要失效。
@@ -125,7 +141,7 @@ git diff --check
 
 使用 Playwright 的桌面／手機專案。正式建置既有 checker 檢查 Hardhat artifact、bytecode 與 localhost 部署／驗證工具隔離；不匯入完整 ABI artifact 或 Solidity。本次不執行完整歷史合約或 metadata 稽核。
 
-2026-11-12（Asia/Taipei）本機結果：
+Task 08C 原始本機結果（08C-UX 驗證另列於下方）：
 
 | 檢查 | 結果 |
 | --- | --- |
@@ -137,3 +153,9 @@ git diff --check
 | Markdown 本機連結／git diff --check | 通過 |
 
 另驗證只有永久鎖定 LP 的已初始化池仍可 Swap／Add；所有可流通 LP 移除不應讓前端誤判成尚未初始化。建置保留既有 worker_threads 外部化與大於 500 kB chunk 提示。沒有修改合約或依賴，不執行真實 Sepolia 交易；GitHub Actions 結果以 PR 為準。
+
+## Task 08C-UX 驗證
+
+2026-11-12（Asia/Taipei）：lint、typecheck、build（含既有正式產物隔離）及 `git diff --check` 通過。AMM Mock **140 passing**（57 個服務案例、13 個 UI 案例，各跑桌面／手機）；Wallet、Token、Faucet、Fixed Exchange 與首頁回歸 **292 passing**。最後摘要文案／收合調整後另重跑全部 AMM UI **26 passing**。
+
+新增覆蓋授權後無自動交易、兩種授權不等於注資、足夠 allowance 不出現 approve、正確成功／失敗／未知結果、實際 LP／取回量、操作切換結果隔離、交易前最新快照、交易後 RPC 失敗及落後區塊不提供假餘額。已檢視桌面／手機摘要與結果截圖，320px 無水平溢出。僅為既有 build checker 本機編譯 artifact，未改合約或執行 Solidity 測試；無真實 Sepolia 交易、部署或 30 人人工課堂驗收。
