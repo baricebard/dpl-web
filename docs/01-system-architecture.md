@@ -64,7 +64,7 @@ A-01 與 A-02 的 Task 03/04 實作範圍已確定；其餘待決部分於對應
 | A-04 | 已確定：教師錢包在 Sepolia 以一般 transfer 分發；不實作自動 ERC-20 Faucet、批次合約或教師 UI；30 人需保留後續練習資產 | Task 05；[合約規格](06-token-contracts.md) |
 | A-05 | Task 06 已定：idle／validating／awaiting-wallet／submitted／confirming／success／failed／unknown；receipt success、至少 1 個區塊及 canonical block／實際 calldata 核對；替換／取消需核對實際交易；重組／逾時結果未知不重送；原鏈／帳號／Hash 記憶體保留，無持久保存 | [Token 詳細策略](modules/token.md) |
 | A-06 | Task 07A 已定：三資產六方向不可變固定有理數匯率、無費用、教師庫存、10 DPLT 等值單筆限制、minAmountOut、最小必要 approve；owner 暫停／提領；非 AMM | [Exchange](modules/exchange.md)；合約／本機工具已合併，07C 前端與 Mock 已完成；真實人工驗收待辦 |
-| A-07 | 池模型、初始流動性、LP 權益表示及資金管理 | Liquidity 階段前；Liquidity |
+| A-07 | Task 08A 已定：DPLT／A 單池常數乘積、0.3% 留池、ERC-20 LP／永久鎖定、實際餘額及捐贈政策、無管理權限；immutable initialProvider 限定教師首次初始化，成功後公開注資 | [Liquidity](modules/liquidity.md)；[合約與本機驗證](15-amm-pool.md)，未部署、UI 未開放 |
 | A-08 | Portfolio 計價單位、價格來源、歷史資料與績效方法 | Portfolio 階段前；Portfolio |
 | A-09 | Layer 2 教材深度、是否實作及對應測試網 | Layer 2 階段前；Layer 2 |
 | A-10 | Pages 發布來源／流程、依賴版本、合約地址與部署紀錄格式 | 相應工具鏈或發布前；本文件 |
